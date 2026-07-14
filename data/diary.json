@@ -30,5 +30,13 @@
     "sub": "Pit people — the Thompsons, the Dixons and the Collinses, all within a mile of St Mary's",
     "date": "14 July 2026",
     "branch": "thompson"
+  },
+  {
+    "id": "service",
+    "file": "../Thompson/journal-in-service.md",
+    "title": "In Service",
+    "sub": "Both sides of the kitchen door — the house that kept a servant, and the women who were one",
+    "date": "18 July 2026",
+    "branch": "thompson"
   }
 ]
