@@ -136,6 +136,19 @@
       <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.2em;color:var(--rust);text-transform:uppercase">The stories we recovered</div>
       <div style="font:500 clamp(26px,3.4vw,40px)/1.08 Newsreader,serif;margin-top:12px;letter-spacing:-.01em;max-width:820px">{{ storyCount }} pulled back out of the record</div>
       <div style="font:400 15px/1.6 Newsreader,serif;color:var(--ink-soft);margin-top:12px;max-width:660px">A pit village, a prison camp, a crossing to Canada, a farm on the moor, a railway footplate — and a house that kept a servant. Every one of them rests on an original document.</div>
+
+      <!-- Say it before they read a word of it, not in a footnote afterwards. This is
+           the first thing on the site for a reason. -->
+      <div style="margin-top:22px;max-width:700px;padding:18px 22px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-left:4px solid var(--rust);border-radius:11px">
+        <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.16em;color:var(--rust);text-transform:uppercase">Please read this first</div>
+        <div style="font:400 15px/1.7 Newsreader,serif;color:var(--ink);margin-top:10px">
+          <strong>This is my research, and it is not gospel.</strong> Everything here I have found myself, from original records — census pages, parish registers, service files — and I have tried very hard to get the right people. But family history is not a science. Names repeat, ages are wrong, enumerators misheard, and there are four different Henry Whiteheads in this tree alone. I have already had to undo findings I was sure of.
+        </div>
+        <div style="font:400 15px/1.7 Newsreader,serif;color:var(--ink-soft);margin-top:10px">
+          So: treat it as the best account I can honestly give, not as fact. Where I am unsure, I say so. Where I got it wrong, I have left the wrong turn in the <span onClick="{{ navJournal }}" style="color:var(--rust);font-weight:600;cursor:pointer">journal</span> rather than quietly deleting it. <strong>If you know better — especially if it is your own family — please tell me, and I will change it.</strong>
+        </div>
+        <div onClick="{{ toMethod }}" class="lift" style="display:inline-block;cursor:pointer;margin-top:14px;font:600 12px/1 Archivo;color:var(--rust)">How I decide it's the right person →</div>
+      </div>
     </div>
 
     <!-- stories — all equal -->
@@ -160,7 +173,7 @@
 
     <!-- the method: the rules this research is held to -->
     <sc-if value="{{ hasRules }}">
-    <div style="margin:34px 40px 0;padding:30px 34px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-left:4px solid var(--rust);border-radius:12px">
+    <div id="method" style="margin:34px 40px 0;padding:30px 34px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-left:4px solid var(--rust);border-radius:12px;scroll-margin-top:100px">
       <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--rust);text-transform:uppercase">The method</div>
       <div style="font:600 24px/1.15 Newsreader,serif;margin-top:9px">How I know it's the right person</div>
 
@@ -2069,6 +2082,8 @@ class Component extends DCLogic {
       // added — count them
       storyCount:(n=>{const w=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten'];
         return (w[n]||n)+' '+(n===1?'life':'lives');})(storyCards.length),
+      toMethod:()=>{ const go=()=>{const el=document.getElementById('method'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});};
+                     if(S.view!=='home') this.setState({view:'home'}, ()=>requestAnimationFrame(go)); else go(); },
       hasRules:!!(this.rules.hard&&this.rules.hard.length),
       rulesStanding:(this.rules.standing||[]).map(t=>({text:t})),
       rulesMethod:this.rules.method||'',
