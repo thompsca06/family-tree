@@ -104,7 +104,7 @@
     </div>
     <div style="display:flex;align-items:center;gap:8px;background:rgba(43,37,28,.07);border:1px solid rgba(43,37,28,.10);border-radius:9px;padding:8px 12px;width:210px">
       <span style="color:var(--ink-faint);font:400 13px/1 'IBM Plex Mono',monospace">⌕</span>
-      <input value="{{ query }}" onInput="{{ onQuery }}" onFocus="{{ navPeople }}" placeholder="Search 278 people…" style="border:0;background:transparent;outline:none;color:var(--ink);font:400 12.5px/1 Archivo;width:100%" />
+      <input value="{{ query }}" onInput="{{ onQuery }}" onFocus="{{ navPeople }}" placeholder="Search people, trades, places, journals…" style="border:0;background:transparent;outline:none;color:var(--ink);font:400 12.5px/1 Archivo;width:100%" />
     </div>
   </div>
 
@@ -402,6 +402,67 @@
         </sc-for>
       </div>
     </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ============ WORK / TRADES ============ -->
+  <sc-if value="{{ isWork }}" hint-placeholder-val="{{ true }}">
+  <div class="ftree-in" style="padding:22px 30px 60px">
+    <div style="margin-bottom:6px">
+      <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase">Work</div>
+      <div style="font:600 22px/1.1 Newsreader,serif;margin-top:6px">{{ workCount }} trades, and who did them</div>
+      <div style="font:400 13.5px/1.6 Newsreader,serif;color:var(--ink-soft);margin-top:8px;max-width:700px">Every occupation recorded against anyone in this family, taken verbatim from the census returns and the 1939 Register. Nothing here is inferred — if a man is down as a coal miner it is because an enumerator wrote it.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;margin-top:22px">
+      <sc-for list="{{ workTrades }}" as="w" hint-placeholder-count="8">
+        <div style="background:var(--surface);border:1px solid rgba(43,37,28,.10);border-left:3px solid {{ w.color }};border-radius:11px;padding:16px 18px">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font:600 17px/1.2 Newsreader,serif;color:var(--ink)">{{ w.title }}</span>
+            <span style="font:400 10.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-left:auto">{{ w.n }}</span>
+          </div>
+          <sc-if value="{{ w.hasBody }}">
+            <div style="font:400 13px/1.55 Newsreader,serif;color:var(--ink-soft);margin-top:7px">{{ w.body }}</div>
+          </sc-if>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:11px">
+            <sc-for list="{{ w.people }}" as="wp" hint-placeholder-count="3">
+              <div onClick="{{ wp.onClick }}" class="lift" style="cursor:pointer;font:500 11.5px/1 Archivo;background:rgba(43,37,28,.05);border:1px solid rgba(43,37,28,.10);padding:6px 10px;border-radius:16px">{{ wp.name }} <span style="color:var(--ink-faint)">{{ wp.years }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ SEARCH — everything ============ -->
+  <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ true }}">
+  <div class="ftree-in" style="padding:22px 30px 60px;max-width:900px">
+    <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase">Search</div>
+    <div style="font:600 22px/1.1 Newsreader,serif;margin-top:6px">{{ searchSummary }}</div>
+
+    <sc-for list="{{ searchGroups }}" as="sg" hint-placeholder-count="3">
+      <div style="margin-top:30px">
+        <div style="display:flex;align-items:baseline;gap:8px;padding-bottom:9px;margin-bottom:12px;border-bottom:1px solid rgba(43,37,28,.11)">
+          <span style="font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--rust);text-transform:uppercase">{{ sg.label }}</span>
+          <span style="font:400 10px/1 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ sg.n }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ sg.hits }}" as="hit" hint-placeholder-count="4">
+            <div onClick="{{ hit.onClick }}" class="lift" style="cursor:pointer;display:flex;gap:12px;align-items:baseline;background:var(--surface);border:1px solid rgba(43,37,28,.09);border-left:3px solid {{ hit.color }};border-radius:9px;padding:12px 15px">
+              <div style="min-width:0;flex:1">
+                <div style="font:600 14.5px/1.25 Newsreader,serif;color:var(--ink)">{{ hit.title }}</div>
+                <sc-if value="{{ hit.hasSub }}"><div style="font:400 12.5px/1.5 Newsreader,serif;color:var(--ink-soft);margin-top:3px">{{ hit.sub }}</div></sc-if>
+              </div>
+              <div style="flex:none;font:400 10px/1.4 'IBM Plex Mono',monospace;color:var(--ink-faint);text-align:right">{{ hit.meta }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+
+    <sc-if value="{{ searchEmpty }}">
+      <div style="margin-top:30px;font:italic 400 15px/1.6 Newsreader,serif;color:var(--ink-faint)">Nothing matched. Try a surname, a trade (<b>coal miner</b>), a place (<b>Garforth</b>), or a word from the journals.</div>
     </sc-if>
   </div>
   </sc-if>
@@ -1345,7 +1406,100 @@ class Component extends DCLogic {
     order.forEach(id=>{const p=P[id];[p.f,p.m].forEach(k=>{if(k&&pos[k]){links.push({x1:pos[id].x+PADX,y1:pos[id].y+PADY+22,x2:pos[k].x+PADX,y2:pos[k].y+PADY-22,color:this.col(P[k].branch)});}});});
     return {nodes,links,width:Math.max(1,(leaf-1))*GAP+PADX*2,height:maxGen*ROW+PADY*2+40};
   }
-  onQuery = (e) => this.setState({view:'people', query:e.target.value});
+  // typing in the nav box searches EVERYTHING, not just names
+  onQuery = (e) => { const v=e.target.value; this.setState({view:(v.trim()?'search':'people'), query:v}); };
+  navWork = () => this.setState({view:'work'});
+
+  // ---- Work: every trade recorded against anyone, and who did it ----------
+  // Occupations are verbatim from the census / 1939 Register. Several wordings
+  // describe one trade ("Coal Miner Hewer", "Miner (coal)"), so they collapse onto
+  // the same entry via matchTrade(); anything unrecognised keeps its own wording
+  // rather than being forced into a bucket it may not belong in.
+  workList(){
+    const byTrade={};
+    Object.keys(this.people).forEach(id=>{
+      const p=this.people[id];
+      (p.occs||[]).forEach(oc=>{
+        const ex=this.matchTrade(oc);
+        const key=ex?ex[0]:oc.trim().toLowerCase();
+        if(!key) return;
+        if(!byTrade[key]) byTrade[key]={title:ex?ex[0]:oc.trim(), body:ex?ex[1]:'', ids:{}};
+        byTrade[key].ids[id]=true;
+      });
+    });
+    return Object.values(byTrade).map(t=>{
+      const ids=Object.keys(t.ids);
+      return {
+        title:t.title, body:t.body, hasBody:!!t.body, n:ids.length,
+        color:this.col(this.people[ids[0]].branch),
+        people:ids
+          .sort((a,b)=>(this.people[a].by||9999)-(this.people[b].by||9999))
+          .map(id=>({name:this.people[id].name, years:this.people[id].years, onClick:()=>this.openPerson(id,'work')}))
+      };
+    }).sort((a,b)=>b.n-a.n || a.title.localeCompare(b.title));
+  }
+
+  // ---- Search: people, trades, places, records, journals -----------------
+  searchAll(q){
+    q=(q||'').trim().toLowerCase();
+    const groups=[];
+    if(!q) return groups;
+    const hit=(s)=>(s||'').toLowerCase().includes(q);
+
+    // people — by name, and by the trade or place recorded against them
+    const people=Object.keys(this.people).filter(id=>{
+      const p=this.people[id];
+      return hit(p.name) || (p.occs||[]).some(hit) || (p.stops||[]).some(s=>hit(s.name));
+    }).sort((a,b)=>(this.people[a].by||9999)-(this.people[b].by||9999));
+    if(people.length) groups.push({label:'People', n:people.length, hits:people.slice(0,40).map(id=>{
+      const p=this.people[id];
+      const why=hit(p.name)?'' : ((p.occs||[]).find(hit) || ((p.stops||[]).find(s=>hit(s.name))||{}).name || '');
+      return {title:p.name, sub:why, hasSub:!!why, meta:p.years, color:this.col(p.branch),
+              onClick:()=>this.openPerson(id,'search')};
+    })});
+
+    // trades
+    const trades=this.workList().filter(t=>hit(t.title)||hit(t.body));
+    if(trades.length) groups.push({label:'Trades', n:trades.length, hits:trades.slice(0,12).map(t=>({
+      title:t.title, sub:t.body, hasSub:!!t.body, meta:t.n+(t.n===1?' person':' people'),
+      color:t.color, onClick:()=>this.setState({view:'work'})
+    }))});
+
+    // places
+    const pl={};
+    Object.keys(this.people).forEach(id=>(this.people[id].stops||[]).forEach(s=>{
+      if(hit(s.name)) (pl[s.name]=pl[s.name]||new Set()).add(id);
+    }));
+    const places=Object.keys(pl);
+    if(places.length) groups.push({label:'Places', n:places.length, hits:places.slice(0,12).map(nm=>({
+      title:nm, sub:'', hasSub:false, meta:pl[nm].size+' lived here', color:'#9a7d3f',
+      onClick:()=>this.setState({view:'places', mapPerson:'all'})
+    }))});
+
+    // the journals — heading and prose
+    const jr=[];
+    (this.diaryEntries||[]).forEach(d=>{
+      const plain=(d.html||'').replace(/<[^>]+>/g,' ');
+      if(hit(d.title)||hit(d.sub)||hit(plain)){
+        jr.push({title:d.title, sub:d.sub, hasSub:!!d.sub, meta:d.date, color:this.col(d.branch),
+                 onClick:()=>this.openDiaryAt(d.id,'')});
+      }
+    });
+    if(jr.length) groups.push({label:'Journals', n:jr.length, hits:jr});
+
+    // records — the source collections cited anywhere
+    const src={};
+    Object.keys(this.people).forEach(id=>(this.people[id].rec||[]).forEach(r=>{
+      if(r.src && hit(r.src)) (src[r.src]=src[r.src]||new Set()).add(id);
+    }));
+    const srcs=Object.keys(src);
+    if(srcs.length) groups.push({label:'Record collections', n:srcs.length, hits:srcs.slice(0,12).map(s=>({
+      title:s, sub:'', hasSub:false, meta:src[s].size+' people', color:'#9a7d3f',
+      onClick:()=>this.setState({view:'data'})
+    }))});
+
+    return groups;
+  }
   setBranch = (b) => this.setState({branch:b});
   selectPlace = (id) => this.setState({place:id});
 
@@ -1363,7 +1517,12 @@ class Component extends DCLogic {
 
   renderVals(){
     const S=this.state;
-    const tabs=[['home','Stories',this.navHome],['tree','Tree',this.navTree],['people','People',this.navPeople],['places','Places',this.navPlaces],['timeline','Timeline',this.navTimeline],['diary','Diary',this.navDiary],['data','Data',this.navData]]
+    // only build these when the view needs them — searchAll scans every journal
+    const wTrades=(S.view==='work'||S.view==='search')?this.workList():[];
+    const sGroups=(S.view==='search')?this.searchAll(S.query):[];
+    const sHits=sGroups.reduce((a,g)=>a+g.n,0);
+
+    const tabs=[['home','Stories',this.navHome],['tree','Tree',this.navTree],['people','People',this.navPeople],['places','Places',this.navPlaces],['work','Work',this.navWork],['timeline','Timeline',this.navTimeline],['diary','Diary',this.navDiary],['data','Data',this.navData]]
       .map(([v,label,fn])=>({label,onClick:fn,active:S.view===v}));
 
     // spine (home)
@@ -1625,9 +1784,15 @@ class Component extends DCLogic {
       hasHero:!!this.storyHero[S.storyId], heroEl:this.storyHero[S.storyId]?React.createElement('img',{src:this.storyHero[S.storyId],style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',objectPosition:'center 35%',filter:'saturate(.85)'}}):null};
 
     return {
-      tabs, query:S.query, onQuery:this.onQuery,
+      tabs, query:S.query, onQuery:this.onQuery, navWork:this.navWork,
+      workTrades:wTrades, workCount:wTrades.length,
+      searchGroups:sGroups, searchEmpty:(S.view==='search' && sGroups.length===0),
+      searchSummary:(S.query||'').trim()
+        ? (sHits + (sHits===1 ? ' result for "' : ' results for "') + S.query.trim() + '"')
+        : 'Type to search',
       navHome:this.navHome, navTree:this.navTree, navPeople:this.navPeople, navPlaces:this.navPlaces, navTimeline:this.navTimeline,
       isHome:S.view==='home', isTree:S.view==='tree', isPeople:S.view==='people', isPlaces:S.view==='places', isTimeline:S.view==='timeline', isPerson:S.view==='person', isStory:S.view==='story',
+      isWork:S.view==='work', isSearch:S.view==='search',
       isData:S.view==='data', navData:this.navData, dataRows:this.buildDataRows(), dataCount:Object.keys(this.people).length+'',
       isDiary:S.view==='diary', navDiary:this.navDiary, diary:this.diaryEntries.map(d=>({title:d.title,date:d.date,sub:d.sub,dot:this.col(d.branch),bodyEl:React.createElement('div',{className:'diaryprose',dangerouslySetInnerHTML:{__html:d.html}})})),
       spine, storyCards, modeCards,
