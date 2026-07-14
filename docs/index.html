@@ -104,9 +104,13 @@
         </div>
       </sc-for>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;background:rgba(43,37,28,.07);border:1px solid rgba(43,37,28,.10);border-radius:9px;padding:8px 12px;width:210px">
-      <span style="color:var(--ink-faint);font:400 13px/1 'IBM Plex Mono',monospace">⌕</span>
-      <input value="{{ query }}" onInput="{{ onQuery }}" onFocus="{{ navPeople }}" placeholder="Search people, trades, places, journals…" style="border:0;background:transparent;outline:none;color:var(--ink);font:400 12.5px/1 Archivo;width:100%" />
+    <div style="display:flex;align-items:center;gap:9px">
+      <div style="display:flex;align-items:center;gap:8px;background:rgba(43,37,28,.07);border:1px solid rgba(43,37,28,.10);border-radius:9px;padding:8px 12px;width:210px">
+        <span style="color:var(--ink-faint);font:400 13px/1 'IBM Plex Mono',monospace">⌕</span>
+        <input value="{{ query }}" onInput="{{ onQuery }}" onFocus="{{ navPeople }}" placeholder="Search people, trades, places, journals…" style="border:0;background:transparent;outline:none;color:var(--ink);font:400 12.5px/1 Archivo;width:100%" />
+      </div>
+      <!-- copies a link to whatever page you are on -->
+      <div onClick="{{ share }}" class="lift noprint" title="{{ shareUrl }}" style="cursor:pointer;flex:none;display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:9px;color:{{ shareFg }};background:{{ shareBg }};border:1px solid {{ shareBd }};font:600 11.5px/1 Archivo;white-space:nowrap;user-select:none">{{ shareLabel }}</div>
     </div>
   </div>
 
@@ -937,7 +941,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', mapGroup:'line', openJ:{}, lbZoom:1, lbX:0, lbY:0 };
+  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', mapGroup:'line', openJ:{}, lbZoom:1, lbX:0, lbY:0, diaryAt:'', shared:false };
 
   // which journal chapters are expanded in place on the profile
   toggleJournal = (key) => this.setState(s=>({ openJ: Object.assign({}, s.openJ, {[key]: !s.openJ[key]}) }));
@@ -1270,6 +1274,8 @@ class Component extends DCLogic {
   }
   componentDidMount(){
     this.syncMaps();
+    this.applyHash();                                       // land on the shared page
+    window.addEventListener('hashchange',()=>this.applyHash());   // browser back/forward
     window.addEventListener('keydown',(e)=>{
       if(!this.state.lightbox) return;
       if(e.key==='Escape') this.closeLightbox();
@@ -1371,7 +1377,7 @@ class Component extends DCLogic {
   navDiary = () => this.setState({view:'diary'});
   // open the Diary and scroll to the tagged section the person is written about
   openDiaryAt = (journalId, anchor) => {
-    this.setState({view:'diary'}, ()=>{
+    this.setState({view:'diary', diaryAt:journalId}, ()=>{
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
         const el=document.getElementById(anchor);
         if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
@@ -1388,6 +1394,70 @@ class Component extends DCLogic {
       requestAnimationFrame(()=>requestAnimationFrame(go));
     }
     this.syncMaps();
+    this.syncHash();
+  }
+
+  // ---- URL routing -------------------------------------------------------
+  // Every view lives in the address bar, so any page can be linked to and shared.
+  //   #/person/I352128205750   #/diary/service   #/story/tommy   #/work
+  // Without this the whole site was one URL and there was nothing to copy.
+  hashFor(S){
+    switch(S.view){
+      case 'person': return S.personId ? '#/person/'+S.personId : '#/people';
+      case 'story':  return '#/story/'+S.storyId;
+      case 'diary':  return S.diaryAt ? '#/diary/'+S.diaryAt : '#/diary';
+      case 'search': return '#/search/'+encodeURIComponent(S.query||'');
+      case 'home':   return '#/';
+      default:       return '#/'+S.view;
+    }
+  }
+  syncHash(){
+    const h=this.hashFor(this.state);
+    if(h!==location.hash && !this._fromHash){
+      history.replaceState(null,'',h);   // replace, not push — the app has its own back
+    }
+    this._fromHash=false;
+  }
+  applyHash(){
+    const raw=(location.hash||'').replace(/^#\/?/,'');
+    if(!raw){ return; }
+    const [head,...rest]=raw.split('/');
+    const arg=rest.join('/');
+    this._fromHash=true;
+    switch(head){
+      case 'person': {
+        const id=this.resolve(decodeURIComponent(arg));
+        if(id && this.people[id]) this.setState({view:'person', personId:id, personBack:'people'});
+        break;
+      }
+      case 'story':  if(this.stories[arg]) this.setState({view:'story', storyId:arg}); break;
+      case 'diary':
+        if(arg && (this.diaryEntries||[]).some(d=>d.id===arg)) this.openDiaryAt(arg,'');
+        else this.setState({view:'diary'});
+        break;
+      case 'search': this.setState({view:'search', query:decodeURIComponent(arg||'')}); break;
+      case 'tree': case 'people': case 'places': case 'work': case 'timeline': case 'data':
+        this.setState({view:head}); break;
+      default: this.setState({view:'home'});
+    }
+  }
+
+  // ---- share -------------------------------------------------------------
+  shareUrl(){ return location.origin + location.pathname + this.hashFor(this.state); }
+  share = () => {
+    const url=this.shareUrl();
+    const done=()=>{ this.setState({shared:true}); setTimeout(()=>this.setState({shared:false}),1800); };
+    // the native sheet on phones; clipboard on a desktop
+    if(navigator.share){ navigator.share({title:document.title, url}).then(done).catch(()=>{}); return; }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done).catch(()=>this.fallbackCopy(url,done)); return; }
+    this.fallbackCopy(url,done);
+  };
+  fallbackCopy(url,done){
+    const ta=document.createElement('textarea');
+    ta.value=url; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){}
+    document.body.removeChild(ta);
   }
   fullTree(){
     const P=this.people, GAP=142, ROW=120, PADX=72, PADY=26;
@@ -1800,6 +1870,11 @@ class Component extends DCLogic {
 
     return {
       tabs, query:S.query, onQuery:this.onQuery, navWork:this.navWork,
+      share:this.share, shareUrl:this.shareUrl(),
+      shareLabel:S.shared?'✓ Link copied':'⇪ Share this page',
+      shareFg:S.shared?'#fffdf8':'#59503f',
+      shareBg:S.shared?'#4d7a52':'transparent',
+      shareBd:S.shared?'transparent':'rgba(43,37,28,.14)',
       workTrades:wTrades, workCount:wTrades.length,
       searchGroups:sGroups, searchEmpty:(S.view==='search' && sGroups.length===0),
       searchSummary:(S.query||'').trim()
