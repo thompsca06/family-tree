@@ -569,15 +569,8 @@
     <div style="font:500 clamp(34px,4.6vw,56px)/1.05 Newsreader,serif;margin-top:14px;letter-spacing:-.015em">Notes from the record office</div>
     <div style="font:400 16.5px/1.7 Newsreader,serif;color:var(--ink-soft);margin-top:14px;max-width:660px">A running log of what the records gave up, and in what order — written up as I worked back through the census returns, parish registers and service files. Everything here rests on an original record image, named in the text.</div>
 
-    <!-- sort + jump: five long journals on one page, so say what order they are in
-         and let you land on one without scrolling through the others -->
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:24px">
-      <span style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase;margin-right:2px">Order</span>
-      <sc-for list="{{ diarySorts }}" as="s" hint-placeholder-count="3">
-        <div onClick="{{ s.onClick }}" class="lift" style="cursor:pointer;font:600 11.5px/1 Archivo;padding:9px 14px;border-radius:8px;color:{{ s.fg }};background:{{ s.bg }};border:1px solid {{ s.bd }}">{{ s.label }}</div>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px">
+    <!-- jump straight to a journal — they are long, and they are all on one page -->
+    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:24px">
       <sc-for list="{{ diaryJump }}" as="j" hint-placeholder-count="5">
         <div onClick="{{ j.onClick }}" style="cursor:pointer;display:flex;align-items:center;gap:7px;font:500 12px/1 Archivo;color:var(--ink-soft);padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface)">
           <span style="width:7px;height:7px;border-radius:50%;flex:none;background:{{ j.dot }}"></span>{{ j.title }}
@@ -589,7 +582,7 @@
       <div id="{{ d.anchor }}" style="margin-top:52px;padding-top:34px;border-top:1px solid rgba(43,37,28,.12);scroll-margin-top:76px">
         <div style="display:flex;align-items:center;gap:9px">
           <span style="width:9px;height:9px;border-radius:50%;flex:none;background:{{ d.dot }}"></span>
-          <span style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase">{{ d.date }}</span>
+          <span style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase">{{ d.branchLabel }}</span>
         </div>
         <div style="font:600 clamp(28px,3.6vw,42px)/1.12 Newsreader,serif;margin-top:12px;letter-spacing:-.01em">{{ d.title }}</div>
         <div style="font:400 18px/1.55 Newsreader,serif;color:var(--ink-soft);margin-top:10px;font-style:italic">{{ d.sub }}</div>
@@ -840,7 +833,6 @@
               <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
                 <span style="font:600 9.5px/1.3 'IBM Plex Mono',monospace;letter-spacing:.08em;color:{{ jl.color }};text-transform:uppercase">{{ jl.roleLabel }}</span>
                 <span style="font:400 10px/1.3 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ jl.jt }}</span>
-                <sc-if value="{{ jl.hasDate }}"><span style="font:400 10px/1.3 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-left:auto">{{ jl.date }}</span></sc-if>
               </div>
               <div style="font:600 17px/1.25 Newsreader,serif;margin-top:6px;color:var(--ink)">{{ jl.heading }}</div>
               <!-- the whole chapter, in place -->
@@ -956,7 +948,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', mapGroup:'line', openJ:{}, lbZoom:1, lbX:0, lbY:0, diaryAt:'', diarySort:'new', shared:false };
+  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', mapGroup:'line', openJ:{}, lbZoom:1, lbX:0, lbY:0, diaryAt:'', shared:false };
 
   // which journal chapters are expanded in place on the profile
   toggleJournal = (key) => this.setState(s=>({ openJ: Object.assign({}, s.openJ, {[key]: !s.openJ[key]}) }));
@@ -975,20 +967,9 @@ class Component extends DCLogic {
   // ---- all person data now comes from the family GEDCOM (familydata.js) ----
   get people(){ return (window.FAMILY&&window.FAMILY.people)||{}; }
   get root(){ return (window.FAMILY&&window.FAMILY.root)||'chris'; }
+  // Already in reading order: each journal declares its own `order` in its .md
+  // header, and the build reads them in it. There are no dates to sort on.
   get diaryEntries(){ return (window.FAMILY&&window.FAMILY.diary)||[]; }
-  // The build ships each journal with two numeric dates: `sort` (the date of its
-  // first section — when I started it) and `sortLast` (its last section — when I
-  // last added to it). They differ: Beeston was begun in Jan 2024 and is still
-  // being corrected, so "started first" and "touched most recently" are different
-  // orders. Default to newest-started, so the latest chapter leads.
-  sortedDiary(){
-    const mode=this.state.diarySort||'new';
-    const key=d=>(mode==='touched' ? (d.sortLast||d.sort||0) : (d.sort||0));
-    // Tie-break on the start date: today every journal has the same last-worked-on
-    // date, so without this "Last worked on" would be a five-way tie.
-    const out=[...this.diaryEntries].sort((a,b)=>(key(a)-key(b))||((a.sort||0)-(b.sort||0)));
-    return mode==='old' ? out : out.reverse();
-  }
   // read straight out of RULES-AND-INSTRUCTIONS.md at build time
   get rules(){ return (window.FAMILY&&window.FAMILY.rules)||{standing:[],method:'',hard:[]}; }
   resolve(id){ if(!id) return id; const a=window.FAMILY&&window.FAMILY.alias; return (a&&a[id])||id; }
@@ -1855,14 +1836,15 @@ class Component extends DCLogic {
       records:(p.rec||[]).map(r=>Object.assign({},r,{hasSrc:!!r.src, hasPage:!!r.page})),
       // journal sections explicitly tagged for this person (never name-matched)
       hasJournal:!!(p.journal&&p.journal.length),
-      journal:(p.journal||[]).slice().sort((a,b)=>(a.sort||0)-(b.sort||0)).map((j,i)=>{
+      // in the order the build read them: the chapter's own story first, then the
+      // journals that merely mention them. No dates to sort on.
+      journal:(p.journal||[]).map((j,i)=>{
         const key=(S.personId||'')+':'+j.j+':'+j.anchor+':'+i;
         const open=!!S.openJ[key];
         return Object.assign({},j,{
           color:this.col(j.branch),
           roleLabel:j.role==='about'?'Their story':'Mentioned',
           hasExcerpt:!!j.excerpt,
-          hasDate:!!j.date,
           open, closed:!open,
           onToggle:()=>this.toggleJournal(key),
           bodyEl: open ? React.createElement('div',{dangerouslySetInnerHTML:{__html:j.html||''}}) : null,
@@ -1918,12 +1900,9 @@ class Component extends DCLogic {
       isWork:S.view==='work', isSearch:S.view==='search',
       isData:S.view==='data', navData:this.navData, dataRows:this.buildDataRows(), dataCount:Object.keys(this.people).length+'',
       isDiary:S.view==='diary', navDiary:this.navDiary,
-      diary:this.sortedDiary().map(d=>({anchor:'j-'+d.id,title:d.title,date:d.date,sub:d.sub,dot:this.col(d.branch),bodyEl:React.createElement('div',{className:'diaryprose',dangerouslySetInnerHTML:{__html:d.html}})})),
-      diarySorts:[['new','Newest first'],['old','Oldest first'],['touched','Last worked on']].map(([k,label])=>{
-        const on=(S.diarySort||'new')===k;
-        return{label,onClick:()=>this.setState({diarySort:k}),
-               fg:on?'#f7f3ea':'#59503f', bg:on?'#9a7d3f':'transparent', bd:on?'transparent':'rgba(43,37,28,.14)'};}),
-      diaryJump:this.sortedDiary().map(d=>({title:d.title,dot:this.col(d.branch),onClick:()=>this.openDiaryAt(d.id,'')})),
+      diary:this.diaryEntries.map(d=>({anchor:'j-'+d.id,title:d.title,sub:d.sub,dot:this.col(d.branch),branchLabel:this.blab(d.branch),
+        bodyEl:React.createElement('div',{className:'diaryprose',dangerouslySetInnerHTML:{__html:d.html}})})),
+      diaryJump:this.diaryEntries.map(d=>({title:d.title,dot:this.col(d.branch),onClick:()=>this.openDiaryAt(d.id,'')})),
       spine, storyCards, modeCards,
       // the headline counted the stories by hand and went stale the moment one was
       // added — count them

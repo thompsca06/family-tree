@@ -496,16 +496,16 @@ function Parse-FtTag {
   return $out
 }
 
-# Split a journal into heading-scoped sections, pulling out any ft: tag and the
-# date line. Each section carries the date it was written, as an italic line right
-# under the heading:
+# Split a journal into heading-scoped sections, pulling out any ft: tag.
 #
 #     ## II. The shoemaker
 #     <!-- ft: about=... -->
-#     *10 February 2024*
 #
-# It is lifted OUT of the prose and shown against the heading, rather than left to
-# render as a stray italic paragraph in the middle of the text.
+# NO DATES. The sections used to carry a research date (*10 February 2026*) which
+# drove the diary's headers and its ordering. They were invented after the fact,
+# they drifted into the future, and they claimed a precision about when the work
+# happened that nothing else here claims. Dates that are FACTS — "died 10 April
+# 1893", "the 1881 census" — live in the prose and are untouched.
 function Split-Sections {
   param([string]$md)
   $secs = [System.Collections.Generic.List[object]]::new()
@@ -518,8 +518,6 @@ function Split-Sections {
         heading = $matches[2].Trim()
         anchor = Get-Slug $matches[2]
         tag = $null
-        date = ''
-        sort = 0
         lines = [System.Collections.Generic.List[string]]::new()
       }
       continue
@@ -528,24 +526,43 @@ function Split-Sections {
       if ($cur) { $cur.tag = Parse-FtTag $line }
       continue
     }
-    # The date line, before any prose. Blank lines between the heading, the ft: tag
-    # and the date are allowed — journals are written with and without them, and
-    # requiring lines.Count -eq 0 silently dropped every date in In Service.
-    $onlyBlankSoFar = $false
-    if ($cur) { $onlyBlankSoFar = -not (@($cur.lines | Where-Object { $_ -and $_.Trim() }).Count) }
-    if ($cur -and -not $cur.date -and $onlyBlankSoFar -and
-        $line -match '^\*\s*(\d{1,2}\s+\w+\s+(?:19|20)\d\d)\s*\*\s*$') {
-      $cur.date = $matches[1]
-      $parsed = [datetime]::MinValue
-      # yyyymmdd, not Ticks — an 18-digit tick count is past JavaScript's safe
-      # integer range (2^53), and the browser sorts these.
-      if ([datetime]::TryParse($cur.date, [ref]$parsed)) { $cur.sort = [int]$parsed.ToString('yyyyMMdd') }
-      continue
-    }
     if ($cur) { $cur.lines.Add($line) }
   }
   if ($cur) { $secs.Add($cur) }
   return $secs
+}
+
+# ---- a journal describes ITSELF ----------------------------------------------
+# A story used to live in two places: the .md file, and an entry in data/diary.json
+# naming its title, subtitle and branch. Write a new story and forget the manifest
+# and it silently never appeared. The metadata now sits at the top of the .md:
+#
+#     <!-- journal: id=service branch=thompson order=50 -->
+#     # In Service
+#     ### Both sides of the kitchen door — ...
+#
+# Title = the H1. Subtitle = the H3 under it. `order` sets where it sits in the
+# diary (low first); with no dates there is nothing else to sort on, so it is said
+# out loud rather than inferred.
+function Parse-JournalHead {
+  param([string]$md, [string]$file)
+  $meta = [ordered]@{ id = ''; branch = 'root'; order = 999; title = ''; sub = '' }
+  foreach ($line in ($md -split "`r?`n")) {
+    if ($line -match '<!--\s*journal:\s*(.+?)\s*-->') {
+      foreach ($kv in ($matches[1] -split '\s+')) {
+        $k, $v = $kv -split '=', 2
+        if ($k -and $v -and $meta.Contains($k)) { $meta[$k] = $v }
+      }
+    }
+    elseif (-not $meta.title -and $line -match '^#\s+(.+)$') { $meta.title = $matches[1].Trim() }
+    elseif ($meta.title -and -not $meta.sub -and $line -match '^#{3}\s+(.+)$') { $meta.sub = $matches[1].Trim() }
+  }
+  if ($meta.order -match '^\d+$') { $meta.order = [int]$meta.order }
+  if (-not $meta.id) { $meta.id = [IO.Path]::GetFileNameWithoutExtension($file) -replace '^journal-', '' }
+  # two of the H1s end "— a research journal", which reads as noise once it is sitting
+  # on a page headed "Research diary"
+  $meta.title = ($meta.title -replace '\s*[—-]\s*a research journal\s*$', '').Trim()
+  return $meta
 }
 
 # first real sentence(s) of a section, as plain text
@@ -657,27 +674,26 @@ $untagged = @()          # ##-level sections with no tag at all
 $taggedCount = 0
 $decoyCount = 0
 
-$diaryManifest = Get-Content (Join-Path $root 'data/diary.json') -Raw | ConvertFrom-Json
-foreach ($d in $diaryManifest) {
-  $mdPath = Join-Path $root $d.file
-  if (-not (Test-Path $mdPath)) { Write-Host "  !! diary source missing: $($d.file)" -ForegroundColor Yellow; continue }
-  $md = [IO.File]::ReadAllText($mdPath)
-  $sections = @(Split-Sections $md)
+# Find the journals by looking for them, rather than by reading a manifest that has
+# to be kept in step by hand. Any .md in a branch folder carrying a
+# <!-- journal: ... --> header is a story; anything else in there (trackers,
+# worklists) is ignored.
+$journalFiles = @(
+  Get-ChildItem (Join-Path $family 'Thompson'), (Join-Path $family 'Ingleby') -Filter *.md -EA SilentlyContinue |
+    Sort-Object Name
+)
+$found = [System.Collections.Generic.List[object]]::new()
+foreach ($f in $journalFiles) {
+  $text = [IO.File]::ReadAllText($f.FullName)
+  if ($text -notmatch '<!--\s*journal:') { continue }
+  $found.Add([pscustomobject]@{ file = $f; md = $text; meta = (Parse-JournalHead $text $f.Name) })
+}
+Write-Host "  journals found  : $($found.Count)"
 
-  # The entry's date comes from its SECTIONS, not from data/diary.json — the
-  # journals carry a date under each heading, and they are the source of truth.
-  $dated = @($sections | Where-Object { $_.sort -gt 0 } | Sort-Object { $_.sort })
-  $entryFrom = ''; $entryTo = ''; $entrySort = 0; $entrySortLast = 0
-  if ($dated.Count) {
-    $entryFrom = $dated[0].date
-    $entryTo = $dated[-1].date
-    # Two orderings, because they answer different questions and a long-running
-    # journal splits them: Beeston was STARTED in Jan 2024 but is still being
-    # corrected now, so "what did I write first" and "what did I touch last"
-    # are not the same list. The page lets you pick.
-    $entrySort = $dated[0].sort      # when I started it
-    $entrySortLast = $dated[-1].sort # when I last added to it
-  }
+foreach ($entry in ($found | Sort-Object { $_.meta.order }, { $_.meta.id })) {
+  $d = $entry.meta
+  $md = $entry.md
+  $sections = @(Split-Sections $md)
 
   foreach ($sec in $sections) {
     $tag = $sec.tag
@@ -700,8 +716,6 @@ foreach ($d in $diaryManifest) {
             branch  = $d.branch
             anchor  = $sec.anchor
             heading = $sec.heading
-            date    = $sec.date
-            sort    = $sec.sort
             excerpt = $excerpt
             html    = $secHtml
             role    = $role
@@ -711,29 +725,16 @@ foreach ($d in $diaryManifest) {
     }
   }
 
-  # "Aug 2023 — Nov 2023", or a single date if it was all one sitting
-  $span = ''
-  if ($entryFrom -and $entryTo) {
-    $span = if ($entryFrom -eq $entryTo) { $entryFrom } else { "$entryFrom $EM_DASH $entryTo" }
-  }
-  elseif ($d.date) { $span = $d.date }     # fall back to data/diary.json
-
   $diary += [ordered]@{
-    id       = $d.id
-    title    = $d.title
-    sub      = $d.sub
-    date     = $span
-    from     = $entryFrom
-    to       = $entryTo
-    sort     = $entrySort
-    sortLast = $entrySortLast
-    branch   = $d.branch
-    html     = Md-Html $md
+    id     = $d.id
+    title  = $d.title
+    sub    = $d.sub
+    branch = $d.branch
+    order  = $d.order
+    html   = Md-Html $md
   }
 }
-
-# the diary reads in the order the work was done, oldest first
-$diary = @($diary | Sort-Object { $_.sort })
+# already in `order` — the journals were read in it
 
 # attach to people
 foreach ($personId in $journalLinks.Keys) {
