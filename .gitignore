@@ -8,8 +8,12 @@ data/places-unresolved.json
 
 # The ROOT familydata.js is the FULL build — living people are NOT redacted (it is
 # what preview.html uses locally, and what gets pushed to the private claude.ai
-# design project). Only dist/familydata.js, the redacted build, may be committed.
-familydata.js
+# design project). Only docs/familydata.js, the redacted build, may be committed.
+#
+# The leading slash ANCHORS this to the repo root. Without it the pattern matches
+# at every level and silently swallows docs/familydata.js too — which published a
+# site with no data in it.
+/familydata.js
 
 # local-only full-data preview (living people NOT redacted)
 preview.html
