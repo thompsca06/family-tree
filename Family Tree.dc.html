@@ -46,12 +46,16 @@
   @keyframes dvpulse{0%,100%{opacity:.5}50%{opacity:1}}
   .lift{transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease}
   .lift:hover{transform:translateY(-2px)}
+  /* drag-to-pan: without this the browser selects text instead of moving the tree */
+  .grabbable{user-select:none;-webkit-user-select:none}
+  .grabbable img{-webkit-user-drag:none;user-drag:none}
   .scrollx::-webkit-scrollbar{height:8px}
   .scrollx::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
   .dvrow:hover td{background:var(--surface-2) !important}
-  .diaryprose{font:400 16px/1.72 Newsreader,serif;color:var(--ink-soft)}
-  .diaryprose h2{font:600 19px/1.3 Newsreader,serif;color:var(--ink);margin:26px 0 10px}
-  .diaryprose h3{font:600 14px/1.4 'IBM Plex Mono',monospace;color:var(--rust);margin:22px 0 8px}
+  .diaryprose{font:400 17px/1.75 Newsreader,serif;color:var(--ink-soft)}
+  /* the chapter headings inside a journal — roughly double what they were (19/14) */
+  .diaryprose h2{font:600 38px/1.18 Newsreader,serif;color:var(--ink);margin:46px 0 16px;letter-spacing:-.01em}
+  .diaryprose h3{font:600 27px/1.25 Newsreader,serif;color:var(--rust);margin:34px 0 12px}
   .diaryprose p{margin:0 0 14px}
   .diaryprose blockquote{margin:16px 0;padding:10px 18px;border-left:3px solid var(--rust);background:rgba(43,37,28,.04);color:var(--ink-soft);font-style:italic}
   .diaryprose ul{margin:0 0 14px;padding-left:20px}
@@ -188,7 +192,7 @@
         <sc-if value="{{ isPedigree }}"><div onClick="{{ treeHome }}" class="lift" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--ink-soft);border:1px solid rgba(43,37,28,.14);padding:8px 13px;border-radius:7px">⌂ Recentre</div></sc-if>
       </div>
     </div>
-    <div style="font:400 12px/1.5 Archivo;color:var(--ink-faint);margin-bottom:26px"><sc-if value="{{ isPedigree }}">Click any ancestor to climb the tree · click the centred person to open their full record</sc-if><sc-if value="{{ isFull }}">The whole ancestry at once — Christopher at the top, every known ancestor branching below. Scroll to explore · click any name to open their record.</sc-if></div>
+    <div style="font:400 12px/1.5 Archivo;color:var(--ink-faint);margin-bottom:26px"><sc-if value="{{ isPedigree }}">Click any ancestor to climb the tree · click the centred person to open their full record</sc-if><sc-if value="{{ isFull }}">The whole ancestry at once — Christopher at the top, every known ancestor branching below. <b style="color:var(--ink-soft)">Grab it and drag to move around</b> · click any name to open their record.</sc-if></div>
 
     <sc-if value="{{ isPedigree }}">
     <div class="scrollx" style="overflow-x:auto;padding-bottom:10px">
@@ -262,7 +266,7 @@
     </sc-if>
 
     <sc-if value="{{ isFull }}">
-    <div class="scrollx" data-fulltree="1" ref="{{ fullTreeRef }}" style="overflow:auto;max-height:76vh;border:1px solid rgba(43,37,28,.09);border-radius:10px;background:var(--surface-2)">
+    <div class="scrollx grabbable" data-fulltree="1" ref="{{ fullTreeRef }}" style="overflow:auto;max-height:76vh;border:1px solid rgba(43,37,28,.09);border-radius:10px;background:var(--surface-2)">
       <div style="position:relative;width:{{ ft.width }}px;height:{{ ft.height }}px">
         <svg style="position:absolute;inset:0;width:100%;height:100%;overflow:visible" viewBox="0 0 {{ ft.width }} {{ ft.height }}">
           <sc-for list="{{ ft.links }}" as="l" hint-placeholder-count="8"><line x1="{{ l.x1 }}" y1="{{ l.y1 }}" x2="{{ l.x2 }}" y2="{{ l.y2 }}" stroke="{{ l.color }}" stroke-width="1.4" opacity="0.4"></line></sc-for>
@@ -1372,7 +1376,40 @@ class Component extends DCLogic {
       t, canBack:S.trail.length>1, treeBack:this.treeBack, treeHome:this.treeHome,
       treeMode:S.treeMode, isPedigree:S.treeMode==='pedigree', isFull:S.treeMode==='full',
       setPedigree:()=>this.setTreeMode('pedigree'), setFull:()=>this.setTreeMode('full'), ft:S.treeMode==='full'?this.fullTree():{nodes:[],links:[],width:1,height:1},
-      fullTreeRef:(el)=>{ if(el){ const rx=this._rootX||0; requestAnimationFrame(()=>requestAnimationFrame(()=>{ if(el.scrollLeft===0) el.scrollLeft=Math.max(0, rx-el.clientWidth/2); })); } },
+      fullTreeRef:(el)=>{
+        if(!el) return;
+        const rx=this._rootX||0;
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{ if(el.scrollLeft===0) el.scrollLeft=Math.max(0, rx-el.clientWidth/2); }));
+
+        // Grab-and-drag the whole tree, like a map. Only bind once per element.
+        if(el._pan) return;
+        el._pan=true;
+        el.style.cursor='grab';
+        let down=false, sx=0, sy=0, sl=0, st=0, moved=0;
+
+        el.addEventListener('mousedown',(e)=>{
+          if(e.button!==0) return;
+          down=true; moved=0;
+          sx=e.clientX; sy=e.clientY; sl=el.scrollLeft; st=el.scrollTop;
+          el.style.cursor='grabbing';
+          e.preventDefault();          // stop the browser starting a text/image drag
+        });
+        window.addEventListener('mouseup',()=>{
+          if(!down) return;
+          down=false; el.style.cursor='grab';
+          // a drag must not also count as a click on the card underneath
+          if(moved>4){ el._suppressClick=true; setTimeout(()=>{el._suppressClick=false;},0); }
+        });
+        window.addEventListener('mousemove',(e)=>{
+          if(!down) return;
+          const dx=e.clientX-sx, dy=e.clientY-sy;
+          moved=Math.max(moved, Math.abs(dx)+Math.abs(dy));
+          el.scrollLeft=sl-dx;
+          el.scrollTop=st-dy;
+        });
+        // swallow the click that ends a drag, so you don't open a person by accident
+        el.addEventListener('click',(e)=>{ if(el._suppressClick){ e.stopPropagation(); e.preventDefault(); } }, true);
+      },
       pedBg:S.treeMode==='pedigree'?'#b34a25':'transparent', pedFg:S.treeMode==='pedigree'?'#fff':'#59503f', fullBg:S.treeMode==='full'?'#b34a25':'transparent', fullFg:S.treeMode==='full'?'#fff':'#59503f',
       people, peopleCount:Object.keys(this.people).length, branchFilters, noResults:people.length===0&&unlinkedPeople.length===0,
       hasUnlinked:unlinkedPeople.length>0, unlinkedCount:unlinkedPeople.length, unlinkedGroups, unlinkedPeople,

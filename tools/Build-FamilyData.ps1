@@ -523,6 +523,12 @@ function Md-Html {
   $html = [System.Text.StringBuilder]::new()
   $inList = $false
   $inQuote = $false
+  # Two journals open with an H3 used as a SUBTITLE, before any real section:
+  #   # The Long Road to Beeston
+  #   ### The Inglebys, from a Nidderdale farm to a Leeds council estate
+  # The site already shows that as the entry's subtitle, so rendering it again as
+  # a heading printed it twice. Drop an H3 that appears before the first H2.
+  $seenH2 = $false
   $para = [System.Collections.Generic.List[string]]::new()
 
   function Inline { param([string]$s)
@@ -557,8 +563,12 @@ function Md-Html {
       FlushPara $html $para
       if ($inList) { [void]$html.Append('</ul>'); $inList = $false }
       $lvl = $matches[1].Length
-      # H1 is the page title, already shown in the site chrome — skip it
-      if ($lvl -gt 1) {
+      if ($lvl -eq 2) { $seenH2 = $true }
+      # H1 is the page title, already in the site chrome. A leading H3 (before any
+      # H2) is the journal's subtitle, already shown as the entry's sub — printing
+      # it again duplicated it on the page.
+      $isSubtitle = ($lvl -eq 3 -and -not $seenH2)
+      if ($lvl -gt 1 -and -not $isSubtitle) {
         $anchor = Get-Slug $matches[2]
         [void]$html.Append("<h$lvl id=""$anchor"">" + (Inline $matches[2]) + "</h$lvl>")
       }
