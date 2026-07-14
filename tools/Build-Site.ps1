@@ -37,10 +37,18 @@ if ($Private) {
 
 Write-Host "== assembling docs/"
 $html = [IO.File]::ReadAllText((Join-Path $root 'Family Tree.dc.html'))
+# React is VENDORED, not pulled from unpkg. The design host injects React for the
+# .dc.html; the published page has to bring its own. It used to fetch it from a CDN,
+# which meant the entire site rendered as a BLANK PAGE if unpkg was slow, blocked, or
+# the reader was offline — nothing on the page is progressive, it is all React.
+# Now the only thing the site fetches from anywhere is the map tiles.
 $react = @'
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
 '@
+foreach ($lib in @('vendor/react.production.min.js', 'vendor/react-dom.production.min.js')) {
+  if (-not (Test-Path (Join-Path $root $lib))) { throw "missing $lib - the published site would render blank" }
+}
 $html = $html -replace '(?i)(<head>)', "`$1`n$react"
 [IO.File]::WriteAllText((Join-Path $dist 'index.html'), $html)
 

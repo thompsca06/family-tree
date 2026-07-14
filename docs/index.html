@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./familydata.js"></script>
@@ -54,6 +54,9 @@
   .scrollx::-webkit-scrollbar{height:8px}
   .scrollx::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
   .dvrow:hover td{background:var(--surface-2) !important}
+  /* the body must never scroll sideways — wide things (tables, the full tree) scroll
+     inside their own box. Without this, large text pushed the whole page off-screen. */
+  html,body{max-width:100%;overflow-x:hidden}
   .diaryprose{font:400 17px/1.75 Newsreader,serif;color:var(--ink-soft)}
   /* the chapter headings inside a journal — roughly double what they were (19/14) */
   .diaryprose h2{font:600 38px/1.18 Newsreader,serif;color:var(--ink);margin:46px 0 16px;letter-spacing:-.01em}
@@ -88,15 +91,17 @@
 </style>
 </helmet>
 
-<div style="min-height:100vh;background:var(--bg)">
+<div data-app style="min-height:100vh;background:var(--bg)">
 
   <!-- ============ TOP NAV ============ -->
-  <div data-nav style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 30px;background:rgba(247,243,234,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(43,37,28,.10)">
+  <!-- flex-wrap: at 150%+ text (or on a phone) the nav is wider than the screen. It
+       must wrap onto a second row, not push the whole page sideways. -->
+  <div data-nav style="position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 18px;padding:13px 30px;background:rgba(247,243,234,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(43,37,28,.10)">
     <div onClick="{{ navHome }}" style="display:flex;align-items:baseline;gap:11px;cursor:pointer">
-      <span style="font:600 16px/1 Newsreader,serif;letter-spacing:.01em">A Family Across Two Centuries</span>
-      <span style="font:400 9.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);letter-spacing:.14em;text-transform:uppercase">Thompson · Ingleby</span>
+      <span style="font:600 16px/1 Newsreader,serif;letter-spacing:.01em;white-space:nowrap">A Family Across Two Centuries</span>
+      <span style="font:400 9.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap">Thompson · Ingleby</span>
     </div>
-    <div style="display:flex;align-items:center;gap:4px">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
       <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="5">
         <div onClick="{{ tab.onClick }}" class="lift" style="position:relative;cursor:pointer;padding:8px 13px;font:600 12px/1 Archivo;color:var(--ink-soft)">
           {{ tab.label }}
@@ -104,10 +109,21 @@
         </div>
       </sc-for>
     </div>
-    <div style="display:flex;align-items:center;gap:9px">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:9px">
       <div style="display:flex;align-items:center;gap:8px;background:rgba(43,37,28,.07);border:1px solid rgba(43,37,28,.10);border-radius:9px;padding:8px 12px;width:210px">
         <span style="color:var(--ink-faint);font:400 13px/1 'IBM Plex Mono',monospace">⌕</span>
         <input value="{{ query }}" onInput="{{ onQuery }}" onFocus="{{ navPeople }}" placeholder="Search people, trades, places, journals…" style="border:0;background:transparent;outline:none;color:var(--ink);font:400 12.5px/1 Archivo;width:100%" />
+      </div>
+      <!-- text size. The whole page is set in fixed pixels, so this scales the page
+           itself rather than a root font-size, which fixed px would ignore. -->
+      <div class="noprint" style="display:flex;align-items:center;flex:none;border:1px solid rgba(43,37,28,.14);border-radius:9px;overflow:hidden">
+        <div onClick="{{ textSmaller }}" class="lift" title="Smaller text" style="cursor:pointer;padding:7px 11px;font:600 12px/1 Archivo;color:var(--ink-soft);user-select:none">A−</div>
+        <div style="width:1px;align-self:stretch;background:rgba(43,37,28,.14)"></div>
+        <div onClick="{{ textBigger }}" class="lift" title="Bigger text" style="cursor:pointer;padding:7px 11px;font:600 15px/1 Archivo;color:var(--ink);user-select:none">A+</div>
+        <sc-if value="{{ textZoomed }}">
+          <div style="width:1px;align-self:stretch;background:rgba(43,37,28,.14)"></div>
+          <div onClick="{{ textReset }}" class="lift" title="Reset text size" style="cursor:pointer;padding:7px 10px;font:500 10px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);user-select:none">{{ textPct }}</div>
+        </sc-if>
       </div>
       <!-- copies a link to whatever page you are on -->
       <div onClick="{{ share }}" class="lift noprint" title="{{ shareUrl }}" style="cursor:pointer;flex:none;display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:9px;color:{{ shareFg }};background:{{ shareBg }};border:1px solid {{ shareBd }};font:600 11.5px/1 Archivo;white-space:nowrap;user-select:none">{{ shareLabel }}</div>
@@ -981,7 +997,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', mapGroup:'line', openJ:{}, lbZoom:1, lbX:0, lbY:0, diaryAt:'', shared:false };
+  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', mapGroup:'line', openJ:{}, lbZoom:1, lbX:0, lbY:0, diaryAt:'', shared:false, textScale:1 };
 
   // which journal chapters are expanded in place on the profile
   toggleJournal = (key) => this.setState(s=>({ openJ: Object.assign({}, s.openJ, {[key]: !s.openJ[key]}) }));
@@ -1346,6 +1362,18 @@ class Component extends DCLogic {
   }
   componentDidMount(){
     this.syncMaps();
+    // text size, as it was left last visit
+    let saved=1;
+    try{ saved=parseFloat(localStorage.getItem('ft.textScale'))||1; }catch(e){}
+    if(this.TEXT_STEPS.indexOf(saved)<0) saved=1;
+    if(saved!==1) this.setState({textScale:saved}, ()=>this.applyTextScale(saved));
+    // ctrl/cmd +, -, 0 — what everyone already presses
+    window.addEventListener('keydown',(e)=>{
+      if(!(e.ctrlKey||e.metaKey)) return;
+      if(e.key==='='||e.key==='+'){ e.preventDefault(); this.textBigger(); }
+      else if(e.key==='-'){ e.preventDefault(); this.textSmaller(); }
+      else if(e.key==='0'){ e.preventDefault(); this.textReset(); }
+    });
     this.applyHash();                                       // land on the shared page
     window.addEventListener('hashchange',()=>this.applyHash());   // browser back/forward
     window.addEventListener('keydown',(e)=>{
@@ -1448,6 +1476,32 @@ class Component extends DCLogic {
   openStory = (id) => this.setState({view:'story', storyId:id});
   navDiary = () => this.setState({view:'diary'});
   navJournal = () => this.setState({view:'journal'});
+
+  // ---- text size ---------------------------------------------------------
+  // Every font on this page is a fixed pixel size, so raising the root font-size
+  // does nothing — px does not inherit from it. Scale the whole page instead, via
+  // zoom on the app root. Steps, not a slider: 90% up to 200%.
+  TEXT_STEPS = [0.9, 1, 1.15, 1.3, 1.5, 1.75, 2];
+  applyTextScale(z){
+    // zoom, not transform:scale — transform would shrink the layout box and leave a
+    // gap down the side of the page, and it fights Leaflet's own transforms.
+    const el = document.querySelector('[data-app]') || document.body;
+    el.style.zoom = (z===1) ? '' : String(z);
+    try{ localStorage.setItem('ft.textScale', String(z)); }catch(e){}
+    // a zoom change resizes the map's container without firing a resize event
+    setTimeout(()=>this.syncMaps&&this.syncMaps(),60);
+  }
+  stepText(dir){
+    const steps=this.TEXT_STEPS;
+    let i=steps.indexOf(this.state.textScale);
+    if(i<0) i=steps.indexOf(1);
+    i=Math.max(0, Math.min(steps.length-1, i+dir));
+    const z=steps[i];
+    this.setState({textScale:z}, ()=>this.applyTextScale(z));
+  }
+  textBigger  = () => this.stepText(1);
+  textSmaller = () => this.stepText(-1);
+  textReset   = () => this.setState({textScale:1}, ()=>this.applyTextScale(1));
   // open the Diary and scroll to the tagged section the person is written about
   // The Diary renders every journal on one long page, so opening it without a
   // target lands you on the FIRST journal, not the one you clicked. With no
@@ -1954,6 +2008,9 @@ class Component extends DCLogic {
       shareFg:S.shared?'#fffdf8':'#59503f',
       shareBg:S.shared?'#4d7a52':'transparent',
       shareBd:S.shared?'transparent':'rgba(43,37,28,.14)',
+      textBigger:this.textBigger, textSmaller:this.textSmaller, textReset:this.textReset,
+      textZoomed:(S.textScale||1)!==1,
+      textPct:Math.round((S.textScale||1)*100)+'%',
       workTrades:wTrades, workCount:wTrades.length,
       searchGroups:sGroups, searchEmpty:(S.view==='search' && sGroups.length===0),
       searchSummary:(S.query||'').trim()
