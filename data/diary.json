@@ -1,0 +1,34 @@
+[
+  {
+    "id": "beeston",
+    "file": "../Ingleby/the-long-road-to-beeston.md",
+    "title": "The Long Road to Beeston",
+    "sub": "The Inglebys, from a Nidderdale farm to a Leeds council estate",
+    "date": "8 July 2026",
+    "branch": "ingleby"
+  },
+  {
+    "id": "midland",
+    "file": "../Ingleby/up-the-midland-line.md",
+    "title": "Up the Midland Line",
+    "sub": "The Blaggs, from a Nottinghamshire village to the footplate",
+    "date": "11 July 2026",
+    "branch": "ingleby"
+  },
+  {
+    "id": "whitehead",
+    "file": "../Thompson/journal-whitehead-and-champion.md",
+    "title": "The Whitehead & Champion Story",
+    "sub": "Ada Whitehead's parents — the Whiteheads out of Beverley, the Champions and Discombes out of Leeds",
+    "date": "13 July 2026",
+    "branch": "thompson"
+  },
+  {
+    "id": "garforth",
+    "file": "../Thompson/journal-the-garforth-families.md",
+    "title": "The Garforth Families",
+    "sub": "Pit people — the Thompsons, the Dixons and the Collinses, all within a mile of St Mary's",
+    "date": "14 July 2026",
+    "branch": "thompson"
+  }
+]

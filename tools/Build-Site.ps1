@@ -1,0 +1,56 @@
+<#
+Build-Site.ps1 — produce dist/, the standalone site for GitHub Pages.
+
+    pwsh tools/Build-Site.ps1            # public build: living people redacted
+    pwsh tools/Build-Site.ps1 -Private   # full build, for local use only
+
+The .dc.html is a Claude design component: it uses React but never loads it,
+because the claude.ai design host injects React/ReactDOM for it. dist/index.html
+is the same page with those two script tags added, so it runs anywhere.
+
+PRIVACY: the public build strips every fact about anyone who may still be living
+(no death record + born within 100 years). Their records are not in the published
+file at all — they are not merely hidden in the browser.
+#>
+param([switch]$Private)
+
+$ErrorActionPreference = 'Stop'
+$root = Split-Path -Parent $PSScriptRoot
+$dist = Join-Path $root 'dist'
+
+# refuse to publish half a photo
+Write-Host "== verifying images"
+pwsh -NoProfile -File (Join-Path $PSScriptRoot 'Verify-Images.ps1') -Report | Out-Host
+if ($LASTEXITCODE -ne 0) { throw "refusing to build: images are missing or truncated (see above)" }
+
+Write-Host "== rebuilding data"
+& (Join-Path $PSScriptRoot 'Parse-Gedcom.ps1') | Out-Host
+
+if (Test-Path $dist) { Remove-Item $dist -Recurse -Force }
+New-Item -ItemType Directory -Force $dist | Out-Null
+
+if ($Private) {
+  & (Join-Path $PSScriptRoot 'Build-FamilyData.ps1') -Out 'dist/familydata.js' | Out-Host
+} else {
+  & (Join-Path $PSScriptRoot 'Build-FamilyData.ps1') -Public -Out 'dist/familydata.js' | Out-Host
+}
+
+Write-Host "== assembling dist/"
+$html = [IO.File]::ReadAllText((Join-Path $root 'Family Tree.dc.html'))
+$react = @'
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+'@
+$html = $html -replace '(?i)(<head>)', "`$1`n$react"
+[IO.File]::WriteAllText((Join-Path $dist 'index.html'), $html)
+
+Copy-Item (Join-Path $root 'support.js') $dist
+Copy-Item (Join-Path $root 'vendor') $dist -Recurse
+Copy-Item (Join-Path $root 'img') $dist -Recurse
+# stops GitHub Pages running the output through Jekyll (which ignores _ files)
+[IO.File]::WriteAllText((Join-Path $dist '.nojekyll'), '')
+
+$n = (Get-ChildItem $dist -Recurse -File).Count
+$kb = [Math]::Round(((Get-ChildItem $dist -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
+Write-Host ""
+Write-Host "dist/ ready — $n files, $kb MB$(if(-not $Private){'   [PUBLIC: living people redacted]'})"

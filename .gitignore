@@ -1,0 +1,21 @@
+# NEVER commit the raw genealogy data — it contains unredacted details for people
+# who are still living. Only dist/ (the redacted public build) is published.
+src/*.ged
+src/*.gedcom
+data/gedcom.json
+data/problems.txt
+data/places-unresolved.json
+
+# The ROOT familydata.js is the FULL build — living people are NOT redacted (it is
+# what preview.html uses locally, and what gets pushed to the private claude.ai
+# design project). Only dist/familydata.js, the redacted build, may be committed.
+familydata.js
+
+# local-only full-data preview (living people NOT redacted)
+preview.html
+_probe.html
+_v_*.html
+_diag.html
+_cdn.html
+
+*.bak
