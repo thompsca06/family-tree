@@ -58,13 +58,31 @@
   .diaryprose li{margin:4px 0}
   .diaryprose hr{border:0;border-top:1px solid rgba(43,37,28,.11);margin:22px 0}
   .diaryprose strong{color:var(--ink);font-weight:600}
+
+  /* ---- print / save-as-PDF ----------------------------------------------
+     Prints whatever is on screen. On a person that gives a one-or-two page
+     record sheet: vitals, the map, every record with its source, the gaps,
+     and the journal chapters that are expanded. */
+  @media print{
+    @page{ margin:14mm }
+    body{ background:#fff !important; color:#000 }
+    .noprint, .leaflet-control-container{ display:none !important }
+    .ftree-in{ animation:none !important; opacity:1 !important; transform:none !important }
+    .lift:hover{ transform:none !important }
+    /* the sticky nav would repeat on every page */
+    [data-nav]{ display:none !important }
+    /* never split a record, a document or a chapter across a page break */
+    .diaryprose, .diaryprose p, .diaryprose blockquote{ break-inside:avoid }
+    img{ max-width:100% }
+    a{ color:#000; text-decoration:none }
+  }
 </style>
 </helmet>
 
 <div style="min-height:100vh;background:var(--bg)">
 
   <!-- ============ TOP NAV ============ -->
-  <div style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 30px;background:rgba(247,243,234,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(43,37,28,.10)">
+  <div data-nav style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 30px;background:rgba(247,243,234,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(43,37,28,.10)">
     <div onClick="{{ navHome }}" style="display:flex;align-items:baseline;gap:11px;cursor:pointer">
       <span style="font:600 16px/1 Newsreader,serif;letter-spacing:.01em">A Family Across Two Centuries</span>
       <span style="font:400 9.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);letter-spacing:.14em;text-transform:uppercase">Thompson · Ingleby</span>
@@ -276,15 +294,44 @@
       <sc-for list="{{ people }}" as="p" hint-placeholder-count="12">
         <div onClick="{{ p.onClick }}" class="lift" style="cursor:pointer;display:flex;gap:12px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:10px;padding:13px 14px">
           <div style="width:42px;height:42px;flex:none;border-radius:8px;background:{{ p.color }};display:flex;align-items:center;justify-content:center;font:600 14px/1 Newsreader,serif;color:var(--bg)">{{ p.initials }}</div>
-          <div style="min-width:0">
-            <div style="font:600 14px/1.15 Newsreader,serif">{{ p.name }}</div>
+          <div style="min-width:0;flex:1">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font:600 14px/1.15 Newsreader,serif">{{ p.name }}</span>
+              <sc-if value="{{ p.sourced }}"><span title="Fully sourced" style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ p.color }}"></span></sc-if>
+            </div>
             <div style="font:400 10.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-top:3px">{{ p.years }}</div>
             <div style="font:400 11.5px/1.35 Archivo;color:var(--ink-faint);margin-top:5px">{{ p.trade }}</div>
+            <sc-if value="{{ p.hasGapCount }}"><div style="font:500 10px/1.3 'IBM Plex Mono',monospace;color:var(--rust);margin-top:5px">{{ p.gapCount }} still missing</div></sc-if>
           </div>
         </div>
       </sc-for>
     </div>
     <sc-if value="{{ noResults }}"><div style="margin-top:30px;font:italic 400 15px/1 Newsreader,serif;color:var(--ink-faint)">No one by that name. Try another spelling.</div></sc-if>
+
+    <!-- people who belong to neither line -->
+    <sc-if value="{{ hasUnlinked }}">
+    <div style="margin-top:46px;padding-top:26px;border-top:1px solid rgba(43,37,28,.12)">
+      <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--rust);text-transform:uppercase">Not yet connected</div>
+      <div style="font:600 20px/1.15 Newsreader,serif;margin-top:7px">{{ unlinkedCount }} people who belong to neither line</div>
+      <div style="font:400 13.5px/1.6 Newsreader,serif;color:var(--ink-soft);margin-top:8px;max-width:660px">Real research that never got joined on — the connecting record is either missing, or exists twice with only the thin copy wired in. They are not on the Thompson side or the Ingleby side because no path of parents reaches them.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+        <sc-for list="{{ unlinkedGroups }}" as="u" hint-placeholder-count="4">
+          <div style="font:500 12px/1 Archivo;background:rgba(179,74,37,.07);border:1px solid rgba(179,74,37,.25);padding:8px 13px;border-radius:20px">{{ u.sur }} <span style="color:var(--ink-faint)">{{ u.n }}</span></div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:18px">
+        <sc-for list="{{ unlinkedPeople }}" as="p" hint-placeholder-count="6">
+          <div onClick="{{ p.onClick }}" class="lift" style="cursor:pointer;display:flex;gap:12px;background:var(--surface);border:1px dashed rgba(179,74,37,.35);border-radius:10px;padding:13px 14px">
+            <div style="width:42px;height:42px;flex:none;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 14px/1 Newsreader,serif;color:var(--ink-faint)">{{ p.initials }}</div>
+            <div style="min-width:0">
+              <div style="font:600 14px/1.15 Newsreader,serif">{{ p.name }}</div>
+              <div style="font:400 10.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-top:3px">{{ p.years }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
   </div>
   </sc-if>
 
@@ -518,6 +565,37 @@
         </div>
         </sc-if>
 
+        <!-- the documents themselves -->
+        <sc-if value="{{ pv.hasDocs }}">
+        <div style="margin-top:30px">
+          <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">The document itself</div>
+          <div style="display:flex;flex-wrap:wrap;gap:12px">
+            <sc-for list="{{ pv.docs }}" as="dc" hint-placeholder-count="2">
+              <div onClick="{{ dc.onClick }}" class="lift" style="cursor:zoom-in;width:190px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:9px;overflow:hidden">
+                <img src="{{ dc.img }}" style="display:block;width:100%;height:130px;object-fit:cover;object-position:center top" />
+                <div style="padding:9px 11px">
+                  <div style="font:600 12px/1.3 'IBM Plex Mono',monospace;color:var(--rust)">{{ dc.year }}</div>
+                  <div style="font:400 10.5px/1.4 Archivo;color:var(--ink-faint);margin-top:3px">{{ dc.ref }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- what we still don't know -->
+        <sc-if value="{{ pv.hasGaps }}">
+        <div style="margin-top:30px;background:rgba(179,74,37,.05);border:1px dashed rgba(179,74,37,.35);border-radius:10px;padding:16px 20px">
+          <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--rust);text-transform:uppercase">What we still don't know</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px">
+            <sc-for list="{{ pv.gaps }}" as="g" hint-placeholder-count="2">
+              <div style="font:400 13.5px/1.5 Newsreader,serif;color:var(--ink-soft)">· {{ g.text }}</div>
+            </sc-for>
+          </div>
+          <div style="font:400 11.5px/1.5 Archivo;color:var(--ink-faint);margin-top:10px">Nothing here is a guess — these are the records this life should have left behind, and hasn't yet.</div>
+        </div>
+        </sc-if>
+
         <!-- records -->
         <sc-if value="{{ pv.hasRecords }}">
         <div style="margin-top:26px">
@@ -571,7 +649,10 @@
         </div>
         </sc-if>
 
-        <div onClick="{{ pv.onTree }}" class="lift" style="display:inline-block;cursor:pointer;margin-top:24px;font:600 11.5px/1 Archivo;color:var(--ink-soft);border:1px solid rgba(43,37,28,.14);padding:10px 16px;border-radius:8px">⌖ Centre the tree on {{ pv.firstName }}</div>
+        <div class="noprint" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px">
+          <div onClick="{{ pv.onTree }}" class="lift" style="display:inline-block;cursor:pointer;font:600 11.5px/1 Archivo;color:var(--ink-soft);border:1px solid rgba(43,37,28,.14);padding:10px 16px;border-radius:8px">⌖ Centre the tree on {{ pv.firstName }}</div>
+          <div onClick="{{ pv.onPrint }}" class="lift" style="display:inline-block;cursor:pointer;font:600 11.5px/1 Archivo;color:var(--ink-soft);border:1px solid rgba(43,37,28,.14);padding:10px 16px;border-radius:8px">⎙ Print / save as PDF</div>
+        </div>
       </div>
     </div>
   </div>
@@ -992,6 +1073,17 @@ class Component extends DCLogic {
   storyHero = { harry:'img/war/pow_capture_1942.jpg', tommy:'img/war/desert_25pounder_1942.jpg', ingleby:'img/places/mickley.jpg', blagg:'img/places/jack_lane.jpg' };
 
   openLightbox = (src,cap) => this.setState({lightbox:src, lightboxCap:cap||''});
+  // "Class: RG11; Piece: 4711; Folio: 24; Page: 43" -> "RG11 4711 / f.24 p.43"
+  shortRef(page){
+    if(!page) return '';
+    const cls=/Class:\s*(\w+)/i.exec(page), pce=/Piece:\s*(\d+)/i.exec(page);
+    const fol=/Folio:\s*(\w+)/i.exec(page), pg=/Page:\s*(\d+)/i.exec(page);
+    const bk=/Book:\s*(\d+)/i.exec(page), r39=/RG\s*101\/(\w+)/i.exec(page);
+    if(cls&&pce) return cls[1]+' '+pce[1]+(fol?' / f.'+fol[1]:'')+(pg?' p.'+pg[1]:'');
+    if(r39) return 'RG101/'+r39[1];
+    if(bk) return '1921 census · book '+bk[1];
+    return page.length>46 ? page.slice(0,46)+'…' : page;
+  }
   closeLightbox = () => this.setState({lightbox:null});
   goPlace = (id) => this.setState({view:'places', place:id});
   imgEl(src,cap,st){return React.createElement('img',{src,onClick:()=>this.openLightbox(src,cap||''),className:'lift',style:Object.assign({cursor:'zoom-in',display:'block'},st||{})});}
@@ -1024,7 +1116,10 @@ class Component extends DCLogic {
       const p=this.people[id];
       const occ=(p.occs&&p.occs.length)?p.occs.join(' · '):'—';
       const addr=(p.stops&&p.stops.length)?p.stops.map(s=>s.name).join(' · '):'—';
-      const sourced=!!(p.rec&&p.rec.length);
+      // "sourced" now means the full-vitals rule is satisfied — birth/baptism +
+      // marriage + death/burial + every census of their lifetime. Having *some*
+      // records is not the same as being done.
+      const sourced=!!p.sourced;
       const bc=this.col(p.branch);
       return {
         id, sourced, name:p.name, years:p.years||'—',
@@ -1141,8 +1236,23 @@ class Component extends DCLogic {
     if(S.branch!=='all') ids=ids.filter(id=>{const b=this.people[id].branch; return b===S.branch||id===this.root;});
     if(q) ids=ids.filter(id=>this.people[id].name.toLowerCase().includes(q));
     ids.sort((a,b)=>(this.people[b].by||0)-(this.people[a].by||0));
-    const people=ids.map(id=>{const p=this.people[id];return{name:p.name,years:p.years,trade:(p.occs&&p.occs.length?p.occs[0]:this.blab(p.branch)),color:this.col(p.branch),initials:this.initials(p.name),onClick:()=>this.openPerson(id,'people')};});
+    // the "Not yet connected" people are listed in their own section below,
+    // so keep them out of the main directory rather than mixing them in
+    ids=ids.filter(id=>!this.people[id].unlinked);
+    const people=ids.map(id=>{const p=this.people[id];const gn=(p.gaps||[]).length;return{
+      name:p.name,years:p.years,trade:(p.occs&&p.occs.length?p.occs[0]:this.blab(p.branch)),
+      color:this.col(p.branch),initials:this.initials(p.name),
+      sourced:!!p.sourced, gapCount:gn, hasGapCount:gn>0,
+      onClick:()=>this.openPerson(id,'people')};});
     const branchFilters=[['all','Everyone'],['thompson','Thompson (Dad)'],['ingleby','Ingleby (Mother)']].map(([b,label])=>{const on=S.branch===b;return{label,onClick:()=>this.setBranch(b),fg:on?'#f7f3ea':'#59503f',bg:on?(b==='ingleby'?'#4d7a52':b==='thompson'?'#b34a25':'#9a7d3f'):'transparent',bd:on?'transparent':'rgba(43,37,28,.14)'};});
+
+    // people who belong to neither line
+    const unIds=Object.keys(this.people).filter(id=>this.people[id].unlinked&&(!q||this.people[id].name.toLowerCase().includes(q)));
+    const bySur={}; unIds.forEach(id=>{const s=this.people[id].sur||'—'; bySur[s]=(bySur[s]||0)+1;});
+    const unlinkedGroups=Object.keys(bySur).sort((a,b)=>bySur[b]-bySur[a]).map(s=>({sur:s,n:bySur[s]}));
+    const unlinkedPeople=unIds
+      .sort((a,b)=>(this.people[a].sur||'').localeCompare(this.people[b].sur||''))
+      .map(id=>{const p=this.people[id];return{name:p.name,years:p.years,initials:this.initials(p.name),onClick:()=>this.openPerson(id,'people')};});
 
     // places
     const mkPlace=(id)=>{const p=this.places[id];return{...p,onClick:()=>this.selectPlace(id)};};
@@ -1230,6 +1340,16 @@ class Component extends DCLogic {
       journey:this.personPins(pid).map(v=>({
         label:v.label, name:v.name, when:v.when, hasWhen:!!v.when, color:v.color
       })),
+      // the actual scans — matched to this person by archive reference, not by name
+      hasDocs:!!(p.docs&&p.docs.length),
+      docs:(p.docs||[]).map(d=>({
+        img:d.img, year:d.year||'', ref:this.shortRef(d.page),
+        onClick:()=>this.openLightbox(d.img, (d.year?d.year+' — ':'')+this.shortRef(d.page))
+      })),
+      // honest about the holes, not just the facts
+      hasGaps:!!(p.gaps&&p.gaps.length),
+      gaps:(p.gaps||[]).map(g=>({text:g})),
+      onPrint:()=>window.print(),
       hasStory:!!storyId2, onStory:()=>storyId2&&this.openStory(storyId2),
       onTree:()=> (p.f||p.m)?this.setFocus(pid):this.openPerson(pid,S.personBack),
     };
@@ -1254,7 +1374,8 @@ class Component extends DCLogic {
       setPedigree:()=>this.setTreeMode('pedigree'), setFull:()=>this.setTreeMode('full'), ft:S.treeMode==='full'?this.fullTree():{nodes:[],links:[],width:1,height:1},
       fullTreeRef:(el)=>{ if(el){ const rx=this._rootX||0; requestAnimationFrame(()=>requestAnimationFrame(()=>{ if(el.scrollLeft===0) el.scrollLeft=Math.max(0, rx-el.clientWidth/2); })); } },
       pedBg:S.treeMode==='pedigree'?'#b34a25':'transparent', pedFg:S.treeMode==='pedigree'?'#fff':'#59503f', fullBg:S.treeMode==='full'?'#b34a25':'transparent', fullFg:S.treeMode==='full'?'#fff':'#59503f',
-      people, peopleCount:Object.keys(this.people).length, branchFilters, noResults:people.length===0,
+      people, peopleCount:Object.keys(this.people).length, branchFilters, noResults:people.length===0&&unlinkedPeople.length===0,
+      hasUnlinked:unlinkedPeople.length>0, unlinkedCount:unlinkedPeople.length, unlinkedGroups, unlinkedPeople,
       britPlaces, worldPlaces, britRoutes:this.britRoutes, worldRoutes:this.worldRoutes, mapLegend:this.mapLegend, place,
       mapPeople, mapAll, mapSelName, mapSelChips, hasMapChips:mapSelChips.length>0, setEveryone:()=>this.setState({view:'places',mapPerson:'all'}), everyoneBg:mapAll?'#b34a25':'transparent', everyoneFg:mapAll?'#fff':'#59503f',
       mapRef:(el)=>{ if(el){ requestAnimationFrame(()=>requestAnimationFrame(()=>this.syncMaps())); } },

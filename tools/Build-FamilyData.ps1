@@ -648,6 +648,75 @@ foreach ($personId in $people.Keys) {
   if (-not $people[$personId].Contains('journal')) { $people[$personId].journal = @() }
 }
 
+# ------------------------------------------------- research gaps & sourced-ness
+# The site should be as honest about what is MISSING as about what is known —
+# "added" is not "sourced". These feed the "What we still don't know" panel and
+# the sourced dot in the People list.
+#
+# Expected censuses: every census year the person was actually alive for. England
+# ran a census every 10 years from 1841 (none in 1941; the 1939 Register stands in).
+$CENSUS_YEARS = @(1841, 1851, 1861, 1871, 1881, 1891, 1901, 1911, 1921, 1939)
+
+$recordsPath = Join-Path $root 'data/records.json'
+$docsFor = @{}
+if (Test-Path $recordsPath) {
+  $rj = Get-Content $recordsPath -Raw | ConvertFrom-Json
+  foreach ($k in $rj.PSObject.Properties.Name) { $docsFor[$k] = $rj.$k }
+}
+
+foreach ($id in $ids) {
+  $p = $people[$id]
+  $ev = $PPL.$id.events
+
+  $hasBirth = [bool](@($ev | Where-Object { $_.tag -in 'BIRT', 'BAPM', 'CHR' }).Count)
+  $hasDeath = [bool](@($ev | Where-Object { $_.tag -in 'DEAT', 'BURI' }).Count)
+  $hasMarr = [bool]($marrEv[$id])
+  $censusYears = @($ev | Where-Object { $_.tag -eq 'RESI' } | ForEach-Object { Get-Year $_.date } | Where-Object { $_ })
+
+  $gaps = @()
+  if (-not $hasBirth) { $gaps += 'No birth or baptism record' }
+  if (-not $hasMarr) { $gaps += 'No marriage record' }
+  if (-not $hasDeath) { $gaps += 'No death or burial record' }
+  if (-not $p.f) { $gaps += 'Father unknown' }
+  if (-not $p.m) { $gaps += 'Mother unknown' }
+
+  # Which censuses of their lifetime are missing?
+  # STRICTLY between birth and death year. A census in the birth year may predate
+  # the birth; a census in the death year may postdate the death — Elizabeth
+  # Collins died in Feb 1911 and the census was taken that April, so demanding a
+  # 1911 return for her would be nagging about a record that cannot exist.
+  # Better to under-report a gap than to cry wolf.
+  $missingCensus = @()
+  if ($p.by) {
+    $died = if ($p.dy) { $p.dy } else { $p.by + 85 }   # no death record: assume a normal span
+    foreach ($cy in $CENSUS_YEARS) {
+      if ($cy -le $p.by -or $cy -ge $died) { continue }
+      if ($censusYears -contains $cy) { continue }
+      $missingCensus += $cy
+    }
+  }
+  if ($missingCensus.Count) {
+    $label = if ($missingCensus.Count -eq 1) { "Not found in the $($missingCensus[0]) census" }
+    else { "Not found in the $(($missingCensus -join ', ')) censuses" }
+    $gaps += $label
+  }
+
+  # ConvertTo-Json turns an EMPTY PowerShell array into `null`, and collapses a
+  # SINGLE-element array into a bare object. Both break `p.docs.map(...)` in the
+  # browser. A List<object> always serialises as a proper JSON array.
+  $gapList = [System.Collections.Generic.List[object]]::new()
+  foreach ($g in $gaps) { $gapList.Add($g) }
+  $p.gaps = $gapList
+
+  $docList = [System.Collections.Generic.List[object]]::new()
+  if ($docsFor.ContainsKey($id)) { foreach ($d in @($docsFor[$id])) { if ($d) { $docList.Add($d) } } }
+  $p.docs = $docList
+
+  # "done" in the sense of the full-vitals rule: everything a life should leave behind
+  $p.sourced = ($hasBirth -and $hasMarr -and $hasDeath -and -not $missingCensus.Count)
+  $p.unlinked = ($p.branch -eq 'root' -and $id -ne $ROOTID)
+}
+
 # ---------------------------------------------------------------- privacy
 # A person is treated as LIVING if there is no death/burial record AND they were
 # born within the last $PrivacyYears.
@@ -671,6 +740,9 @@ if ($Public) {
     $p.by = $null; $p.dy = $null
     $p.birtP = ''; $p.deatP = ''
     $p.occs = @(); $p.stops = @(); $p.rec = @(); $p.journal = @()
+    $p.gaps = [System.Collections.Generic.List[object]]::new()
+    $p.docs = [System.Collections.Generic.List[object]]::new()
+    $p.sourced = $false
   }
 }
 
