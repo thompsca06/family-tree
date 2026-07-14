@@ -757,6 +757,61 @@ foreach ($personId in $people.Keys) {
   if (-not $people[$personId].Contains('journal')) { $people[$personId].journal = @() }
 }
 
+# ---------------------------------------------------------------- the journal
+# Family/JOURNAL.md — the notebook, published as the working record BEHIND the
+# stories. The dead ends are the point of it: a run of records that all agree with
+# each other can still be the wrong man, and the only proof that the right man is
+# right is the wrong one written down next to him.
+#
+# The preamble (how the files fit together, the rules) is Chris talking to himself.
+# It stays off the site. Only the notes are published.
+$SKIP_HEADINGS = @(
+  'Journal, stories, tracker, worklist', 'How a find travels',
+  'Rules I am not breaking', 'Markers', '(first note goes here)'
+)
+$notes = [System.Collections.Generic.List[object]]::new()
+$journalPath = Join-Path $family 'JOURNAL.md'
+if (Test-Path $journalPath) {
+  $jmd = [IO.File]::ReadAllText($journalPath)
+  foreach ($sec in @(Split-Sections $jmd)) {
+    if ($sec.level -ne 2) { continue }
+    if ($SKIP_HEADINGS -contains $sec.heading) { continue }
+    $body = ($sec.lines -join "`n")
+    if (-not $body.Trim()) { continue }
+
+    # the marker sits in the first line or two, as `OPEN` / `DEAD END` / "written up"
+    $head = ($sec.lines | Select-Object -First 4) -join ' '
+    $mark = if ($head -match 'DEAD END') { 'Dead end' }
+    elseif ($head -match '(?m)^\s*`?OPEN`?') { 'Still open' }
+    elseif ($head -match 'written up|fixed') { 'Written up' }
+    else { '' }
+
+    $notes.Add([ordered]@{
+        heading = $sec.heading
+        anchor  = $sec.anchor
+        mark    = $mark
+        html    = Md-Html $body
+      })
+  }
+}
+Write-Host "  journal notes   : $($notes.Count)  ($(@($notes | Where-Object { $_.mark -eq 'Dead end' }).Count) dead ends)"
+
+# PRIVACY: the journal is prose, so the living-person redaction that works on facts
+# cannot touch it. Say so out loud rather than publishing a living person's details
+# in a sentence.
+if ($Public) {
+  foreach ($personId in $people.Keys) {
+    if ($people[$personId].years -ne 'Living') { continue }
+    $livingName = $PPL.$personId.givn
+    if (-not $livingName) { continue }
+    foreach ($note in $notes) {
+      if ($note.html -match "\b$([regex]::Escape($livingName))\b") {
+        Write-Host "  !! JOURNAL names a living person ($livingName) in '$($note.heading)'" -ForegroundColor Red
+      }
+    }
+  }
+}
+
 # ---------------------------------------------------------------- portraits
 # Ancestry's GEDCOM lists media objects for people but leaves the FILE line EMPTY
 # — you get the size and the pixel width and nothing else. The photos cannot be
@@ -980,6 +1035,7 @@ $doc = [ordered]@{
   alias  = $aliasOut
   geo    = $geo
   diary  = @($diary)
+  notes  = @($notes)          # JOURNAL.md — the working record, dead ends and all
   rules  = $rules
   root   = $ROOTID
   meta   = [ordered]@{ exported = $G.meta.exported; people = $people.Count; built = 'Build-FamilyData.ps1' }

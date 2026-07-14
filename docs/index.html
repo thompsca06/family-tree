@@ -594,6 +594,37 @@
   </div>
   </sc-if>
 
+  <!-- ============ JOURNAL ============
+       The working record behind the stories. The dead ends are the point: a run of
+       records that all agree with each other can still be the wrong man, and the
+       only proof the right man is right is the wrong one written down beside him. -->
+  <sc-if value="{{ isJournal }}" hint-placeholder-val="{{ true }}">
+  <div class="ftree-in" style="padding:22px 30px 80px;max-width:840px;margin:0 auto">
+    <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.2em;color:var(--rust);text-transform:uppercase">The journal</div>
+    <div style="font:500 clamp(34px,4.6vw,56px)/1.05 Newsreader,serif;margin-top:14px;letter-spacing:-.015em">Including the wrong turns</div>
+    <div style="font:400 16.5px/1.7 Newsreader,serif;color:var(--ink-soft);margin-top:14px;max-width:660px">My notebook, as I worked. The finds are here — but so are the men I chased for days who turned out to belong to somebody else. I have kept every one of them, because a set of records that all agree with each other can still be the wrong man, and the only way to show the right one is right is to leave the wrong one lying beside him.</div>
+
+    <div style="display:flex;gap:16px;margin-top:26px;flex-wrap:wrap">
+      <sc-for list="{{ noteStats }}" as="s" hint-placeholder-count="3">
+        <div style="border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 18px;min-width:104px">
+          <div style="font:600 26px/1 Newsreader,serif;color:{{ s.color }}">{{ s.n }}</div>
+          <div style="font:500 10px/1.3 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;margin-top:7px">{{ s.label }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-for list="{{ notes }}" as="n" hint-placeholder-count="6">
+      <div id="{{ n.anchor }}" style="margin-top:40px;padding-top:28px;border-top:1px solid rgba(43,37,28,.12);scroll-margin-top:76px">
+        <sc-if value="{{ n.hasMark }}">
+          <span style="display:inline-block;font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;border-radius:6px;color:{{ n.markFg }};background:{{ n.markBg }}">{{ n.mark }}</span>
+        </sc-if>
+        <div style="font:600 clamp(22px,2.6vw,30px)/1.2 Newsreader,serif;margin-top:12px;letter-spacing:-.01em">{{ n.heading }}</div>
+        <div class="diaryprose" style="margin-top:12px">{{ n.bodyEl }}</div>
+      </div>
+    </sc-for>
+  </div>
+  </sc-if>
+
   <!-- ============ DATA / AUDIT TABLE ============ -->
   <sc-if value="{{ isData }}" hint-placeholder-val="{{ true }}">
   <div class="ftree-in" style="padding:22px 30px 40px">
@@ -972,6 +1003,8 @@ class Component extends DCLogic {
   // Already in reading order: each journal declares its own `order` in its .md
   // header, and the build reads them in it. There are no dates to sort on.
   get diaryEntries(){ return (window.FAMILY&&window.FAMILY.diary)||[]; }
+  // JOURNAL.md — the notebook. Published as the working record behind the stories.
+  get notes(){ return (window.FAMILY&&window.FAMILY.notes)||[]; }
   // read straight out of RULES-AND-INSTRUCTIONS.md at build time
   get rules(){ return (window.FAMILY&&window.FAMILY.rules)||{standing:[],method:'',hard:[]}; }
   resolve(id){ if(!id) return id; const a=window.FAMILY&&window.FAMILY.alias; return (a&&a[id])||id; }
@@ -1386,6 +1419,7 @@ class Component extends DCLogic {
   openPerson = (id, back='people') => this.setState({view:'person', personId:this.resolve(id), personBack:back});
   openStory = (id) => this.setState({view:'story', storyId:id});
   navDiary = () => this.setState({view:'diary'});
+  navJournal = () => this.setState({view:'journal'});
   // open the Diary and scroll to the tagged section the person is written about
   // The Diary renders every journal on one long page, so opening it without a
   // target lands you on the FIRST journal, not the one you clicked. With no
@@ -1452,7 +1486,7 @@ class Component extends DCLogic {
         else this.setState({view:'diary'});
         break;
       case 'search': this.setState({view:'search', query:decodeURIComponent(arg||'')}); break;
-      case 'tree': case 'people': case 'places': case 'work': case 'timeline': case 'data':
+      case 'tree': case 'people': case 'places': case 'work': case 'timeline': case 'data': case 'journal':
         this.setState({view:head}); break;
       default: this.setState({view:'home'});
     }
@@ -1610,7 +1644,7 @@ class Component extends DCLogic {
     const sGroups=(S.view==='search')?this.searchAll(S.query):[];
     const sHits=sGroups.reduce((a,g)=>a+g.n,0);
 
-    const tabs=[['home','Home',this.navHome],['tree','Tree',this.navTree],['people','People',this.navPeople],['places','Places',this.navPlaces],['work','Work',this.navWork],['timeline','Timeline',this.navTimeline],['diary','Stories',this.navDiary],['data','Data',this.navData]]
+    const tabs=[['home','Home',this.navHome],['tree','Tree',this.navTree],['people','People',this.navPeople],['places','Places',this.navPlaces],['work','Work',this.navWork],['timeline','Timeline',this.navTimeline],['diary','Stories',this.navDiary],['journal','Journal',this.navJournal],['data','Data',this.navData]]
       .map(([v,label,fn])=>({label,onClick:fn,active:S.view===v}));
 
     // spine (home)
@@ -1901,6 +1935,17 @@ class Component extends DCLogic {
       isHome:S.view==='home', isTree:S.view==='tree', isPeople:S.view==='people', isPlaces:S.view==='places', isTimeline:S.view==='timeline', isPerson:S.view==='person', isStory:S.view==='story',
       isWork:S.view==='work', isSearch:S.view==='search',
       isData:S.view==='data', navData:this.navData, dataRows:this.buildDataRows(), dataCount:Object.keys(this.people).length+'',
+      // the notebook: every find, and every man I had to rule out
+      isJournal:S.view==='journal', navJournal:this.navJournal,
+      notes:this.notes.map(n=>({
+        anchor:'n-'+n.anchor, heading:n.heading, mark:n.mark, hasMark:!!n.mark,
+        markFg:n.mark==='Dead end'?'#f7f3ea':(n.mark==='Still open'?'#f7f3ea':'#59503f'),
+        markBg:n.mark==='Dead end'?'#b34a25':(n.mark==='Still open'?'#9a7d3f':'transparent'),
+        bodyEl:React.createElement('div',{dangerouslySetInnerHTML:{__html:n.html}})})),
+      noteStats:[
+        {label:'Notes', n:String(this.notes.length), color:'var(--ink)'},
+        {label:'Dead ends', n:String(this.notes.filter(n=>n.mark==='Dead end').length), color:'#b34a25'},
+        {label:'Still open', n:String(this.notes.filter(n=>n.mark==='Still open').length), color:'#9a7d3f'}],
       isDiary:S.view==='diary', navDiary:this.navDiary,
       diary:this.diaryEntries.map(d=>({anchor:'j-'+d.id,title:d.title,sub:d.sub,dot:this.col(d.branch),branchLabel:this.blab(d.branch),
         bodyEl:React.createElement('div',{className:'diaryprose',dangerouslySetInnerHTML:{__html:d.html}})})),
