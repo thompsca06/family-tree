@@ -532,23 +532,27 @@ function Split-Sections {
   return $secs
 }
 
-# ---- a journal describes ITSELF ----------------------------------------------
+# ---- a story describes ITSELF ------------------------------------------------
+# Naming, because it kept confusing us: a STORY is a written piece that goes on the
+# site (Thompson/story-in-service.md). The JOURNAL is the single running log of
+# finds in the root — raw, private, never published. One journal, many stories.
+#
 # A story used to live in two places: the .md file, and an entry in data/diary.json
 # naming its title, subtitle and branch. Write a new story and forget the manifest
 # and it silently never appeared. The metadata now sits at the top of the .md:
 #
-#     <!-- journal: id=service branch=thompson order=50 -->
+#     <!-- story: id=service branch=thompson order=50 -->
 #     # In Service
 #     ### Both sides of the kitchen door — ...
 #
-# Title = the H1. Subtitle = the H3 under it. `order` sets where it sits in the
-# diary (low first); with no dates there is nothing else to sort on, so it is said
-# out loud rather than inferred.
-function Parse-JournalHead {
+# Title = the H1. Subtitle = the H3 under it. `order` sets the reading order (low
+# first); with no dates there is nothing else to sort on, so it is said out loud
+# rather than inferred.
+function Parse-StoryHead {
   param([string]$md, [string]$file)
   $meta = [ordered]@{ id = ''; branch = 'root'; order = 999; title = ''; sub = '' }
   foreach ($line in ($md -split "`r?`n")) {
-    if ($line -match '<!--\s*journal:\s*(.+?)\s*-->') {
+    if ($line -match '<!--\s*story:\s*(.+?)\s*-->') {
       foreach ($kv in ($matches[1] -split '\s+')) {
         $k, $v = $kv -split '=', 2
         if ($k -and $v -and $meta.Contains($k)) { $meta[$k] = $v }
@@ -674,21 +678,29 @@ $untagged = @()          # ##-level sections with no tag at all
 $taggedCount = 0
 $decoyCount = 0
 
-# Find the journals by looking for them, rather than by reading a manifest that has
-# to be kept in step by hand. Any .md in a branch folder carrying a
-# <!-- journal: ... --> header is a story; anything else in there (trackers,
-# worklists) is ignored.
-$journalFiles = @(
+# Find the stories by looking for them, rather than by reading a manifest that has to
+# be kept in step by hand. A .md in a branch folder carrying a <!-- story: ... -->
+# header IS a story; everything else in there (trackers, worklists) is ignored. The
+# header is what counts, not the filename — a file called story-*.md with no header
+# is still not a story, and the build will say so.
+$branchMd = @(
   Get-ChildItem (Join-Path $family 'Thompson'), (Join-Path $family 'Ingleby') -Filter *.md -EA SilentlyContinue |
     Sort-Object Name
 )
 $found = [System.Collections.Generic.List[object]]::new()
-foreach ($f in $journalFiles) {
-  $text = [IO.File]::ReadAllText($f.FullName)
-  if ($text -notmatch '<!--\s*journal:') { continue }
-  $found.Add([pscustomobject]@{ file = $f; md = $text; meta = (Parse-JournalHead $text $f.Name) })
+$mislabelled = @()
+foreach ($mdFile in $branchMd) {
+  $text = [IO.File]::ReadAllText($mdFile.FullName)
+  if ($text -notmatch '<!--\s*story:') {
+    if ($mdFile.Name -like 'story-*') { $mislabelled += $mdFile.Name }
+    continue
+  }
+  $found.Add([pscustomobject]@{ file = $mdFile; md = $text; meta = (Parse-StoryHead $text $mdFile.Name) })
 }
-Write-Host "  journals found  : $($found.Count)"
+Write-Host "  stories found   : $($found.Count)"
+foreach ($bad in $mislabelled) {
+  Write-Host "  !! $bad is named like a story but has no <!-- story: --> header - NOT published" -ForegroundColor Yellow
+}
 
 foreach ($entry in ($found | Sort-Object { $_.meta.order }, { $_.meta.id })) {
   $d = $entry.meta

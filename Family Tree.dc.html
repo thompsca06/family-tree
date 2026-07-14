@@ -565,9 +565,9 @@
   <!-- ============ DIARY ============ -->
   <sc-if value="{{ isDiary }}" hint-placeholder-val="{{ true }}">
   <div class="ftree-in" style="padding:22px 30px 80px;max-width:840px;margin:0 auto">
-    <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.2em;color:var(--rust);text-transform:uppercase">Research diary</div>
+    <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.2em;color:var(--rust);text-transform:uppercase">The stories</div>
     <div style="font:500 clamp(34px,4.6vw,56px)/1.05 Newsreader,serif;margin-top:14px;letter-spacing:-.015em">Notes from the record office</div>
-    <div style="font:400 16.5px/1.7 Newsreader,serif;color:var(--ink-soft);margin-top:14px;max-width:660px">A running log of what the records gave up, and in what order — written up as I worked back through the census returns, parish registers and service files. Everything here rests on an original record image, named in the text.</div>
+    <div style="font:400 16.5px/1.7 Newsreader,serif;color:var(--ink-soft);margin-top:14px;max-width:660px">Every story in full, written up as I worked back through the census returns, parish registers and service files — including the wrong turns, and the men I had to rule out. Everything here rests on an original record image, named in the text.</div>
 
     <!-- jump straight to a journal — they are long, and they are all on one page -->
     <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:24px">
@@ -827,7 +827,7 @@
         <!-- in the journals -->
         <sc-if value="{{ pv.hasJournal }}">
         <div style="margin-top:30px">
-          <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">In the journals</div>
+          <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">In the stories</div>
           <sc-for list="{{ pv.journal }}" as="jl" hint-placeholder-count="2">
             <div style="background:var(--surface);border:1px solid rgba(43,37,28,.09);border-left:3px solid {{ jl.color }};border-radius:9px;padding:16px 20px;margin-bottom:12px">
               <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
@@ -1608,7 +1608,7 @@ class Component extends DCLogic {
     const sGroups=(S.view==='search')?this.searchAll(S.query):[];
     const sHits=sGroups.reduce((a,g)=>a+g.n,0);
 
-    const tabs=[['home','Stories',this.navHome],['tree','Tree',this.navTree],['people','People',this.navPeople],['places','Places',this.navPlaces],['work','Work',this.navWork],['timeline','Timeline',this.navTimeline],['diary','Diary',this.navDiary],['data','Data',this.navData]]
+    const tabs=[['home','Home',this.navHome],['tree','Tree',this.navTree],['people','People',this.navPeople],['places','Places',this.navPlaces],['work','Work',this.navWork],['timeline','Timeline',this.navTimeline],['diary','Stories',this.navDiary],['data','Data',this.navData]]
       .map(([v,label,fn])=>({label,onClick:fn,active:S.view===v}));
 
     // spine (home)
@@ -1634,7 +1634,7 @@ class Component extends DCLogic {
        dek:'One household kept a servant. Two of the women who married into this family were one. The same census, the same decade.',
        color:'#b34a25'}
     ].filter(c=>(this.diaryEntries||[]).some(d=>d.id===c.j))
-     .map(c=>({kicker:c.kicker,title:c.title,dek:c.dek,cta:'Read the journal →',color:c.color,
+     .map(c=>({kicker:c.kicker,title:c.title,dek:c.dek,cta:'Read the story →',color:c.color,
                img:null,hasImg:false,onClick:()=>this.openDiaryAt(c.j,'')}));
     storyCards.push(...journalCards);
 
@@ -1801,7 +1801,7 @@ class Component extends DCLogic {
     const parents=[p.f,p.m].filter(Boolean).map(relNode).filter(Boolean);
     const childrenIds=Object.keys(this.people).filter(id=>{const x=this.people[id];return x.f===pid||x.m===pid;});
     const children=childrenIds.map(relNode).filter(Boolean);
-    const backLabels={home:'Back to stories',people:'Back to people',tree:'Back to the tree',places:'Back to the map',timeline:'Back to the timeline',data:'Back to the data',diary:'Back to the diary'};
+    const backLabels={home:'Back home',people:'Back to people',tree:'Back to the tree',places:'Back to the map',timeline:'Back to the timeline',data:'Back to the data',diary:'Back to the stories'};
     const jb=this.jobsOf(pid);
     const chips=this.personChips(pid).map(n=>({name:n, onClick:()=>{}}));
     const storyId2=this.storyByPid[pid];
