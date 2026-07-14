@@ -528,8 +528,12 @@ function Split-Sections {
       if ($cur) { $cur.tag = Parse-FtTag $line }
       continue
     }
-    # the date line — only if we haven't got one yet and no prose has started
-    if ($cur -and -not $cur.date -and $cur.lines.Count -eq 0 -and
+    # The date line, before any prose. Blank lines between the heading, the ft: tag
+    # and the date are allowed — journals are written with and without them, and
+    # requiring lines.Count -eq 0 silently dropped every date in In Service.
+    $onlyBlankSoFar = $false
+    if ($cur) { $onlyBlankSoFar = -not (@($cur.lines | Where-Object { $_ -and $_.Trim() }).Count) }
+    if ($cur -and -not $cur.date -and $onlyBlankSoFar -and
         $line -match '^\*\s*(\d{1,2}\s+\w+\s+(?:19|20)\d\d)\s*\*\s*$') {
       $cur.date = $matches[1]
       $parsed = [datetime]::MinValue
