@@ -683,6 +683,17 @@
       }
     ]
   },
+  "I352548959233": {
+    "photos": [],
+    "docs": [
+      {
+        "img": "img/media/62230_193023000115_0926-00144.jpg",
+        "thumb": "img/media/62230_193023000115_0926-00144_t.jpg",
+        "caption": "York, Yorkshire, England, Church of England Baptisms, Marriages and Burials, 1538-1812",
+        "year": "1812"
+      }
+    ]
+  },
   "I352548959236": {
     "photos": [],
     "docs": [
@@ -743,6 +754,12 @@
         "thumb": "img/media/rg14_27144_0553_03_t.jpg",
         "caption": "1911 England Census",
         "year": "1911"
+      },
+      {
+        "img": "img/media/tna_r39_3484_3484d_012.jpg",
+        "thumb": "img/media/tna_r39_3484_3484d_012_t.jpg",
+        "caption": "1939 England and Wales Register",
+        "year": "1939"
       }
     ]
   },
@@ -840,6 +857,24 @@
     "photos": [],
     "docs": [
       {
+        "img": "img/media/ons_d19782az-0095.jpg",
+        "thumb": "img/media/ons_d19782az-0095_t.jpg",
+        "caption": "England & Wales, Civil Registration Death Index, 1916-2007",
+        "year": ""
+      },
+      {
+        "img": "img/media/32355_249539-00168.jpg",
+        "thumb": "img/media/32355_249539-00168_t.jpg",
+        "caption": "West Yorkshire, England, Church of England Births and Baptisms, 1813-1910",
+        "year": "1904"
+      },
+      {
+        "img": "img/media/rg14_27203_0407_03.jpg",
+        "thumb": "img/media/rg14_27203_0407_03_t.jpg",
+        "caption": "1911 England Census",
+        "year": "1911"
+      },
+      {
         "img": "img/media/22305_0087.jpg",
         "thumb": "img/media/22305_0087_t.jpg",
         "caption": "1921 England Census",
@@ -873,6 +908,12 @@
         "thumb": "img/media/YRKRG13_4199_4202-0986_t.jpg",
         "caption": "1901 England Census",
         "year": "1901"
+      },
+      {
+        "img": "img/media/rg14_27203_0407_03.jpg",
+        "thumb": "img/media/rg14_27203_0407_03_t.jpg",
+        "caption": "1911 England Census",
+        "year": "1911"
       },
       {
         "img": "img/media/22305_0087.jpg",
@@ -1020,6 +1061,12 @@
         "thumb": "img/media/YRKRG13_4199_4202-0986_t.jpg",
         "caption": "1901 England Census",
         "year": "1901"
+      },
+      {
+        "img": "img/media/rg14_27203_0407_03.jpg",
+        "thumb": "img/media/rg14_27203_0407_03_t.jpg",
+        "caption": "1911 England Census",
+        "year": "1911"
       },
       {
         "img": "img/media/22305_0087.jpg",
