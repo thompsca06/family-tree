@@ -575,7 +575,15 @@
     <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
       <!-- left: portrait + facts -->
       <div style="flex:none;width:280px">
-        <div style="width:100%;aspect-ratio:4/5;border-radius:12px;background:repeating-linear-gradient(45deg,var(--surface-2),var(--surface-2) 9px,var(--hatch) 9px,var(--hatch) 18px);display:flex;align-items:center;justify-content:center;text-align:center;font:400 9px/1.5 'IBM Plex Mono',monospace;color:var(--ink-faint);border:1px solid rgba(43,37,28,.10)">{{ pv.photoLabel }}</div>
+        <sc-if value="{{ pv.hasPhoto }}">
+          <img onClick="{{ pv.onPhoto }}" src="{{ pv.photo }}" class="lift" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:12px;border:1px solid rgba(43,37,28,.10);cursor:zoom-in;display:block" />
+        </sc-if>
+        <sc-if value="{{ pv.noPhoto }}">
+          <div style="width:100%;aspect-ratio:4/5;border-radius:12px;background:repeating-linear-gradient(45deg,var(--surface-2),var(--surface-2) 9px,var(--hatch) 9px,var(--hatch) 18px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;border:1px solid rgba(43,37,28,.10)">
+            <div style="font:400 9px/1.6 'IBM Plex Mono',monospace;color:var(--ink-faint)">NO PHOTOGRAPH YET</div>
+            <div style="font:400 8.5px/1.6 'IBM Plex Mono',monospace;color:var(--ink-faint);opacity:.75;margin-top:8px;word-break:break-all">photos/{{ pv.photoLabel }}</div>
+          </div>
+        </sc-if>
         <div style="margin-top:16px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:11px;padding:16px 18px">
           <sc-for list="{{ pv.facts }}" as="f" hint-placeholder-count="4">
             <div style="padding:8px 0;border-bottom:1px solid rgba(43,37,28,.06)">
@@ -661,16 +669,31 @@
         </div>
         </sc-if>
 
+        <!-- photographs -->
+        <sc-if value="{{ pv.hasGallery }}">
+        <div style="margin-top:30px">
+          <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">Photographs</div>
+          <div style="display:flex;flex-wrap:wrap;gap:12px">
+            <sc-for list="{{ pv.gallery }}" as="g" hint-placeholder-count="3">
+              <div onClick="{{ g.onClick }}" class="lift" style="cursor:zoom-in;width:190px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:9px;overflow:hidden">
+                <img src="{{ g.img }}" style="display:block;width:100%;height:140px;object-fit:cover" />
+                <div style="padding:9px 11px;font:400 11px/1.4 Newsreader,serif;color:var(--ink-soft)">{{ g.caption }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
         <!-- the documents themselves -->
         <sc-if value="{{ pv.hasDocs }}">
         <div style="margin-top:30px">
-          <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">The document itself</div>
+          <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">The documents themselves</div>
           <div style="display:flex;flex-wrap:wrap;gap:12px">
             <sc-for list="{{ pv.docs }}" as="dc" hint-placeholder-count="2">
               <div onClick="{{ dc.onClick }}" class="lift" style="cursor:zoom-in;width:190px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:9px;overflow:hidden">
                 <img src="{{ dc.img }}" style="display:block;width:100%;height:130px;object-fit:cover;object-position:center top" />
                 <div style="padding:9px 11px">
-                  <div style="font:600 12px/1.3 'IBM Plex Mono',monospace;color:var(--rust)">{{ dc.year }}</div>
+                  <sc-if value="{{ dc.hasYear }}"><div style="font:600 12px/1.3 'IBM Plex Mono',monospace;color:var(--rust)">{{ dc.year }}</div></sc-if>
                   <div style="font:400 10.5px/1.4 Archivo;color:var(--ink-faint);margin-top:3px">{{ dc.ref }}</div>
                 </div>
               </div>
@@ -1484,7 +1507,11 @@ class Component extends DCLogic {
     const pv={
       name:p.name, years:p.years, color:this.col(p.branch), branchLabel:this.blab(p.branch),
       firstName:(p.name||'').replace(/[\u201c\u201d"].*?[\u201c\u201d"]\s*/,'').split(' ')[0],
-      photoLabel:'PHOTO / DOCUMENT SLOT\n'+pid+'.jpg',
+      // drop a photo into Family/photos/<personId>.jpg and it appears here —
+      // Ancestry's GEDCOM leaves the FILE line empty, so photos cannot be exported
+      photoLabel:pid+'.jpg',
+      hasPhoto:!!p.photo, noPhoto:!p.photo, photo:p.photo||'',
+      onPhoto:()=>p.photo&&this.openLightbox(p.photo, p.name+(p.years&&p.years!=='—'?' ('+p.years+')':'')),
       facts:this.personFacts(p),
       bio:[this.personSummary(p)],
       hasWork:jb.length>0, jobs:jb, workRole:(p.occs&&p.occs[0])||'',
@@ -1516,11 +1543,18 @@ class Component extends DCLogic {
       journey:this.personPins(pid).map(v=>({
         label:v.label, name:v.name, when:v.when, hasWhen:!!v.when, color:v.color
       })),
-      // the actual scans — matched to this person by archive reference, not by name
+      // The actual scans, linked to this person in RootsMagic — not guessed at.
+      // Cards show the thumbnail; the lightbox loads the full-size scan.
       hasDocs:!!(p.docs&&p.docs.length),
       docs:(p.docs||[]).map(d=>({
-        img:d.img, year:d.year||'', ref:this.shortRef(d.page),
+        img:d.thumb||d.img, year:d.year||'', hasYear:!!d.year, ref:this.shortRef(d.page),
         onClick:()=>this.openLightbox(d.img, (d.year?d.year+' — ':'')+this.shortRef(d.page))
+      })),
+      // photographs, graves, houses — whatever was attached to the person directly
+      hasGallery:!!(p.gallery&&p.gallery.length),
+      gallery:(p.gallery||[]).map(g=>({
+        img:g.thumb||g.img, caption:g.caption||'',
+        onClick:()=>this.openLightbox(g.img, g.caption||p.name)
       })),
       // honest about the holes, not just the facts
       hasGaps:!!(p.gaps&&p.gaps.length),

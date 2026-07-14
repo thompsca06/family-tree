@@ -659,6 +659,29 @@ foreach ($personId in $people.Keys) {
   if (-not $people[$personId].Contains('journal')) { $people[$personId].journal = @() }
 }
 
+# ---------------------------------------------------------------- portraits
+# Ancestry's GEDCOM lists media objects for people but leaves the FILE line EMPTY
+# — you get the size and the pixel width and nothing else. The photos cannot be
+# exported. So: drop a photo into  Family/photos/  named after the person's ID
+#
+#     photos/I352128205750.jpg      -> Harry Ingleby's portrait
+#
+# and the build picks it up. That is the filename the empty slot on the profile
+# has been showing all along. A photos/README.txt explains it in the folder.
+$photoDir = Join-Path $family 'photos'
+$photoOut = Join-Path $root 'img/people'
+$photoFor = @{}
+if (Test-Path $photoDir) {
+  New-Item -ItemType Directory -Force $photoOut | Out-Null
+  foreach ($f in (Get-ChildItem $photoDir -File -Include *.jpg, *.jpeg, *.png -Recurse)) {
+    $id = [IO.Path]::GetFileNameWithoutExtension($f.Name)
+    if (-not $people.Contains($id)) { continue }
+    Copy-Item $f.FullName (Join-Path $photoOut $f.Name) -Force
+    $photoFor[$id] = "img/people/$($f.Name)"
+  }
+}
+Write-Host "  portraits       : $($photoFor.Count) (drop more into Family/photos/ named <personId>.jpg)"
+
 # ------------------------------------------------- research gaps & sourced-ness
 # The site should be as honest about what is MISSING as about what is known —
 # "added" is not "sourced". These feed the "What we still don't know" panel and
@@ -668,11 +691,41 @@ foreach ($personId in $people.Keys) {
 # ran a census every 10 years from 1841 (none in 1941; the 1939 Register stands in).
 $CENSUS_YEARS = @(1841, 1851, 1861, 1871, 1881, 1891, 1901, 1911, 1921, 1939)
 
-$recordsPath = Join-Path $root 'data/records.json'
+# Documents and photographs.
+#
+# data/media.json is the AUTHORITY — it comes from the RootsMagic database, where
+# the links between people and images were actually made (Match-Media.ps1).
+# data/records.json is the older, weaker match: filename archive-reference against
+# citation (Match-Records.ps1). It is kept only as a fallback for anyone the
+# RootsMagic file doesn't cover.
 $docsFor = @{}
+$photosFor = @{}
+
+$mediaPath = Join-Path $root 'data/media.json'
+if (Test-Path $mediaPath) {
+  $mj = Get-Content $mediaPath -Raw | ConvertFrom-Json
+  foreach ($k in $mj.PSObject.Properties.Name) {
+    $e = $mj.$k
+    $d = @($e.docs | Where-Object { $_ } | ForEach-Object { [ordered]@{ img = $_.img; thumb = $_.thumb; page = $_.caption; year = $_.year } })
+    if ($d.Count) { $docsFor[$k] = $d }
+    $ph = @($e.photos | Where-Object { $_ })
+    if ($ph.Count) {
+      # the primary photo is the portrait; the rest go in the gallery
+      $prim = @($ph | Where-Object { $_.primary })
+      $photosFor[$k] = [ordered]@{
+        portrait = $(if ($prim.Count) { $prim[0].img } else { $ph[0].img })
+        all      = @($ph | ForEach-Object { [ordered]@{ img = $_.img; thumb = $_.thumb; caption = $_.caption } })
+      }
+    }
+  }
+}
+
+$recordsPath = Join-Path $root 'data/records.json'
 if (Test-Path $recordsPath) {
   $rj = Get-Content $recordsPath -Raw | ConvertFrom-Json
-  foreach ($k in $rj.PSObject.Properties.Name) { $docsFor[$k] = $rj.$k }
+  foreach ($k in $rj.PSObject.Properties.Name) {
+    if (-not $docsFor.ContainsKey($k)) { $docsFor[$k] = @($rj.$k) }
+  }
 }
 
 foreach ($id in $ids) {
@@ -723,6 +776,18 @@ foreach ($id in $ids) {
   if ($docsFor.ContainsKey($id)) { foreach ($d in @($docsFor[$id])) { if ($d) { $docList.Add($d) } } }
   $p.docs = $docList
 
+  # portrait: RootsMagic's primary photo first; else a file dropped into Family/photos/
+  if ($photosFor.ContainsKey($id)) {
+    $p.photo = $photosFor[$id].portrait
+    $gal = [System.Collections.Generic.List[object]]::new()
+    foreach ($g in @($photosFor[$id].all)) { $gal.Add($g) }
+    $p.gallery = $gal
+  }
+  else {
+    $p.photo = $(if ($photoFor.ContainsKey($id)) { $photoFor[$id] } else { '' })
+    $p.gallery = [System.Collections.Generic.List[object]]::new()
+  }
+
   # "done" in the sense of the full-vitals rule: everything a life should leave behind
   $p.sourced = ($hasBirth -and $hasMarr -and $hasDeath -and -not $missingCensus.Count)
   $p.unlinked = ($p.branch -eq 'root' -and $id -ne $ROOTID)
@@ -754,6 +819,9 @@ if ($Public) {
     $p.gaps = [System.Collections.Generic.List[object]]::new()
     $p.docs = [System.Collections.Generic.List[object]]::new()
     $p.sourced = $false
+    # never publish a living person's photograph
+    $p.photo = ''
+    $p.gallery = [System.Collections.Generic.List[object]]::new()
   }
 }
 

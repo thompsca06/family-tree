@@ -24,3 +24,15 @@ _cdn.html
 
 *.bak
 dist/
+
+# Working copies of the record scans and photographs. These are GENERATED from
+# Roots/Thompson Family Tree_media by Match-Media.ps1 / Match-Records.ps1, and
+# Build-Site copies them into docs/. Committing both would put ~90 MB in the repo
+# twice over. Only the published copy (docs/img/) is tracked.
+img/media/
+img/records/
+img/people/
+
+# the RootsMagic database — an input to the build, like the GEDCOM. Never publish:
+# it holds living people's details.
+*.rmtree

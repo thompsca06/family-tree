@@ -36,8 +36,18 @@ $family = Split-Path -Parent $root
 $G = Get-Content (Join-Path $root 'data/gedcom.json') -Raw | ConvertFrom-Json
 
 # ---------------------------------------------------------------- the scans
+# The full Ancestry media export lives in Roots/Thompson Family Tree_media (287
+# images). The GEDCOM's OBJE records leave the FILE line EMPTY, so it cannot tell
+# us which image belongs to whom — but the FILENAMES carry the archive reference,
+# and the citations carry it too. That is the join.
+$scanDirs = @(
+  (Join-Path $family 'Thompson'),
+  (Join-Path $family 'Ingleby'),
+  (Join-Path $family 'Roots\Thompson Family Tree_media')
+) | Where-Object { Test-Path $_ }
+
 $scans = @()
-foreach ($f in (Get-ChildItem (Join-Path $family 'Thompson'), (Join-Path $family 'Ingleby') -File -Filter *.jpg)) {
+foreach ($f in (Get-ChildItem $scanDirs -File -Filter *.jpg)) {
   $n = $f.Name
   $s = $null
   # census image bundles: <county><CLASS>_<lo>_<hi>-<image>.jpg
