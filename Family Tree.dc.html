@@ -1127,6 +1127,17 @@ class Component extends DCLogic {
     boilermaker:['Boilermaker','Built and riveted the great iron boilers and pressure vessels that drove Victorian industry. Skilled, brutal, deafening work — one of the aristocrats of heavy engineering. Arthur Ingleby did it at the Vulcan Foundry, Stourton.'],
     engine_driver:['Engine driver','The man on the footplate who held the regulator, with the train and everyone on it in his hands. No job carried more standing among working men; boys stood at the ends of platforms to watch them pass.'],
     engine_cleaner:['Engine cleaner','The bottom rung of the railway ladder — scrubbing soot off locomotives in the shed. The path up was cleaner → fireman → driver. George Blagg was doing it at seventeen, on his father\'s railway.'],
+    // NOT a fire brigade. This is the middle rung of the footplate ladder, and the
+    // word on its own has fooled people for a century.
+    wife_at_home:['"Miner\'s wife" — the census describing a woman by her husband','Not her trade. The enumerator had no column that fitted a woman running a household, so he wrote down what her husband did and added "wife". It tells you what he did and nothing at all about what she did, which was all the cooking, laundry, water-carrying and child-rearing in a pit cottage, unpaid and unrecorded.'],
+    housework:['Housework, unpaid','"Unpaid Domestic Duties", "Home Duties", "House Keeper" — the 1921 census and the 1939 Register finally admitted this was work, and then declined to pay for it. Note it is NOT domestic service: she was keeping her own house, not somebody else\'s. Elizabeth Ellen Dixon was a servant at sixteen and did the identical work unpaid for the next fifty years.'],
+    scholar:['Scholar','At school. In the Victorian censuses this is the entry that tells you a family could afford to keep a child out of the mill or off the pit screens — and the year it stops tells you when they could not.'],
+    baister:['Baister — a tailoring hand','A baister (baster) tacked the pieces of a garment together with long loose stitches so it could be fitted and then machined properly. A hand trade of the Leeds clothing factories, and usually a woman\'s.'],
+    loco_fireman:['Loco fireman — not a fire brigade','He put the fire IN, he did not put it out. The fireman shovelled coal into the firebox of a steam locomotive — several tons of it in a shift, by hand, with the engine moving — and kept the boiler at pressure so the driver had steam when he asked for it. It was the second rung on the footplate: cleaner, then fireman, then driver. William Blagg fired the engines before he drove them.'],
+    electrical_engineer:['Electrical engineer','Installed and maintained the electrical plant that was replacing steam and gas across the West Riding — a modern, skilled trade, and a long way from the pit and the footplate his family came off.'],
+    dray_checker:['Dray checker','Checked the loads on and off the drays — the flat horse-drawn carts that hauled goods between the railway yards, the mills and the warehouses. The man with the tally book at the yard gate.'],
+    picture_framer:['Picture framer','Cut, joined and gilded frames to order. A small skilled trade of the town, working for the print shops and photographers.'],
+    screen_boy:['Colliery screen boy','A boy\'s first job at the pit, above ground: picking stone and dirt out of the coal as it rattled past on the screens. Cold, filthy and endless — but it was the way in, and the way to the coalface.'],
     railway_police:['Railway Police Inspector','Guarded the goods yards and platforms, chased trespassers off the line and thieves out of the wagons. A solid, respectable post on a company that spread across five counties.'],
     presser:['Hoffman presser','Operated a steam press in the tailoring trade — and Leeds was the tailoring capital of England (Burton\'s, Hepworth\'s). Crucially, unlike coal-mining, pressing was not a reserved occupation, which is why Tommy went to war.'],
     miner:['Coal miner','Garforth was pit country; four generations of Thompsons went underground. A "haulage hand" moved the tubs, a "hewer" cut the coal at the face. Mining was a reserved occupation — the state kept miners where they were.'],
@@ -1149,10 +1160,27 @@ class Component extends DCLogic {
     tram:['Tram driver\'s assistant','A boy\'s first job on the town tram system. Alfred Whitehead was doing it at fifteen, in the poorer Walmgate quarter of York.'],
   };
   matchTrade(t){ t=(t||'').toLowerCase(); const pick=k=>this.trades[k];
+    // FIRST, before anything else, two classes of entry that the trade rules below
+    // get catastrophically wrong if they see them:
+    //   "Coal Miner Wife"        matched /miner/  -> she was listed as a coal miner
+    //   "Unpaid Domestic Duties" matched /domestic/ -> she was listed as a SERVANT
+    // She is neither. The enumerator was describing a woman keeping her own house.
+    if(/\bwife\b/.test(t))return pick('wife_at_home');
+    if(/unpaid|home duties|house ?keeper|householder|domestic duties/.test(t))return pick('housework');
+    if(/scholar/.test(t))return pick('scholar');
+    if(/baister|baster/.test(t))return pick('baister');
     if(/wheelwright/.test(t))return pick('wheelwright');
     if(/cordwainer|shoemaker/.test(t))return pick('cordwainer');
     if(/boiler/.test(t))return pick('boilermaker');
     if(/engine.?driver|footplate/.test(t))return pick('engine_driver');
+    // BEFORE the generic rules: "Loco Fireman" must not fall through to nothing, and
+    // must never read as a fire brigade. Also before /miner/ — "screen boy" is a pit
+    // job but a very particular one.
+    if(/fireman|stoker/.test(t))return pick('loco_fireman');
+    if(/screen.?boy/.test(t))return pick('screen_boy');
+    if(/electrical/.test(t))return pick('electrical_engineer');
+    if(/dray/.test(t))return pick('dray_checker');
+    if(/picture.?framer|framer/.test(t))return pick('picture_framer');
     if(/cleaner/.test(t))return pick('engine_cleaner');
     if(/inspector|police/.test(t))return pick('railway_police');
     if(/presser/.test(t))return pick('presser');
