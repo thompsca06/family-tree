@@ -354,15 +354,18 @@
   <!-- ============ DIARY ============ -->
   <sc-if value="{{ isDiary }}" hint-placeholder-val="{{ true }}">
   <div class="ftree-in" style="padding:22px 30px 80px;max-width:840px;margin:0 auto">
-    <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase">Research diary</div>
-    <div style="font:600 28px/1.15 Newsreader,serif;margin-top:8px">Notes from the record office</div>
-    <div style="font:400 14px/1.65 Archivo;color:var(--ink-faint);margin-top:10px;max-width:640px">A running log of what the records gave up, and in what order — written up as I worked back through the census returns, parish registers and service files. Everything here rests on an original record image, named in the text.</div>
+    <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.2em;color:var(--rust);text-transform:uppercase">Research diary</div>
+    <div style="font:500 clamp(34px,4.6vw,56px)/1.05 Newsreader,serif;margin-top:14px;letter-spacing:-.015em">Notes from the record office</div>
+    <div style="font:400 16.5px/1.7 Newsreader,serif;color:var(--ink-soft);margin-top:14px;max-width:660px">A running log of what the records gave up, and in what order — written up as I worked back through the census returns, parish registers and service files. Everything here rests on an original record image, named in the text.</div>
     <sc-for list="{{ diary }}" as="d" hint-placeholder-count="3">
-      <div style="margin-top:36px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-left:3px solid {{ d.dot }};border-radius:12px;padding:28px 32px">
-        <div style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase">{{ d.date }}</div>
-        <div style="font:600 25px/1.2 Newsreader,serif;margin-top:10px">{{ d.title }}</div>
-        <div style="font:400 15.5px/1.6 Newsreader,serif;color:var(--ink-soft);margin-top:8px;font-style:italic">{{ d.sub }}</div>
-        <div style="margin-top:18px;border-top:1px solid rgba(43,37,28,.09);padding-top:16px">{{ d.bodyEl }}</div>
+      <div style="margin-top:52px;padding-top:34px;border-top:1px solid rgba(43,37,28,.12)">
+        <div style="display:flex;align-items:center;gap:9px">
+          <span style="width:9px;height:9px;border-radius:50%;flex:none;background:{{ d.dot }}"></span>
+          <span style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase">{{ d.date }}</span>
+        </div>
+        <div style="font:600 clamp(28px,3.6vw,42px)/1.12 Newsreader,serif;margin-top:12px;letter-spacing:-.01em">{{ d.title }}</div>
+        <div style="font:400 18px/1.55 Newsreader,serif;color:var(--ink-soft);margin-top:10px;font-style:italic">{{ d.sub }}</div>
+        <div style="margin-top:22px">{{ d.bodyEl }}</div>
       </div>
     </sc-for>
   </div>
@@ -493,11 +496,24 @@
 
         <!-- places / movement -->
         <sc-if value="{{ pv.hasChips }}">
-        <div style="margin-top:26px;max-width:640px">
-          <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">Places in this life</div>
-          <div data-pmap ref="{{ mapRef }}" style="height:280px;border-radius:10px;overflow:hidden;border:1px solid rgba(43,37,28,.11);margin-bottom:12px;background:var(--map-bg)"></div>
-          <div style="display:flex;flex-wrap:wrap;gap:7px">
-            <sc-for list="{{ pv.livedChips }}" as="c" hint-placeholder-count="2"><div onClick="{{ c.onClick }}" class="lift" style="cursor:pointer;font:500 11.5px/1 Archivo;background:rgba(43,37,28,.07);border:1px solid rgba(43,37,28,.11);padding:7px 11px;border-radius:20px">{{ c.name }}</div></sc-for>
+        <div style="margin-top:30px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+            <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase">Places in this life</div>
+            <div style="font:400 11.5px/1 Archivo;color:var(--ink-faint)">Numbered in the order they were there</div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:stretch;flex-wrap:wrap">
+            <div data-pmap ref="{{ mapRef }}" style="flex:1 1 460px;min-width:340px;height:520px;border-radius:12px;overflow:hidden;border:1px solid rgba(43,37,28,.11);background:var(--map-bg)"></div>
+            <div style="flex:0 1 250px;min-width:210px;display:flex;flex-direction:column;gap:6px">
+              <sc-for list="{{ pv.journey }}" as="j" hint-placeholder-count="4">
+                <div style="display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid rgba(43,37,28,.09);border-radius:9px;padding:9px 11px">
+                  <span style="flex:none;min-width:22px;height:22px;padding:0 5px;border-radius:11px;background:{{ j.color }};color:#fff;font:700 11px/22px Archivo;text-align:center">{{ j.label }}</span>
+                  <span>
+                    <span style="display:block;font:600 13.5px/1.25 Newsreader,serif;color:var(--ink)">{{ j.name }}</span>
+                    <sc-if value="{{ j.hasWhen }}"><span style="display:block;font:400 10.5px/1.4 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-top:2px">{{ j.when }}</span></sc-if>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
           </div>
         </div>
         </sc-if>
@@ -530,16 +546,26 @@
         <div style="margin-top:30px">
           <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">In the journals</div>
           <sc-for list="{{ pv.journal }}" as="jl" hint-placeholder-count="2">
-            <div onClick="{{ jl.onClick }}" class="lift" style="cursor:pointer;background:var(--surface);border:1px solid rgba(43,37,28,.09);border-left:3px solid {{ jl.color }};border-radius:9px;padding:13px 16px;margin-bottom:9px">
+            <div style="background:var(--surface);border:1px solid rgba(43,37,28,.09);border-left:3px solid {{ jl.color }};border-radius:9px;padding:16px 20px;margin-bottom:12px">
               <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
                 <span style="font:600 9.5px/1.3 'IBM Plex Mono',monospace;letter-spacing:.08em;color:{{ jl.color }};text-transform:uppercase">{{ jl.roleLabel }}</span>
                 <span style="font:400 10px/1.3 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ jl.jt }}</span>
               </div>
-              <div style="font:600 15px/1.25 Newsreader,serif;margin-top:5px;color:var(--ink)">{{ jl.heading }}</div>
-              <sc-if value="{{ jl.hasExcerpt }}">
-                <div style="font:400 13px/1.55 Newsreader,serif;color:var(--ink-soft);margin-top:5px">{{ jl.excerpt }}</div>
+              <div style="font:600 17px/1.25 Newsreader,serif;margin-top:6px;color:var(--ink)">{{ jl.heading }}</div>
+              <!-- the whole chapter, in place -->
+              <sc-if value="{{ jl.open }}">
+                <div class="diaryprose" style="margin-top:12px;border-top:1px solid rgba(43,37,28,.09);padding-top:14px">{{ jl.bodyEl }}</div>
+                <div onClick="{{ jl.onToggle }}" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--rust);margin-top:14px">Collapse ↑</div>
               </sc-if>
-              <div style="font:600 11px/1 Archivo;color:var(--rust);margin-top:9px">Read the chapter →</div>
+              <sc-if value="{{ jl.closed }}">
+                <sc-if value="{{ jl.hasExcerpt }}">
+                  <div style="font:400 13.5px/1.6 Newsreader,serif;color:var(--ink-soft);margin-top:6px">{{ jl.excerpt }}</div>
+                </sc-if>
+                <div style="display:flex;gap:16px;align-items:center;margin-top:11px">
+                  <div onClick="{{ jl.onToggle }}" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--rust)">Read the full chapter ↓</div>
+                  <div onClick="{{ jl.onClick }}" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--ink-faint)">Open in the diary →</div>
+                </div>
+              </sc-if>
             </div>
           </sc-for>
         </div>
@@ -622,7 +648,10 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all' };
+  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', openJ:{} };
+
+  // which journal chapters are expanded in place on the profile
+  toggleJournal = (key) => this.setState(s=>({ openJ: Object.assign({}, s.openJ, {[key]: !s.openJ[key]}) }));
 
   // Branch colours live here AND in the :root CSS vars — keep the two in step.
   // Darkened from the old dark-theme values so they pass contrast on cream.
@@ -1184,11 +1213,22 @@ class Component extends DCLogic {
       records:(p.rec||[]).map(r=>Object.assign({},r,{hasSrc:!!r.src, hasPage:!!r.page})),
       // journal sections explicitly tagged for this person (never name-matched)
       hasJournal:!!(p.journal&&p.journal.length),
-      journal:(p.journal||[]).map(j=>Object.assign({},j,{
-        color:this.col(j.branch),
-        roleLabel:j.role==='about'?'Their story':'Mentioned',
-        hasExcerpt:!!j.excerpt,
-        onClick:()=>this.openDiaryAt(j.j, j.anchor)
+      journal:(p.journal||[]).map((j,i)=>{
+        const key=(S.personId||'')+':'+j.j+':'+j.anchor+':'+i;
+        const open=!!S.openJ[key];
+        return Object.assign({},j,{
+          color:this.col(j.branch),
+          roleLabel:j.role==='about'?'Their story':'Mentioned',
+          hasExcerpt:!!j.excerpt,
+          open, closed:!open,
+          onToggle:()=>this.toggleJournal(key),
+          bodyEl: open ? React.createElement('div',{dangerouslySetInnerHTML:{__html:j.html||''}}) : null,
+          onClick:()=>this.openDiaryAt(j.j, j.anchor)
+        });
+      }),
+      // the numbered journey, shown beside the map
+      journey:this.personPins(pid).map(v=>({
+        label:v.label, name:v.name, when:v.when, hasWhen:!!v.when, color:v.color
       })),
       hasStory:!!storyId2, onStory:()=>storyId2&&this.openStory(storyId2),
       onTree:()=> (p.f||p.m)?this.setFocus(pid):this.openPerson(pid,S.personBack),

@@ -608,6 +608,8 @@ foreach ($d in $diaryManifest) {
     if ($tag.decoy) { $decoyCount++; continue }   # a rejected identification — link to nobody
 
     $excerpt = Get-Excerpt $sec.lines
+    # the section's own prose, so a profile can show the whole chapter in place
+    $secHtml = Md-Html (($sec.lines) -join "`n")
     foreach ($role in @('about', 'mentions')) {
       foreach ($personId in $tag.$role) {
         if (-not $people.Contains($personId)) { $tagBadIds += "$($d.id) '$($sec.heading)' -> $personId"; continue }
@@ -619,6 +621,7 @@ foreach ($d in $diaryManifest) {
             anchor  = $sec.anchor
             heading = $sec.heading
             excerpt = $excerpt
+            html    = $secHtml
             role    = $role
           })
         $taggedCount++
