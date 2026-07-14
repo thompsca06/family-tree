@@ -537,7 +537,9 @@ function Split-Sections {
         $line -match '^\*\s*(\d{1,2}\s+\w+\s+(?:19|20)\d\d)\s*\*\s*$') {
       $cur.date = $matches[1]
       $parsed = [datetime]::MinValue
-      if ([datetime]::TryParse($cur.date, [ref]$parsed)) { $cur.sort = $parsed.Ticks }
+      # yyyymmdd, not Ticks — an 18-digit tick count is past JavaScript's safe
+      # integer range (2^53), and the browser sorts these.
+      if ([datetime]::TryParse($cur.date, [ref]$parsed)) { $cur.sort = [int]$parsed.ToString('yyyyMMdd') }
       continue
     }
     if ($cur) { $cur.lines.Add($line) }
@@ -665,14 +667,16 @@ foreach ($d in $diaryManifest) {
   # The entry's date comes from its SECTIONS, not from data/diary.json — the
   # journals carry a date under each heading, and they are the source of truth.
   $dated = @($sections | Where-Object { $_.sort -gt 0 } | Sort-Object { $_.sort })
-  $entryFrom = ''; $entryTo = ''; $entrySort = 0
+  $entryFrom = ''; $entryTo = ''; $entrySort = 0; $entrySortLast = 0
   if ($dated.Count) {
     $entryFrom = $dated[0].date
     $entryTo = $dated[-1].date
-    # Order the diary by when each journal was STARTED. Sorting by the last date
-    # would push a long-running one (Beeston, still being corrected in 2026) past
-    # journals that were begun and finished long after it.
-    $entrySort = $dated[0].sort
+    # Two orderings, because they answer different questions and a long-running
+    # journal splits them: Beeston was STARTED in Jan 2024 but is still being
+    # corrected now, so "what did I write first" and "what did I touch last"
+    # are not the same list. The page lets you pick.
+    $entrySort = $dated[0].sort      # when I started it
+    $entrySortLast = $dated[-1].sort # when I last added to it
   }
 
   foreach ($sec in $sections) {
@@ -715,15 +719,16 @@ foreach ($d in $diaryManifest) {
   elseif ($d.date) { $span = $d.date }     # fall back to data/diary.json
 
   $diary += [ordered]@{
-    id     = $d.id
-    title  = $d.title
-    sub    = $d.sub
-    date   = $span
-    from   = $entryFrom
-    to     = $entryTo
-    sort   = $entrySort
-    branch = $d.branch
-    html   = Md-Html $md
+    id       = $d.id
+    title    = $d.title
+    sub      = $d.sub
+    date     = $span
+    from     = $entryFrom
+    to       = $entryTo
+    sort     = $entrySort
+    sortLast = $entrySortLast
+    branch   = $d.branch
+    html     = Md-Html $md
   }
 }
 

@@ -46,7 +46,37 @@ $html = $html -replace '(?i)(<head>)', "`$1`n$react"
 
 Copy-Item (Join-Path $root 'support.js') $dist
 Copy-Item (Join-Path $root 'vendor') $dist -Recurse
-Copy-Item (Join-Path $root 'img') $dist -Recurse
+
+# Copy ONLY the images the built site actually asks for — never the whole img/
+# tree. Two reasons, both of which bit us:
+#   1. PRIVACY. The public build strips a living person's documents from the data,
+#      but a blanket copy still published the scan itself. Unlisted is not private.
+#   2. Stale files. Match-Media doesn't prune, so images from an earlier media sync
+#      linger on disk and would be published forever.
+# Refs come from the built data AND from the page (the story hero photos are named
+# in the component, not in familydata.js).
+$imgRefs = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($src in @((Join-Path $dist 'familydata.js'), (Join-Path $dist 'index.html'))) {
+  foreach ($m in [regex]::Matches([IO.File]::ReadAllText($src), 'img/[A-Za-z0-9_\-./]+\.(?:jpg|jpeg|png|gif|webp)')) {
+    [void]$imgRefs.Add($m.Value)
+  }
+}
+$copied = 0; $missingRefs = [System.Collections.Generic.List[string]]::new()
+foreach ($rel in $imgRefs) {
+  $from = Join-Path $root ($rel -replace '/', '\')
+  if (-not (Test-Path $from)) { $missingRefs.Add($rel); continue }
+  $to = Join-Path $dist ($rel -replace '/', '\')
+  New-Item -ItemType Directory -Force (Split-Path $to) | Out-Null
+  Copy-Item $from $to
+  $copied++
+}
+$onDisk = @(Get-ChildItem (Join-Path $root 'img') -Recurse -File).Count
+Write-Host ("  images: $copied published, " + ($onDisk - $copied) + " on disk but unused (not published)")
+if ($missingRefs.Count) {
+  Write-Host "  !! referenced but missing from disk:" -ForegroundColor Red
+  $missingRefs | ForEach-Object { Write-Host "     $_" -ForegroundColor Red }
+  throw "refusing to build: the site references $($missingRefs.Count) image(s) that do not exist"
+}
 # stops GitHub Pages running the output through Jekyll (which ignores _ files)
 [IO.File]::WriteAllText((Join-Path $dist '.nojekyll'), '')
 
