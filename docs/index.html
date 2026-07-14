@@ -137,6 +137,39 @@
       </div>
     </div>
 
+    <!-- the method: the rules this research is held to -->
+    <sc-if value="{{ hasRules }}">
+    <div style="margin:34px 40px 0;padding:30px 34px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-left:4px solid var(--rust);border-radius:12px">
+      <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--rust);text-transform:uppercase">The method</div>
+      <div style="font:600 24px/1.15 Newsreader,serif;margin-top:9px">How we know it is the right person</div>
+
+      <!-- the standing rule -->
+      <div style="margin-top:16px;padding:16px 20px;background:rgba(179,74,37,.05);border-radius:9px">
+        <sc-for list="{{ rulesStanding }}" as="r" hint-placeholder-count="2">
+          <div style="font:600 16.5px/1.55 Newsreader,serif;color:var(--ink)">{{ r.text }}</div>
+        </sc-for>
+        <div style="font:600 12.5px/1.5 'IBM Plex Mono',monospace;color:var(--rust);margin-top:10px">{{ rulesMethod }}</div>
+      </div>
+
+      <div style="font:400 13.5px/1.6 Newsreader,serif;color:var(--ink-soft);margin-top:16px;max-width:680px">Open the register image. Read the abode, the occupation, the fathers, the witnesses. <i>Then</i> decide. Other people's trees and bare transcriptions are leads to test, never evidence.</div>
+
+      <!-- the four hard rules -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:22px">
+        <sc-for list="{{ rulesHard }}" as="h" hint-placeholder-count="4">
+          <div style="display:flex;gap:12px;padding:14px 16px;background:var(--surface-2);border-radius:9px">
+            <span style="flex:none;width:24px;height:24px;border-radius:50%;background:var(--rust);color:#fff;font:700 12px/24px Archivo;text-align:center">{{ h.n }}</span>
+            <div>
+              <div style="font:600 14.5px/1.25 Newsreader,serif;color:var(--ink)">{{ h.title }}</div>
+              <div style="font:400 12.5px/1.55 Archivo;color:var(--ink-faint);margin-top:5px">{{ h.body }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font:400 11.5px/1.5 Archivo;color:var(--ink-faint);margin-top:18px">Every record on this site names the collection it came from and its archive reference. Where a life should have left a record and hasn't, the profile says so rather than filling the hole with a plausible guess.</div>
+    </div>
+    </sc-if>
+
     <!-- your line -->
     <div style="padding:26px 40px 4px">
       <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:14px">Your line, at a glance</div>
@@ -814,6 +847,8 @@ class Component extends DCLogic {
   get people(){ return (window.FAMILY&&window.FAMILY.people)||{}; }
   get root(){ return (window.FAMILY&&window.FAMILY.root)||'chris'; }
   get diaryEntries(){ return (window.FAMILY&&window.FAMILY.diary)||[]; }
+  // read straight out of RULES-AND-INSTRUCTIONS.md at build time
+  get rules(){ return (window.FAMILY&&window.FAMILY.rules)||{standing:[],method:'',hard:[]}; }
   resolve(id){ if(!id) return id; const a=window.FAMILY&&window.FAMILY.alias; return (a&&a[id])||id; }
   get storyByPid(){ const m={}; for(const k in this.stories){ const pid=this.resolve(this.stories[k].personId); if(pid) m[pid]=k; } return m; }
   personFacts(p){ const f=[]; const yrs=(p.years.match(/[0-9]{4}/g)||[]); const bY=yrs[0]; const dY=(p.years.indexOf(String.fromCharCode(8211))>-1)?yrs[1]:null; const born=[bY,p.birtP].filter(Boolean).join(', '); if(born)f.push({k:'Born',v:born}); const died=[dY,p.deatP].filter(Boolean).join(', '); if(died)f.push({k:'Died',v:died}); f.push({k:'Line',v:this.blab(p.branch)}); if(p.occs&&p.occs.length)f.push({k:'Occupation',v:p.occs.join(', ')}); const sp=p.sp&&this.people[p.sp]?this.people[p.sp].name:null; if(sp)f.push({k:'Married',v:sp}); return f; }
@@ -1511,6 +1546,10 @@ class Component extends DCLogic {
       isData:S.view==='data', navData:this.navData, dataRows:this.buildDataRows(), dataCount:Object.keys(this.people).length+'',
       isDiary:S.view==='diary', navDiary:this.navDiary, diary:this.diaryEntries.map(d=>({title:d.title,date:d.date,sub:d.sub,dot:this.col(d.branch),bodyEl:React.createElement('div',{className:'diaryprose',dangerouslySetInnerHTML:{__html:d.html}})})),
       spine, storyCards, modeCards,
+      hasRules:!!(this.rules.hard&&this.rules.hard.length),
+      rulesStanding:(this.rules.standing||[]).map(t=>({text:t})),
+      rulesMethod:this.rules.method||'',
+      rulesHard:(this.rules.hard||[]),
       openTommyStory:()=>this.openStory('tommy'), openTommyPerson:()=>this.setFocus('tommy'),
       t, canBack:S.trail.length>1, treeBack:this.treeBack, treeHome:this.treeHome,
       treeMode:S.treeMode, isPedigree:S.treeMode==='pedigree', isFull:S.treeMode==='full',

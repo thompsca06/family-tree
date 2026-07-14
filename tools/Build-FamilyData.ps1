@@ -24,6 +24,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
+$family = Split-Path -Parent $root       # the Family/ folder: journals, rules, scans
 $G = Get-Content (Join-Path $root $GedJson) -Raw | ConvertFrom-Json
 $GAZ = Get-Content (Join-Path $root $Places) -Raw | ConvertFrom-Json
 
@@ -756,12 +757,51 @@ if ($Public) {
   }
 }
 
+# ---------------------------------------------------------------- the method
+# Read the Standing Rule and the Hard Rules straight out of
+# RULES-AND-INSTRUCTIONS.md so the site states the rules Chris actually works to.
+# Edit that file and the front page follows — it cannot drift out of sync.
+$rules = [ordered]@{ standing = @(); method = ''; hard = @() }
+$rulesPath = Join-Path $family 'RULES-AND-INSTRUCTIONS.md'
+if (Test-Path $rulesPath) {
+  $rl = Get-Content $rulesPath
+  $section = ''
+  for ($i = 0; $i -lt $rl.Count; $i++) {
+    $line = $rl[$i]
+    if ($line -match '^##\s+THE STANDING RULE') { $section = 'standing'; continue }
+    if ($line -match '^##\s+THE HARD RULES') { $section = 'hard'; continue }
+    if ($line -match '^##\s' ) { $section = ''; continue }
+
+    if ($section -eq 'standing') {
+      # the blockquote holds the rule; the "Method:" line is called out separately
+      if ($line -match '^>\s*\*\*(.+?)\*\*\s*$') {
+        $txt = $matches[1]
+        if ($txt -match '^Method:') { $rules.method = ($txt -replace '^Method:\s*', '') }
+        else { $rules.standing += $txt }
+      }
+    }
+    if ($section -eq 'hard') {
+      # "1. **Direct line, generation by generation** *(memory: ...)*"
+      if ($line -match '^\s*(\d+)\.\s+\*\*(.+?)\*\*') {
+        $n = $matches[1]; $title = $matches[2]
+        $body = ''
+        if ($i + 1 -lt $rl.Count) { $body = $rl[$i + 1].Trim() }
+        # strip markdown emphasis for display
+        $body = $body -replace '\*\*(.+?)\*\*', '$1' -replace '\*(.+?)\*', '$1'
+        $rules.hard += [ordered]@{ n = $n; title = $title; body = $body }
+      }
+    }
+  }
+}
+Write-Host "  method rules    : $($rules.hard.Count) hard rules, $($rules.standing.Count)-line standing rule"
+
 # ---------------------------------------------------------------- emit
 $doc = [ordered]@{
   people = $people
   alias  = $aliasOut
   geo    = $geo
   diary  = @($diary)
+  rules  = $rules
   root   = $ROOTID
   meta   = [ordered]@{ exported = $G.meta.exported; people = $people.Count; built = 'Build-FamilyData.ps1' }
 }
