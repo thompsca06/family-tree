@@ -41,8 +41,8 @@ pwsh tools/Build-FamilyData.ps1    # + journals + gazetteer -> familydata.js
 pwsh tools/Build-Preview.ps1       # standalone local preview (FULL data)
 
 # publish
-pwsh tools/Build-Site.ps1          # -> dist/  (living people redacted)
-pwsh tools/Build-Site.ps1 -Private # -> dist/  (full data, local only)
+pwsh tools/Build-Site.ps1          # -> docs/  (living people redacted)
+pwsh tools/Build-Site.ps1 -Private # -> docs/  (full data, local only)
 
 # audit the tree itself
 pwsh tools/Find-Problems.ps1       # duplicates, missing vitals, bad places
@@ -90,5 +90,5 @@ data/     gazetteer, diary manifest, generated reports
 src/      the GEDCOM export  (git-ignored)
 img/      photos
 vendor/   Leaflet (vendored — no CDN dependency)
-dist/     the published site
+docs/     the published site
 ```

@@ -1,11 +1,11 @@
 <#
-Build-Site.ps1 — produce dist/, the standalone site for GitHub Pages.
+Build-Site.ps1 — produce docs/, the standalone site for GitHub Pages.
 
     pwsh tools/Build-Site.ps1            # public build: living people redacted
     pwsh tools/Build-Site.ps1 -Private   # full build, for local use only
 
 The .dc.html is a Claude design component: it uses React but never loads it,
-because the claude.ai design host injects React/ReactDOM for it. dist/index.html
+because the claude.ai design host injects React/ReactDOM for it. docs/index.html
 is the same page with those two script tags added, so it runs anywhere.
 
 PRIVACY: the public build strips every fact about anyone who may still be living
@@ -16,7 +16,7 @@ param([switch]$Private)
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$dist = Join-Path $root 'dist'
+$dist = Join-Path $root 'docs'   # GitHub Pages only serves / or /docs
 
 # refuse to publish half a photo
 Write-Host "== verifying images"
@@ -30,12 +30,12 @@ if (Test-Path $dist) { Remove-Item $dist -Recurse -Force }
 New-Item -ItemType Directory -Force $dist | Out-Null
 
 if ($Private) {
-  & (Join-Path $PSScriptRoot 'Build-FamilyData.ps1') -Out 'dist/familydata.js' | Out-Host
+  & (Join-Path $PSScriptRoot 'Build-FamilyData.ps1') -Out 'docs/familydata.js' | Out-Host
 } else {
-  & (Join-Path $PSScriptRoot 'Build-FamilyData.ps1') -Public -Out 'dist/familydata.js' | Out-Host
+  & (Join-Path $PSScriptRoot 'Build-FamilyData.ps1') -Public -Out 'docs/familydata.js' | Out-Host
 }
 
-Write-Host "== assembling dist/"
+Write-Host "== assembling docs/"
 $html = [IO.File]::ReadAllText((Join-Path $root 'Family Tree.dc.html'))
 $react = @'
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -53,4 +53,4 @@ Copy-Item (Join-Path $root 'img') $dist -Recurse
 $n = (Get-ChildItem $dist -Recurse -File).Count
 $kb = [Math]::Round(((Get-ChildItem $dist -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
 Write-Host ""
-Write-Host "dist/ ready — $n files, $kb MB$(if(-not $Private){'   [PUBLIC: living people redacted]'})"
+Write-Host "docs/ ready — $n files, $kb MB$(if(-not $Private){'   [PUBLIC: living people redacted]'})"
