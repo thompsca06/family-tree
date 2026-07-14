@@ -294,6 +294,36 @@
         </sc-for>
       </div>
     </div>
+    <!-- filtered to one line: group the directory by surname -->
+    <sc-if value="{{ groupedBySurname }}">
+    <sc-for list="{{ peopleFamilies }}" as="fam" hint-placeholder-count="4">
+      <div style="margin-bottom:26px">
+        <div style="display:flex;align-items:baseline;gap:9px;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid rgba(43,37,28,.10)">
+          <span style="width:9px;height:9px;border-radius:50%;flex:none;background:{{ fam.color }}"></span>
+          <span style="font:600 19px/1.1 Newsreader,serif;color:var(--ink)">{{ fam.sur }}</span>
+          <span style="font:400 10.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ fam.n }}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px">
+          <sc-for list="{{ fam.people }}" as="p" hint-placeholder-count="6">
+            <div onClick="{{ p.onClick }}" class="lift" style="cursor:pointer;display:flex;gap:12px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:10px;padding:13px 14px">
+              <div style="width:42px;height:42px;flex:none;border-radius:8px;background:{{ p.color }};display:flex;align-items:center;justify-content:center;font:600 14px/1 Newsreader,serif;color:var(--bg)">{{ p.initials }}</div>
+              <div style="min-width:0;flex:1">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font:600 14px/1.15 Newsreader,serif">{{ p.name }}</span>
+                  <sc-if value="{{ p.sourced }}"><span title="Fully sourced" style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ p.color }}"></span></sc-if>
+                </div>
+                <div style="font:400 10.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-top:3px">{{ p.years }}</div>
+                <div style="font:400 11.5px/1.35 Archivo;color:var(--ink-faint);margin-top:5px">{{ p.trade }}</div>
+                <sc-if value="{{ p.hasGapCount }}"><div style="font:500 10px/1.3 'IBM Plex Mono',monospace;color:var(--rust);margin-top:5px">{{ p.gapCount }} still missing</div></sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+    </sc-if>
+
+    <sc-if value="{{ flatList }}">
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px">
       <sc-for list="{{ people }}" as="p" hint-placeholder-count="12">
         <div onClick="{{ p.onClick }}" class="lift" style="cursor:pointer;display:flex;gap:12px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:10px;padding:13px 14px">
@@ -310,6 +340,7 @@
         </div>
       </sc-for>
     </div>
+    </sc-if>
     <sc-if value="{{ noResults }}"><div style="margin-top:30px;font:italic 400 15px/1 Newsreader,serif;color:var(--ink-faint)">No one by that name. Try another spelling.</div></sc-if>
 
     <!-- people who belong to neither line -->
@@ -349,7 +380,7 @@
       <div style="flex:none;width:262px">
         <div onClick="{{ setEveryone }}" class="lift" style="cursor:pointer;font:600 12px/1 Archivo;text-align:center;padding:11px;border-radius:9px;margin-bottom:9px;color:{{ everyoneFg }};background:{{ everyoneBg }};border:1px solid rgba(43,37,28,.12)">◍ Everyone &amp; every move</div>
         <!-- which line is on the map -->
-        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px">
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px">
           <sc-for list="{{ lineFilters }}" as="lf" hint-placeholder-count="4">
             <div onClick="{{ lf.onClick }}" class="lift" style="cursor:pointer;font:600 10.5px/1 Archivo;padding:7px 10px;border-radius:7px;color:{{ lf.fg }};background:{{ lf.bg }};border:1px solid {{ lf.bd }}">{{ lf.label }} <span style="opacity:.65">{{ lf.n }}</span></div>
           </sc-for>
@@ -366,10 +397,12 @@
               <!-- the families within it -->
               <sc-for list="{{ g.families }}" as="fam" hint-placeholder-count="3">
                 <div style="margin-top:9px">
+                  <sc-if value="{{ fam.hasSur }}">
                   <div style="display:flex;align-items:baseline;gap:6px;padding:0 3px 5px">
                     <span style="font:600 11.5px/1.2 Newsreader,serif;color:var(--ink-soft)">{{ fam.sur }}</span>
                     <span style="font:400 9px/1 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ fam.n }}</span>
                   </div>
+                  </sc-if>
                   <div style="display:flex;flex-direction:column;gap:4px">
                     <sc-for list="{{ fam.people }}" as="mp" hint-placeholder-count="4">
                       <div onClick="{{ mp.onClick }}" class="lift" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;background:{{ mp.bg }};border:1px solid rgba(43,37,28,.09);border-left:3px solid {{ mp.color }}">
@@ -759,7 +792,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', openJ:{} };
+  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', mapGroup:'line', openJ:{} };
 
   // which journal chapters are expanded in place on the profile
   toggleJournal = (key) => this.setState(s=>({ openJ: Object.assign({}, s.openJ, {[key]: !s.openJ[key]}) }));
@@ -1283,6 +1316,25 @@ class Component extends DCLogic {
       onClick:()=>this.openPerson(id,'people')};});
     const branchFilters=[['all','Everyone'],['thompson','Thompson (Dad)'],['ingleby','Ingleby (Mother)']].map(([b,label])=>{const on=S.branch===b;return{label,onClick:()=>this.setBranch(b),fg:on?'#f7f3ea':'#59503f',bg:on?(b==='ingleby'?'#4d7a52':b==='thompson'?'#b34a25':'#9a7d3f'):'transparent',bd:on?'transparent':'rgba(43,37,28,.14)'};});
 
+    // Filtered to one line? group the directory by surname, biggest family first.
+    // Showing everyone, the surname headings would just be noise, so keep the flat grid.
+    const groupedBySurname = S.branch!=='all' && people.length>0;
+    const pfam={};
+    if(groupedBySurname){ ids.forEach(id=>{ const s=this.people[id].sur||'—'; (pfam[s]=pfam[s]||[]).push(id); }); }
+    const peopleFamilies = !groupedBySurname ? [] : Object.keys(pfam)
+      .sort((a,b)=>pfam[b].length-pfam[a].length||a.localeCompare(b))
+      .map(sur=>({
+        sur, n:pfam[sur].length, color:this.col(this.people[pfam[sur][0]].branch),
+        people:pfam[sur]
+          .sort((a,b)=>(this.people[a].by||9999)-(this.people[b].by||9999))
+          .map(id=>{const p=this.people[id];const gn=(p.gaps||[]).length;return{
+            name:p.name, years:p.years,
+            trade:(p.occs&&p.occs.length?p.occs[0]:this.blab(p.branch)),
+            color:this.col(p.branch), initials:this.initials(p.name),
+            sourced:!!p.sourced, gapCount:gn, hasGapCount:gn>0,
+            onClick:()=>this.openPerson(id,'people')};})
+      }));
+
     // people who belong to neither line
     const unIds=Object.keys(this.people).filter(id=>this.people[id].unlinked&&(!q||this.people[id].name.toLowerCase().includes(q)));
     const bySur={}; unIds.forEach(id=>{const s=this.people[id].sur||'—'; bySur[s]=(bySur[s]||0)+1;});
@@ -1305,27 +1357,41 @@ class Component extends DCLogic {
     const mapKeys=this.mapKeys();
     const inLine=(id,k)=>this.people[id].branch===k;
 
-    const mapGroups=LINES.map(L=>{
-      const ids=mapKeys.filter(id=>inLine(id,L.key)).filter(id=>mline==='all'||mline===L.key);
-      // bucket by surname
-      const bySur={};
-      ids.forEach(id=>{ const s=this.people[id].sur||'—'; (bySur[s]=bySur[s]||[]).push(id); });
-      const families=Object.keys(bySur)
-        .sort((a,b)=>bySur[b].length-bySur[a].length||a.localeCompare(b))
-        .map(sur=>({
-          sur, n:bySur[sur].length,
-          people:bySur[sur]
-            .sort((a,b)=>(this.people[a].by||9999)-(this.people[b].by||9999))
-            .map(id=>{const p=this.people[id];return{
-              id, name:p.name,
-              given:(p.name||'').replace(new RegExp('\\s*'+sur+'$'),'')||p.name,
-              years:p.years,
-              color:this.col(p.branch),
-              bg:S.mapPerson===id?'rgba(179,74,37,.13)':'#fffdf8',
-              onClick:()=>this.setState({view:'places',mapPerson:id})};})
-        }));
-      return {key:L.key, label:L.label, color:this.col(L.key), n:ids.length, families};
-    }).filter(g=>g.n>0);
+    // one person's row in the list
+    const row=(id,sur)=>{const p=this.people[id];return{
+      id, name:p.name,
+      given:sur ? ((p.name||'').replace(new RegExp('\\s*'+sur.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$'),'')||p.name) : p.name,
+      years:p.years, color:this.col(p.branch),
+      bg:S.mapPerson===id?'rgba(179,74,37,.13)':'#fffdf8',
+      onClick:()=>this.setState({view:'places',mapPerson:id})};};
+
+    // bucket a set of ids by surname, biggest family first, each ordered by birth
+    const bySurname=(ids)=>{
+      const b={};
+      ids.forEach(id=>{ const s=this.people[id].sur||'—'; (b[s]=b[s]||[]).push(id); });
+      return Object.keys(b)
+        .sort((x,y)=>b[y].length-b[x].length||x.localeCompare(y))
+        .map(sur=>({sur, hasSur:true, n:b[sur].length,
+          people:b[sur].sort((x,y)=>(this.people[x].by||9999)-(this.people[y].by||9999)).map(id=>row(id,sur))}));
+    };
+
+    // Showing everyone? group by line, then surname within it.
+    // Filtered to ONE line? the line heading is redundant — group straight by surname.
+    const gmode = (mline==='all') ? 'line' : 'surname';
+    const visible=mapKeys.filter(id=>mline==='all'||this.people[id].branch===mline);
+
+    // grouped by LINE, then surname within it — or straight by SURNAME
+    const mapGroups = gmode==='surname'
+      ? bySurname(visible).map(f=>({
+          key:'sur:'+f.sur, label:f.sur, n:f.n,
+          color:this.col(this.people[ (visible.filter(id=>(this.people[id].sur||'—')===f.sur))[0] ].branch),
+          families:[{sur:'', hasSur:false, n:f.n, people:f.people}]
+        }))
+      : LINES.map(L=>{
+          const ids=visible.filter(id=>inLine(id,L.key));
+          return {key:L.key, label:L.label, color:this.col(L.key), n:ids.length, families:bySurname(ids)};
+        }).filter(g=>g.n>0);
+
 
     const lineCount=(k)=>mapKeys.filter(id=>inLine(id,k)).length;
     const lineFilters=[{key:'all',label:'All'}].concat(LINES.map(L=>({key:L.key,label:L.key==='root'?'Other':L.label.replace(' line','')})))
@@ -1483,6 +1549,7 @@ class Component extends DCLogic {
       },
       pedBg:S.treeMode==='pedigree'?'#b34a25':'transparent', pedFg:S.treeMode==='pedigree'?'#fff':'#59503f', fullBg:S.treeMode==='full'?'#b34a25':'transparent', fullFg:S.treeMode==='full'?'#fff':'#59503f',
       people, peopleCount:Object.keys(this.people).length, branchFilters, noResults:people.length===0&&unlinkedPeople.length===0,
+      groupedBySurname, peopleFamilies, flatList:!groupedBySurname,
       hasUnlinked:unlinkedPeople.length>0, unlinkedCount:unlinkedPeople.length, unlinkedGroups, unlinkedPeople,
       britPlaces, worldPlaces, britRoutes:this.britRoutes, worldRoutes:this.worldRoutes, mapLegend:this.mapLegend, place,
       mapGroups, lineFilters, mapAll, mapSelName, mapSelChips, hasMapChips:mapSelChips.length>0, setEveryone:()=>this.setState({view:'places',mapPerson:'all'}), everyoneBg:mapAll?'#b34a25':'transparent', everyoneFg:mapAll?'#fff':'#59503f',
