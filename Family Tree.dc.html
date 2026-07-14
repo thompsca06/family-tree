@@ -345,15 +345,41 @@
     <div style="margin-bottom:6px"><div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase">Places</div><div style="font:600 22px/1.1 Newsreader,serif;margin-top:6px">Where they lived, and how they moved</div></div>
     <div style="font:400 12px/1.5 Archivo;color:var(--ink-faint);margin-bottom:20px">A live map (OpenStreetMap). <b style="color:var(--ink-soft)">Everyone</b> shows every residence and every migration line at once — pick a name to trace one person's journey, from where they were born to where they ended.</div>
     <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start">
-      <!-- people list -->
-      <div style="flex:none;width:240px">
-        <div onClick="{{ setEveryone }}" class="lift" style="cursor:pointer;font:600 12px/1 Archivo;text-align:center;padding:11px;border-radius:9px;margin-bottom:10px;color:{{ everyoneFg }};background:{{ everyoneBg }};border:1px solid rgba(43,37,28,.12)">◍ Everyone &amp; every move</div>
-        <div class="scrollx" style="max-height:520px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px">
-          <sc-for list="{{ mapPeople }}" as="mp" hint-placeholder-count="10">
-            <div onClick="{{ mp.onClick }}" class="lift" style="cursor:pointer;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;background:{{ mp.bg }};border:1px solid rgba(43,37,28,.09)">
-              <span style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ mp.color }}"></span>
-              <span style="font:500 12.5px/1.2 Newsreader,serif;color:var(--ink)">{{ mp.name }}</span>
-              <span style="font:400 9px 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-left:auto">{{ mp.years }}</span>
+      <!-- people, grouped by line -->
+      <div style="flex:none;width:262px">
+        <div onClick="{{ setEveryone }}" class="lift" style="cursor:pointer;font:600 12px/1 Archivo;text-align:center;padding:11px;border-radius:9px;margin-bottom:9px;color:{{ everyoneFg }};background:{{ everyoneBg }};border:1px solid rgba(43,37,28,.12)">◍ Everyone &amp; every move</div>
+        <!-- which line is on the map -->
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px">
+          <sc-for list="{{ lineFilters }}" as="lf" hint-placeholder-count="4">
+            <div onClick="{{ lf.onClick }}" class="lift" style="cursor:pointer;font:600 10.5px/1 Archivo;padding:7px 10px;border-radius:7px;color:{{ lf.fg }};background:{{ lf.bg }};border:1px solid {{ lf.bd }}">{{ lf.label }} <span style="opacity:.65">{{ lf.n }}</span></div>
+          </sc-for>
+        </div>
+        <div class="scrollx" style="max-height:560px;overflow-y:auto;display:flex;flex-direction:column;padding-right:4px">
+          <sc-for list="{{ mapGroups }}" as="g" hint-placeholder-count="3">
+            <div style="margin-bottom:14px">
+              <!-- the line -->
+              <div style="display:flex;align-items:center;gap:7px;padding:7px 2px 6px;position:sticky;top:0;background:var(--bg);z-index:2;border-bottom:1px solid rgba(43,37,28,.10)">
+                <span style="width:9px;height:9px;border-radius:50%;flex:none;background:{{ g.color }}"></span>
+                <span style="font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:{{ g.color }};text-transform:uppercase">{{ g.label }}</span>
+                <span style="font:400 10px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-left:auto">{{ g.n }}</span>
+              </div>
+              <!-- the families within it -->
+              <sc-for list="{{ g.families }}" as="fam" hint-placeholder-count="3">
+                <div style="margin-top:9px">
+                  <div style="display:flex;align-items:baseline;gap:6px;padding:0 3px 5px">
+                    <span style="font:600 11.5px/1.2 Newsreader,serif;color:var(--ink-soft)">{{ fam.sur }}</span>
+                    <span style="font:400 9px/1 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ fam.n }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <sc-for list="{{ fam.people }}" as="mp" hint-placeholder-count="4">
+                      <div onClick="{{ mp.onClick }}" class="lift" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;background:{{ mp.bg }};border:1px solid rgba(43,37,28,.09);border-left:3px solid {{ mp.color }}">
+                        <span style="font:500 12px/1.2 Newsreader,serif;color:var(--ink)">{{ mp.given }}</span>
+                        <span style="font:400 9px 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-left:auto">{{ mp.years }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
             </div>
           </sc-for>
         </div>
@@ -733,7 +759,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', openJ:{} };
+  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', openJ:{} };
 
   // which journal chapters are expanded in place on the profile
   toggleJournal = (key) => this.setState(s=>({ openJ: Object.assign({}, s.openJ, {[key]: !s.openJ[key]}) }));
@@ -966,14 +992,21 @@ class Component extends DCLogic {
   }
   personChips(id){ const p=this.people[id]; if(!p)return[]; const seen={}; return (p.stops||[]).map(s=>s.name).filter(n=>{ if(seen[n])return false; seen[n]=1; return true; }); }
   mapKeys(){ return Object.keys(this.people).filter(id=>this.personVisits(id).length); }
-  allStops(){ return this.mapKeys().map(id=>({id,stops:this.personVisits(id)})).filter(o=>o.stops.length); }
+  allStops(){ return this.mapKeysForLine().map(id=>({id,stops:this.personVisits(id)})).filter(o=>o.stops.length); }
+
+  // people currently on the "everyone" map — all lines, or just one
+  mapKeysForLine(){
+    const line=this.state.mapLine||'all';
+    return this.mapKeys().filter(id=>line==='all'||this.people[id].branch===line);
+  }
 
   // The "everyone" map: one dot per place, carrying who was there and when.
   placeMarkers(){
     const m={};
-    this.mapKeys().forEach(id=>{ const p=this.people[id];
+    this.mapKeysForLine().forEach(id=>{ const p=this.people[id];
       this.personVisits(id).forEach(v=>{ const k=v.name;
-        if(!m[k]) m[k]={ll:v.ll,name:v.name,color:'#9a7d3f',who:{}};
+        const lc=(this.state.mapLine&&this.state.mapLine!=='all')?this.col(this.state.mapLine):'#9a7d3f';
+        if(!m[k]) m[k]={ll:v.ll,name:v.name,color:lc,who:{}};
         if(!m[k].who[id]) m[k].who[id]={id:id,name:p.name,years:[]};
         (v.years||[]).forEach(y=>{ if(y!=null) m[k].who[id].years.push(y); });
       });
@@ -1053,7 +1086,7 @@ class Component extends DCLogic {
       return { pins:this.personPins(id), lines: v.length>1?[{pts:v.map(s=>s.ll),color:'#b34a25',opacity:0.9}]:[] }; };
 
     if(S.view==='person'){ const el=document.querySelector('[data-pmap]'); if(el){ const j=journey(S.personId||'chris'); const key='p:'+S.personId+':'+j.pins.length; if(el._key!==key){ el._key=key; this.buildLeaflet(el, j.pins, j.lines); } setTimeout(()=>{try{el._map&&el._map.invalidateSize();}catch(e){}},120); } }
-    else if(S.view==='places'){ const el=document.querySelector('[data-placesmap]'); if(el){ const key='m:'+S.mapPerson; if(el._key!==key){ el._key=key; if(S.mapPerson==='all'){ this.buildLeaflet(el, this.placeMarkers(), this.allLines()); } else { const j=journey(S.mapPerson); this.buildLeaflet(el, j.pins, j.lines); } } setTimeout(()=>{try{el._map&&el._map.invalidateSize();}catch(e){}},120); } }
+    else if(S.view==='places'){ const el=document.querySelector('[data-placesmap]'); if(el){ const key='m:'+S.mapPerson+':'+(S.mapLine||'all'); if(el._key!==key){ el._key=key; if(S.mapPerson==='all'){ this.buildLeaflet(el, this.placeMarkers(), this.allLines()); } else { const j=journey(S.mapPerson); this.buildLeaflet(el, j.pins, j.lines); } } setTimeout(()=>{try{el._map&&el._map.invalidateSize();}catch(e){}},120); } }
   }
   componentDidMount(){ this.syncMaps(); }
   placePhoto = { mickley:'img/places/mickley.jpg', eavestone:'img/places/azerley.jpg', leeds:'img/places/hunslet.jpg', bleasby:'img/places/bathley_st.jpg' };
@@ -1262,7 +1295,45 @@ class Component extends DCLogic {
     const mkPlace=(id)=>{const p=this.places[id];return{...p,onClick:()=>this.selectPlace(id)};};
     const britPlaces=['eavestone','malton','beverley','wetwang','york','grimsby','garforth','leeds','bleasby','saintfield','norwich'].map(id=>{const p=this.places[id];return{name:p.name,label:p.name.split(/[ ,—]/)[0],x:p.x,y:p.y,r:p.r,ly:p.ly,anchor:p.anchor,color:p.color,onClick:()=>this.selectPlace(id)};});
     const worldPlaces=['canada','germany','italy','crete','egypt','ceylon','india','burma'].map(id=>{const p=this.places[id];return{name:p.name,label:p.name.split(/[ ,—]/)[0],x:p.x,y:p.y,r:p.r,ly:p.ly,anchor:p.anchor,color:p.color,onClick:()=>this.selectPlace(id)};});
-    const mapPeople=this.mapKeys().map(id=>({id,name:this.people[id].name,years:this.people[id].years,color:this.col(this.people[id].branch),active:S.mapPerson===id,bg:S.mapPerson===id?'rgba(179,74,37,.13)':'#fffdf8',onClick:()=>this.setState({view:'places',mapPerson:id})})).sort((a,b)=>a.name.localeCompare(b.name));
+    // ---- Places: people grouped by LINE, then by SURNAME within it ----
+    const LINES=[
+      {key:'thompson', label:'Thompson line'},
+      {key:'ingleby',  label:'Ingleby line'},
+      {key:'root',     label:'Home line & not yet connected'}
+    ];
+    const mline=S.mapLine||'all';
+    const mapKeys=this.mapKeys();
+    const inLine=(id,k)=>this.people[id].branch===k;
+
+    const mapGroups=LINES.map(L=>{
+      const ids=mapKeys.filter(id=>inLine(id,L.key)).filter(id=>mline==='all'||mline===L.key);
+      // bucket by surname
+      const bySur={};
+      ids.forEach(id=>{ const s=this.people[id].sur||'—'; (bySur[s]=bySur[s]||[]).push(id); });
+      const families=Object.keys(bySur)
+        .sort((a,b)=>bySur[b].length-bySur[a].length||a.localeCompare(b))
+        .map(sur=>({
+          sur, n:bySur[sur].length,
+          people:bySur[sur]
+            .sort((a,b)=>(this.people[a].by||9999)-(this.people[b].by||9999))
+            .map(id=>{const p=this.people[id];return{
+              id, name:p.name,
+              given:(p.name||'').replace(new RegExp('\\s*'+sur+'$'),'')||p.name,
+              years:p.years,
+              color:this.col(p.branch),
+              bg:S.mapPerson===id?'rgba(179,74,37,.13)':'#fffdf8',
+              onClick:()=>this.setState({view:'places',mapPerson:id})};})
+        }));
+      return {key:L.key, label:L.label, color:this.col(L.key), n:ids.length, families};
+    }).filter(g=>g.n>0);
+
+    const lineCount=(k)=>mapKeys.filter(id=>inLine(id,k)).length;
+    const lineFilters=[{key:'all',label:'All'}].concat(LINES.map(L=>({key:L.key,label:L.key==='root'?'Other':L.label.replace(' line','')})))
+      .map(f=>{const on=mline===f.key;const c=f.key==='all'?'#9a7d3f':this.col(f.key);
+        return {label:f.label, n:f.key==='all'?mapKeys.length:lineCount(f.key),
+          onClick:()=>this.setState({mapLine:f.key, mapPerson:'all'}),
+          fg:on?'#fffdf8':'#59503f', bg:on?c:'transparent', bd:on?'transparent':'rgba(43,37,28,.14)'};});
+
     const mapAll=S.mapPerson==='all';
     const mapSelName=mapAll?'Everyone':(this.people[S.mapPerson]?this.people[S.mapPerson].name:'Everyone');
     const mapSelChips=mapAll?[]:this.personVisits(S.mapPerson).map(s=>({name:s.n+'. '+s.name+(s.when?'  '+s.when:'')}));
@@ -1414,7 +1485,7 @@ class Component extends DCLogic {
       people, peopleCount:Object.keys(this.people).length, branchFilters, noResults:people.length===0&&unlinkedPeople.length===0,
       hasUnlinked:unlinkedPeople.length>0, unlinkedCount:unlinkedPeople.length, unlinkedGroups, unlinkedPeople,
       britPlaces, worldPlaces, britRoutes:this.britRoutes, worldRoutes:this.worldRoutes, mapLegend:this.mapLegend, place,
-      mapPeople, mapAll, mapSelName, mapSelChips, hasMapChips:mapSelChips.length>0, setEveryone:()=>this.setState({view:'places',mapPerson:'all'}), everyoneBg:mapAll?'#b34a25':'transparent', everyoneFg:mapAll?'#fff':'#59503f',
+      mapGroups, lineFilters, mapAll, mapSelName, mapSelChips, hasMapChips:mapSelChips.length>0, setEveryone:()=>this.setState({view:'places',mapPerson:'all'}), everyoneBg:mapAll?'#b34a25':'transparent', everyoneFg:mapAll?'#fff':'#59503f',
       mapRef:(el)=>{ if(el){ requestAnimationFrame(()=>requestAnimationFrame(()=>this.syncMaps())); } },
       timeline,
       pv, backFromPerson:()=>this.setState({view:S.personBack==='story'?'home':S.personBack}), backLabel:backLabels[S.personBack]||'Back',
