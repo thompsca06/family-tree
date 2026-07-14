@@ -476,7 +476,16 @@ function Parse-FtTag {
   return $out
 }
 
-# Split a journal into heading-scoped sections, pulling out any ft: tag.
+# Split a journal into heading-scoped sections, pulling out any ft: tag and the
+# date line. Each section carries the date it was written, as an italic line right
+# under the heading:
+#
+#     ## II. The shoemaker
+#     <!-- ft: about=... -->
+#     *10 February 2024*
+#
+# It is lifted OUT of the prose and shown against the heading, rather than left to
+# render as a stray italic paragraph in the middle of the text.
 function Split-Sections {
   param([string]$md)
   $secs = [System.Collections.Generic.List[object]]::new()
@@ -489,12 +498,22 @@ function Split-Sections {
         heading = $matches[2].Trim()
         anchor = Get-Slug $matches[2]
         tag = $null
+        date = ''
+        sort = 0
         lines = [System.Collections.Generic.List[string]]::new()
       }
       continue
     }
     if ($line -match '<!--\s*ft:') {
       if ($cur) { $cur.tag = Parse-FtTag $line }
+      continue
+    }
+    # the date line — only if we haven't got one yet and no prose has started
+    if ($cur -and -not $cur.date -and $cur.lines.Count -eq 0 -and
+        $line -match '^\*\s*(\d{1,2}\s+\w+\s+(?:19|20)\d\d)\s*\*\s*$') {
+      $cur.date = $matches[1]
+      $parsed = [datetime]::MinValue
+      if ([datetime]::TryParse($cur.date, [ref]$parsed)) { $cur.sort = $parsed.Ticks }
       continue
     }
     if ($cur) { $cur.lines.Add($line) }
@@ -572,11 +591,19 @@ function Md-Html {
       if ($lvl -gt 1 -and -not $isSubtitle) {
         $anchor = Get-Slug $matches[2]
         [void]$html.Append("<h$lvl id=""$anchor"">" + (Inline $matches[2]) + "</h$lvl>")
+        $justHeaded = $true
       }
       continue
     }
     # person tags are metadata, never rendered
     if ($line -match '^\s*<!--\s*ft:.*-->\s*$') { continue }
+    # the date line under a heading — styled as a dateline, not a stray italic para
+    if ($justHeaded -and $line -match '^\*\s*(\d{1,2}\s+\w+\s+(?:19|20)\d\d)\s*\*\s*$') {
+      [void]$html.Append('<div class="secdate">' + (Inline $matches[1]) + '</div>')
+      $justHeaded = $false
+      continue
+    }
+    if ($line.Trim()) { $justHeaded = $false }
     if ($line -match '^\s*[-*+]\s+(.*)$') {
       FlushPara $html $para
       if (-not $inList) { [void]$html.Append('<ul>'); $inList = $true }
@@ -609,8 +636,22 @@ foreach ($d in $diaryManifest) {
   $mdPath = Join-Path $root $d.file
   if (-not (Test-Path $mdPath)) { Write-Host "  !! diary source missing: $($d.file)" -ForegroundColor Yellow; continue }
   $md = [IO.File]::ReadAllText($mdPath)
+  $sections = @(Split-Sections $md)
 
-  foreach ($sec in (Split-Sections $md)) {
+  # The entry's date comes from its SECTIONS, not from data/diary.json — the
+  # journals carry a date under each heading, and they are the source of truth.
+  $dated = @($sections | Where-Object { $_.sort -gt 0 } | Sort-Object { $_.sort })
+  $entryFrom = ''; $entryTo = ''; $entrySort = 0
+  if ($dated.Count) {
+    $entryFrom = $dated[0].date
+    $entryTo = $dated[-1].date
+    # Order the diary by when each journal was STARTED. Sorting by the last date
+    # would push a long-running one (Beeston, still being corrected in 2026) past
+    # journals that were begun and finished long after it.
+    $entrySort = $dated[0].sort
+  }
+
+  foreach ($sec in $sections) {
     $tag = $sec.tag
     if (-not $tag) {
       if ($sec.level -eq 2) { $untagged += "$($d.id): $($sec.heading)" }
@@ -631,6 +672,8 @@ foreach ($d in $diaryManifest) {
             branch  = $d.branch
             anchor  = $sec.anchor
             heading = $sec.heading
+            date    = $sec.date
+            sort    = $sec.sort
             excerpt = $excerpt
             html    = $secHtml
             role    = $role
@@ -640,15 +683,28 @@ foreach ($d in $diaryManifest) {
     }
   }
 
+  # "Aug 2023 — Nov 2023", or a single date if it was all one sitting
+  $span = ''
+  if ($entryFrom -and $entryTo) {
+    $span = if ($entryFrom -eq $entryTo) { $entryFrom } else { "$entryFrom $EM_DASH $entryTo" }
+  }
+  elseif ($d.date) { $span = $d.date }     # fall back to data/diary.json
+
   $diary += [ordered]@{
     id     = $d.id
     title  = $d.title
     sub    = $d.sub
-    date   = $d.date
+    date   = $span
+    from   = $entryFrom
+    to     = $entryTo
+    sort   = $entrySort
     branch = $d.branch
     html   = Md-Html $md
   }
 }
+
+# the diary reads in the order the work was done, oldest first
+$diary = @($diary | Sort-Object { $_.sort })
 
 # attach to people
 foreach ($personId in $journalLinks.Keys) {

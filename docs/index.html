@@ -64,6 +64,9 @@
   .diaryprose li{margin:4px 0}
   .diaryprose hr{border:0;border-top:1px solid rgba(43,37,28,.11);margin:22px 0}
   .diaryprose strong{color:var(--ink);font-weight:600}
+  /* the date under a section heading, lifted out of the prose */
+  .diaryprose .secdate{font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;
+    color:var(--rust);text-transform:uppercase;margin:-6px 0 16px}
 
   /* ---- print / save-as-PDF ----------------------------------------------
      Prints whatever is on screen. On a person that gives a one-or-two page
@@ -749,6 +752,7 @@
               <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
                 <span style="font:600 9.5px/1.3 'IBM Plex Mono',monospace;letter-spacing:.08em;color:{{ jl.color }};text-transform:uppercase">{{ jl.roleLabel }}</span>
                 <span style="font:400 10px/1.3 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ jl.jt }}</span>
+                <sc-if value="{{ jl.hasDate }}"><span style="font:400 10px/1.3 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-left:auto">{{ jl.date }}</span></sc-if>
               </div>
               <div style="font:600 17px/1.25 Newsreader,serif;margin-top:6px;color:var(--ink)">{{ jl.heading }}</div>
               <!-- the whole chapter, in place -->
@@ -1528,13 +1532,14 @@ class Component extends DCLogic {
       records:(p.rec||[]).map(r=>Object.assign({},r,{hasSrc:!!r.src, hasPage:!!r.page})),
       // journal sections explicitly tagged for this person (never name-matched)
       hasJournal:!!(p.journal&&p.journal.length),
-      journal:(p.journal||[]).map((j,i)=>{
+      journal:(p.journal||[]).slice().sort((a,b)=>(a.sort||0)-(b.sort||0)).map((j,i)=>{
         const key=(S.personId||'')+':'+j.j+':'+j.anchor+':'+i;
         const open=!!S.openJ[key];
         return Object.assign({},j,{
           color:this.col(j.branch),
           roleLabel:j.role==='about'?'Their story':'Mentioned',
           hasExcerpt:!!j.excerpt,
+          hasDate:!!j.date,
           open, closed:!open,
           onToggle:()=>this.toggleJournal(key),
           bodyEl: open ? React.createElement('div',{dangerouslySetInnerHTML:{__html:j.html||''}}) : null,
