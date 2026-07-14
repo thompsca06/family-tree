@@ -379,6 +379,25 @@ foreach ($id in $ids) {
   $sps = @($spouseOf[$id])
   $par = $parentsOf[$id]
 
+  # Siblings: anyone sharing a father OR a mother, so half-siblings count — which
+  # matters here (Elizabeth Collins had children by two husbands). Eldest first.
+  $sibs = [System.Collections.Generic.List[object]]::new()
+  if ($par) {
+    $seenSib = @{}
+    $cand = @()
+    foreach ($p0 in @($par.f, $par.m)) {
+      if (-not $p0) { continue }
+      foreach ($c in @($childrenOf[$p0])) {
+        if (-not $c -or $c -eq $id -or $seenSib[$c]) { continue }
+        $seenSib[$c] = $true
+        $cand += $c
+      }
+    }
+    foreach ($s in @($cand | Sort-Object { $y = Get-Year ($PPL.$_.events | Where-Object { $_.tag -in 'BIRT', 'BAPM', 'CHR' } | Select-Object -First 1).date; if ($y) { $y } else { 9999 } })) {
+      $sibs.Add($s)
+    }
+  }
+
   $people[$id] = [ordered]@{
     name    = $name
     sur     = $surn
@@ -391,6 +410,7 @@ foreach ($id in $ids) {
     m       = $(if ($par) { $par.m } else { $null })
     sp      = $(if ($sps.Count) { $sps[0] } else { $null })
     spouses = $sps
+    sibs    = $sibs
     birtP   = Short-Place $birt.place
     deatP   = Short-Place $deat.place
     occs    = @($occs)
