@@ -571,7 +571,7 @@
     <div style="font:500 clamp(34px,4.6vw,56px)/1.05 Newsreader,serif;margin-top:14px;letter-spacing:-.015em">Notes from the record office</div>
     <div style="font:400 16.5px/1.7 Newsreader,serif;color:var(--ink-soft);margin-top:14px;max-width:660px">A running log of what the records gave up, and in what order — written up as I worked back through the census returns, parish registers and service files. Everything here rests on an original record image, named in the text.</div>
     <sc-for list="{{ diary }}" as="d" hint-placeholder-count="3">
-      <div style="margin-top:52px;padding-top:34px;border-top:1px solid rgba(43,37,28,.12)">
+      <div id="{{ d.anchor }}" style="margin-top:52px;padding-top:34px;border-top:1px solid rgba(43,37,28,.12);scroll-margin-top:76px">
         <div style="display:flex;align-items:center;gap:9px">
           <span style="width:9px;height:9px;border-radius:50%;flex:none;background:{{ d.dot }}"></span>
           <span style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase">{{ d.date }}</span>
@@ -1376,11 +1376,16 @@ class Component extends DCLogic {
   openStory = (id) => this.setState({view:'story', storyId:id});
   navDiary = () => this.setState({view:'diary'});
   // open the Diary and scroll to the tagged section the person is written about
+  // The Diary renders every journal on one long page, so opening it without a
+  // target lands you on the FIRST journal, not the one you clicked. With no
+  // section anchor, fall back to the top of the journal itself.
   openDiaryAt = (journalId, anchor) => {
+    const target = anchor || (journalId ? 'j-'+journalId : '');
     this.setState({view:'diary', diaryAt:journalId}, ()=>{
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        const el=document.getElementById(anchor);
+        const el = target && document.getElementById(target);
         if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+        else window.scrollTo({top:0});
       }));
     });
   };
@@ -1884,7 +1889,7 @@ class Component extends DCLogic {
       isHome:S.view==='home', isTree:S.view==='tree', isPeople:S.view==='people', isPlaces:S.view==='places', isTimeline:S.view==='timeline', isPerson:S.view==='person', isStory:S.view==='story',
       isWork:S.view==='work', isSearch:S.view==='search',
       isData:S.view==='data', navData:this.navData, dataRows:this.buildDataRows(), dataCount:Object.keys(this.people).length+'',
-      isDiary:S.view==='diary', navDiary:this.navDiary, diary:this.diaryEntries.map(d=>({title:d.title,date:d.date,sub:d.sub,dot:this.col(d.branch),bodyEl:React.createElement('div',{className:'diaryprose',dangerouslySetInnerHTML:{__html:d.html}})})),
+      isDiary:S.view==='diary', navDiary:this.navDiary, diary:this.diaryEntries.map(d=>({anchor:'j-'+d.id,title:d.title,date:d.date,sub:d.sub,dot:this.col(d.branch),bodyEl:React.createElement('div',{className:'diaryprose',dangerouslySetInnerHTML:{__html:d.html}})})),
       spine, storyCards, modeCards,
       // the headline counted the stories by hand and went stale the moment one was
       // added — count them
