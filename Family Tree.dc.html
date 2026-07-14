@@ -139,7 +139,7 @@
     <sc-if value="{{ hasRules }}">
     <div style="margin:34px 40px 0;padding:30px 34px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-left:4px solid var(--rust);border-radius:12px">
       <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--rust);text-transform:uppercase">The method</div>
-      <div style="font:600 24px/1.15 Newsreader,serif;margin-top:9px">How we know it is the right person</div>
+      <div style="font:600 24px/1.15 Newsreader,serif;margin-top:9px">How I know it's the right person</div>
 
       <!-- the standing rule -->
       <div style="margin-top:16px;padding:16px 20px;background:rgba(179,74,37,.05);border-radius:9px">
@@ -149,7 +149,7 @@
         <div style="font:600 12.5px/1.5 'IBM Plex Mono',monospace;color:var(--rust);margin-top:10px">{{ rulesMethod }}</div>
       </div>
 
-      <div style="font:400 13.5px/1.6 Newsreader,serif;color:var(--ink-soft);margin-top:16px;max-width:680px">Open the register image. Read the abode, the occupation, the fathers, the witnesses. <i>Then</i> decide. Other people's trees and bare transcriptions are leads to test, never evidence.</div>
+      <div style="font:400 14.5px/1.65 Newsreader,serif;color:var(--ink-soft);margin-top:16px;max-width:700px">{{ rulesIntro }}</div>
 
       <!-- the four hard rules -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:22px">
@@ -164,7 +164,7 @@
         </sc-for>
       </div>
 
-      <div style="font:400 11.5px/1.5 Archivo;color:var(--ink-faint);margin-top:18px">Every record on this site names the collection it came from and its archive reference. Where a life should have left a record and hasn't, the profile says so rather than filling the hole with a plausible guess.</div>
+      <div style="font:italic 400 13px/1.6 Newsreader,serif;color:var(--ink-faint);margin-top:20px;max-width:700px">{{ rulesClosing }}</div>
     </div>
     </sc-if>
 
@@ -1547,6 +1547,8 @@ class Component extends DCLogic {
       hasRules:!!(this.rules.hard&&this.rules.hard.length),
       rulesStanding:(this.rules.standing||[]).map(t=>({text:t})),
       rulesMethod:this.rules.method||'',
+      rulesIntro:this.rules.intro||'',
+      rulesClosing:this.rules.closing||'',
       rulesHard:(this.rules.hard||[]),
       openTommyStory:()=>this.openStory('tommy'), openTommyPerson:()=>this.setFocus('tommy'),
       t, canBack:S.trail.length>1, treeBack:this.treeBack, treeHome:this.treeHome,

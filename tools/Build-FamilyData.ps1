@@ -758,11 +758,15 @@ if ($Public) {
 }
 
 # ---------------------------------------------------------------- the method
-# Read the Standing Rule and the Hard Rules straight out of
-# RULES-AND-INSTRUCTIONS.md so the site states the rules Chris actually works to.
-# Edit that file and the front page follows — it cannot drift out of sync.
-$rules = [ordered]@{ standing = @(); method = ''; hard = @() }
-$rulesPath = Join-Path $family 'RULES-AND-INSTRUCTIONS.md'
+# The front-page "how I know it's the right person" section.
+#
+# Prefer data/method.md — the same rules written in Chris's own voice, for a
+# reader of the site. Fall back to RULES-AND-INSTRUCTIONS.md, which is the
+# working spec written as instructions. Both parse the same way, so whichever is
+# present, the front page follows the file rather than a hand-copied duplicate.
+$rules = [ordered]@{ standing = @(); method = ''; hard = @(); intro = ''; closing = '' }
+$rulesPath = Join-Path $root 'data/method.md'
+if (-not (Test-Path $rulesPath)) { $rulesPath = Join-Path $family 'RULES-AND-INSTRUCTIONS.md' }
 if (Test-Path $rulesPath) {
   $rl = Get-Content $rulesPath
   $section = ''
@@ -779,6 +783,10 @@ if (Test-Path $rulesPath) {
         if ($txt -match '^Method:') { $rules.method = ($txt -replace '^Method:\s*', '') }
         else { $rules.standing += $txt }
       }
+      # the paragraph after the blockquote is the intro prose
+      elseif ($line -notmatch '^[>\-#\s*]' -and $line.Trim() -and -not $rules.intro) {
+        $rules.intro = ($line.Trim() -replace '\*\*(.+?)\*\*', '$1' -replace '\*(.+?)\*', '$1')
+      }
     }
     if ($section -eq 'hard') {
       # "1. **Direct line, generation by generation** *(memory: ...)*"
@@ -791,6 +799,11 @@ if (Test-Path $rulesPath) {
         $rules.hard += [ordered]@{ n = $n; title = $title; body = $body }
       }
     }
+  }
+  # the closing italic line at the foot of the file
+  $last = @($rl | Where-Object { $_ -match '^\*[^*].+\*\s*$' } | Select-Object -Last 1)
+  if ($last.Count -and $rules.hard.Count) {
+    $rules.closing = ($last[0].Trim() -replace '^\*|\*$', '' -replace '\*\*(.+?)\*\*', '$1')
   }
 }
 Write-Host "  method rules    : $($rules.hard.Count) hard rules, $($rules.standing.Count)-line standing rule"
