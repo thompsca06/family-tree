@@ -364,8 +364,14 @@ foreach ($id in $ids) {
         srcs  = @(Src-List $e)   # every citation on this event
       })
 
-    # map pin only for places we actually know
-    $r = Resolve-Place $e.place
+    # A map pin means "this person was HERE". Probate is the one event whose place is
+    # not a place in the life: it is the registry that issued the grant. Elizabeth
+    # Ellen Dixon, a Garforth pit widow who died at Garforth, was being given a pin in
+    # LONDON in 1931 — the Principal Probate Registry. Others got Wakefield and York.
+    # The grant still appears in her records, where the registry belongs. It does not
+    # go on the map. (7 people were affected.)
+    $noPin = @('PROB')
+    $r = if ($e.tag -in $noPin) { $null } else { Resolve-Place $e.place }
     if ($r) {
       $geoUsed[$r.key] = $r.ll
       $k = "$($r.key)|$yr"

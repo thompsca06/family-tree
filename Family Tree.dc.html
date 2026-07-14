@@ -725,6 +725,21 @@
         <div style="font:600 clamp(28px,3.4vw,40px)/1.04 Newsreader,serif;margin-top:8px">{{ pv.name }}</div>
         <div style="font:400 15px/1 Archivo;color:var(--ink-soft);margin-top:6px">{{ pv.years }}</div>
 
+        <!-- what is ON this page, and a way straight to it. A well-sourced ancestor
+             runs to several screens — the documents and the stories were below the
+             fold and nobody knew they were there. Only sections this person actually
+             HAS are listed, so an empty profile shows no chips at all. -->
+        <sc-if value="{{ pv.hasJumps }}">
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:16px">
+          <sc-for list="{{ pv.jumps }}" as="jp" hint-placeholder-count="4">
+            <div onClick="{{ jp.onClick }}" class="lift" style="cursor:pointer;display:flex;align-items:center;gap:7px;font:600 11px/1 Archivo;color:var(--ink-soft);padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);white-space:nowrap">
+              {{ jp.label }}
+              <span style="font:500 9.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ jp.n }}</span>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
         <div style="margin-top:22px;max-width:640px">
           <sc-for list="{{ pv.bio }}" as="para" hint-placeholder-count="2"><p style="font:400 16px/1.65 Newsreader,serif;color:var(--ink-soft);margin:0 0 14px">{{ para }}</p></sc-for>
         </div>
@@ -765,7 +780,7 @@
 
         <!-- work -->
         <sc-if value="{{ pv.hasWork }}">
-        <div style="margin-top:26px;max-width:640px">
+        <div id="p-work" style="margin-top:26px;max-width:640px;scroll-margin-top:120px">
           <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">What they did</div>
           <div style="display:flex;flex-direction:column;gap:10px">
             <sc-for list="{{ pv.jobs }}" as="j" hint-placeholder-count="1">
@@ -780,7 +795,7 @@
 
         <!-- places / movement -->
         <sc-if value="{{ pv.hasChips }}">
-        <div style="margin-top:30px">
+        <div id="p-places" style="margin-top:30px;scroll-margin-top:120px">
           <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
             <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase">Places in this life</div>
             <div style="font:400 11.5px/1 Archivo;color:var(--ink-faint)">Numbered in the order they were there</div>
@@ -804,7 +819,7 @@
 
         <!-- photographs -->
         <sc-if value="{{ pv.hasGallery }}">
-        <div style="margin-top:30px">
+        <div id="p-photos" style="margin-top:30px;scroll-margin-top:120px">
           <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">Photographs</div>
           <div style="display:flex;flex-wrap:wrap;gap:12px">
             <sc-for list="{{ pv.gallery }}" as="g" hint-placeholder-count="3">
@@ -819,7 +834,7 @@
 
         <!-- the documents themselves -->
         <sc-if value="{{ pv.hasDocs }}">
-        <div style="margin-top:30px">
+        <div id="p-docs" style="margin-top:30px;scroll-margin-top:120px">
           <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">The documents themselves</div>
           <div style="display:flex;flex-wrap:wrap;gap:12px">
             <sc-for list="{{ pv.docs }}" as="dc" hint-placeholder-count="2">
@@ -837,7 +852,7 @@
 
         <!-- what we still don't know -->
         <sc-if value="{{ pv.hasGaps }}">
-        <div style="margin-top:30px;background:rgba(179,74,37,.05);border:1px dashed rgba(179,74,37,.35);border-radius:10px;padding:16px 20px">
+        <div id="p-gaps" style="scroll-margin-top:120px;margin-top:30px;background:rgba(179,74,37,.05);border:1px dashed rgba(179,74,37,.35);border-radius:10px;padding:16px 20px">
           <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--rust);text-transform:uppercase">What we still don't know</div>
           <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px">
             <sc-for list="{{ pv.gaps }}" as="g" hint-placeholder-count="2">
@@ -850,7 +865,7 @@
 
         <!-- records -->
         <sc-if value="{{ pv.hasRecords }}">
-        <div style="margin-top:26px">
+        <div id="p-records" style="margin-top:26px;scroll-margin-top:120px">
           <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">Records &amp; sources</div>
           <div style="display:flex;flex-direction:column">
             <sc-for list="{{ pv.records }}" as="rec" hint-placeholder-count="4">
@@ -873,7 +888,7 @@
 
         <!-- in the journals -->
         <sc-if value="{{ pv.hasJournal }}">
-        <div style="margin-top:30px">
+        <div id="p-stories" style="margin-top:30px;scroll-margin-top:120px">
           <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:12px">In the stories</div>
           <sc-for list="{{ pv.journal }}" as="jl" hint-placeholder-count="2">
             <div style="background:var(--surface);border:1px solid rgba(43,37,28,.09);border-left:3px solid {{ jl.color }};border-radius:9px;padding:16px 20px;margin-bottom:12px">
@@ -1991,6 +2006,22 @@ class Component extends DCLogic {
       hasStory:!!storyId2, onStory:()=>storyId2&&this.openStory(storyId2),
       onTree:()=> (p.f||p.m)?this.setFocus(pid):this.openPerson(pid,S.personBack),
     };
+
+    // Jump links: only the sections this person actually has, in the order they
+    // appear down the page, each with how many things are in it.
+    pv.jumps=[
+      ['p-work',    'What they did',   (this.jobsOf(pid)||[]).length],
+      ['p-places',  'Places',          (this.personVisits(pid)||[]).length],
+      ['p-photos',  'Photographs',     (p.gallery||[]).length],
+      ['p-docs',    'Documents',       (p.docs||[]).length],
+      ['p-records', 'Records',         (p.rec||[]).length],
+      ['p-stories', 'In the stories',  (p.journal||[]).length],
+      ['p-gaps',    "What's missing",  (p.gaps||[]).length],
+    ].filter(([,,n])=>n>0).map(([id,label,n])=>({
+      label, n:String(n),
+      onClick:()=>{ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+    }));
+    pv.hasJumps=pv.jumps.length>1;   // one chip is not a menu
 
     // story view
     const sty=this.stories[S.storyId]||this.stories.tommy;
