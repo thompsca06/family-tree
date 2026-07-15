@@ -1,7 +1,7 @@
 # NEVER commit the raw genealogy data — it contains unredacted details for people
 # who are still living. Only dist/ (the redacted public build) is published.
-src/*.ged
-src/*.gedcom
+src/*.ged*
+src/*.gedcom*
 data/gedcom.json
 data/problems.txt
 data/places-unresolved.json
