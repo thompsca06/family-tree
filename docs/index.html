@@ -96,7 +96,7 @@
      (a CSS-only checkbox toggle — no JS), and the card grids that are wider
      than a phone drop to fewer columns. */
   #navtoggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-  [data-hamburger]{display:none}
+  [data-hamburger],[data-textsize-m]{display:none}
   @media (max-width:820px){
     /* --- nav: title + hamburger only, until tapped open --- */
     [data-nav]{padding:11px 16px;gap:8px 12px}
@@ -105,16 +105,19 @@
        and drop the decorative tagline on phones to keep the bar compact */
     [data-brand] > span:first-child{white-space:normal !important}
     [data-brand] > span:nth-child(2){display:none}
-    [data-hamburger]{display:flex;order:2;margin-left:auto;align-items:center;
+    /* A-/A+ stays beside the burger, always visible; the in-menu copy is hidden */
+    [data-textsize-d]{display:none !important}
+    [data-textsize-m]{display:flex;order:2;margin-left:auto;align-items:center;flex:none}
+    [data-hamburger]{display:flex;order:3;align-items:center;
       justify-content:center;width:44px;height:38px;cursor:pointer;border-radius:9px;
       border:1px solid rgba(43,37,28,.16);color:var(--ink);font-size:19px;line-height:1;
       user-select:none;-webkit-user-select:none}
     [data-hamburger]::before{content:"\2630"}                       /* hamburger */
     #navtoggle:checked ~ [data-hamburger]::before{content:"\2715"}  /* close (x) */
     [data-tabs],[data-navctrls]{display:none !important;width:100%}
-    #navtoggle:checked ~ [data-tabs]{display:flex !important;order:3;
+    #navtoggle:checked ~ [data-tabs]{display:flex !important;order:4;
       flex-direction:column;gap:2px;margin-top:4px}
-    #navtoggle:checked ~ [data-navctrls]{display:flex !important;order:4;
+    #navtoggle:checked ~ [data-navctrls]{display:flex !important;order:5;
       flex-direction:column;align-items:stretch;gap:10px;margin-top:6px}
     /* full-width, finger-sized rows in the open menu */
     #navtoggle:checked ~ [data-tabs] > div{padding:13px 14px !important;
@@ -138,6 +141,17 @@
   <div data-nav style="position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 18px;padding:13px 30px;background:rgba(247,243,234,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(43,37,28,.10)">
     <input id="navtoggle" type="checkbox" class="noprint" aria-hidden="true" tabindex="-1" />
     <label data-hamburger for="navtoggle" class="noprint" title="Menu" aria-label="Menu"></label>
+    <!-- mobile-only copy of the text-size control, kept beside the burger so it is
+         always reachable; hidden on desktop (the original lives in the nav controls) -->
+    <div data-textsize-m class="noprint" style="align-items:center;flex:none;border:1px solid rgba(43,37,28,.14);border-radius:9px;overflow:hidden">
+      <div onClick="{{ textSmaller }}" class="lift" title="Smaller text" style="cursor:pointer;padding:7px 11px;font:600 12px/1 Archivo;color:var(--ink-soft);user-select:none">A−</div>
+      <div style="width:1px;align-self:stretch;background:rgba(43,37,28,.14)"></div>
+      <div onClick="{{ textBigger }}" class="lift" title="Bigger text" style="cursor:pointer;padding:7px 11px;font:600 15px/1 Archivo;color:var(--ink);user-select:none">A+</div>
+      <sc-if value="{{ textZoomed }}">
+        <div style="width:1px;align-self:stretch;background:rgba(43,37,28,.14)"></div>
+        <div onClick="{{ textReset }}" class="lift" title="Reset text size" style="cursor:pointer;padding:7px 10px;font:500 10px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);user-select:none">{{ textPct }}</div>
+      </sc-if>
+    </div>
     <div data-brand onClick="{{ navHome }}" style="display:flex;align-items:baseline;gap:11px;cursor:pointer">
       <span style="font:600 16px/1 Newsreader,serif;letter-spacing:.01em;white-space:nowrap">A Family Across Two Centuries</span>
       <span style="font:400 9.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap">Thompson · Ingleby</span>
@@ -157,7 +171,7 @@
       </div>
       <!-- text size. The whole page is set in fixed pixels, so this scales the page
            itself rather than a root font-size, which fixed px would ignore. -->
-      <div class="noprint" style="display:flex;align-items:center;flex:none;border:1px solid rgba(43,37,28,.14);border-radius:9px;overflow:hidden">
+      <div data-textsize-d class="noprint" style="display:flex;align-items:center;flex:none;border:1px solid rgba(43,37,28,.14);border-radius:9px;overflow:hidden">
         <div onClick="{{ textSmaller }}" class="lift" title="Smaller text" style="cursor:pointer;padding:7px 11px;font:600 12px/1 Archivo;color:var(--ink-soft);user-select:none">A−</div>
         <div style="width:1px;align-self:stretch;background:rgba(43,37,28,.14)"></div>
         <div onClick="{{ textBigger }}" class="lift" title="Bigger text" style="cursor:pointer;padding:7px 11px;font:600 15px/1 Archivo;color:var(--ink);user-select:none">A+</div>
@@ -2224,6 +2238,22 @@ class Component extends DCLogic {
     };
   }
 }
+</script>
+<script>
+/* Mobile menu: close it when you tap a section, or tap anywhere outside it.
+   The menu is a CSS-only checkbox (#navtoggle); this only unchecks it. On desktop
+   the box is never checked, so this is a no-op there. Document-level delegation
+   means it keeps working across the app's re-renders. */
+(function(){
+  document.addEventListener('click', function(e){
+    var tgl = document.getElementById('navtoggle');
+    if(!tgl || !tgl.checked) return;
+    var t = e.target; if(!t || !t.closest) return;
+    if(t.closest('[data-hamburger]')) return;          // the burger toggles itself
+    if(!t.closest('[data-nav]')){ tgl.checked = false; return; }   // tapped outside -> close
+    if(t.closest('[data-tabs]')){ tgl.checked = false; }           // tapped a section -> close
+  }, true);
+})();
 </script>
 </body>
 </html>
