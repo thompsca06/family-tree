@@ -123,6 +123,9 @@
     [data-search]{width:100% !important}
     /* --- grids that would overflow a phone --- */
     [data-grid4]{grid-template-columns:1fr 1fr !important}
+    /* fixed-width side columns (profile/places sidebars, the maps, the home
+       "your line" strip) stack full-width instead of poking off-screen */
+    [data-col]{width:100% !important;min-width:0 !important;flex:1 1 100% !important}
   }
 </style>
 </helmet>
@@ -248,7 +251,7 @@
     <div style="padding:26px 40px 4px">
       <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:14px">Your line, at a glance</div>
       <div style="display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start">
-        <div style="flex:none;width:340px">
+        <div data-col style="flex:none;width:340px">
           <sc-for list="{{ spine }}" as="s" hint-placeholder-count="5">
             <div onClick="{{ s.onClick }}" class="lift" style="cursor:pointer;display:flex;align-items:center;gap:11px;padding:7px 0">
               <span style="width:10px;height:10px;border-radius:50%;flex:none;background:{{ s.dot }}"></span>
@@ -547,7 +550,7 @@
     <div style="font:400 12px/1.5 Archivo;color:var(--ink-faint);margin-bottom:20px">A live map (OpenStreetMap). <b style="color:var(--ink-soft)">Everyone</b> shows every residence and every migration line at once — pick a name to trace one person's journey, from where they were born to where they ended.</div>
     <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start">
       <!-- people, grouped by line -->
-      <div style="flex:none;width:262px">
+      <div data-col style="flex:none;width:262px">
         <div onClick="{{ setEveryone }}" class="lift" style="cursor:pointer;font:600 12px/1 Archivo;text-align:center;padding:11px;border-radius:9px;margin-bottom:9px;color:{{ everyoneFg }};background:{{ everyoneBg }};border:1px solid rgba(43,37,28,.12)">◍ Everyone &amp; every move</div>
         <!-- which line is on the map -->
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px">
@@ -588,7 +591,7 @@
         </div>
       </div>
       <!-- map -->
-      <div style="flex:1;min-width:440px">
+      <div data-col style="flex:1;min-width:440px">
         <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px">
           <div style="font:600 17px/1.1 Newsreader,serif">{{ mapSelName }}</div>
           <sc-if value="{{ mapAll }}"><div style="font:400 12px/1 Archivo;color:var(--ink-faint)">— every life on the map</div></sc-if>
@@ -752,7 +755,7 @@
     <div onClick="{{ backFromPerson }}" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--ink-faint);margin-bottom:16px">← {{ backLabel }}</div>
     <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
       <!-- left: portrait + facts -->
-      <div style="flex:none;width:280px">
+      <div data-col style="flex:none;width:280px">
         <sc-if value="{{ pv.hasPhoto }}">
           <img onClick="{{ pv.onPhoto }}" src="{{ pv.photo }}" class="lift" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:12px;border:1px solid rgba(43,37,28,.10);cursor:zoom-in;display:block" />
         </sc-if>
@@ -773,7 +776,7 @@
         <sc-if value="{{ pv.hasStory }}"><div onClick="{{ pv.onStory }}" class="lift" style="cursor:pointer;margin-top:14px;text-align:center;font:600 12px/1 Archivo;color:#fff;background:var(--rust);padding:12px;border-radius:9px">Read the full story →</div></sc-if>
       </div>
       <!-- right: bio + records + relations -->
-      <div style="flex:1;min-width:400px">
+      <div data-col style="flex:1;min-width:400px">
         <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.16em;color:{{ pv.color }};text-transform:uppercase">{{ pv.branchLabel }}</div>
         <div style="font:600 clamp(28px,3.4vw,40px)/1.04 Newsreader,serif;margin-top:8px">{{ pv.name }}</div>
         <div style="font:400 15px/1 Archivo;color:var(--ink-soft);margin-top:6px">{{ pv.years }}</div>
@@ -854,7 +857,7 @@
             <div style="font:400 11.5px/1 Archivo;color:var(--ink-faint)">Numbered in the order they were there</div>
           </div>
           <div style="display:flex;gap:16px;align-items:stretch;flex-wrap:wrap">
-            <div data-pmap ref="{{ mapRef }}" style="flex:1 1 460px;min-width:340px;height:520px;border-radius:12px;overflow:hidden;border:1px solid rgba(43,37,28,.11);background:var(--map-bg)"></div>
+            <div data-pmap data-col ref="{{ mapRef }}" style="flex:1 1 460px;min-width:340px;height:520px;border-radius:12px;overflow:hidden;border:1px solid rgba(43,37,28,.11);background:var(--map-bg)"></div>
             <div style="flex:0 1 250px;min-width:210px;display:flex;flex-direction:column;gap:6px">
               <sc-for list="{{ pv.journey }}" as="j" hint-placeholder-count="4">
                 <div style="display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid rgba(43,37,28,.09);border-radius:9px;padding:9px 11px">
@@ -994,7 +997,7 @@
     </div>
 
     <div style="display:flex;flex-wrap:wrap-reverse;gap:36px;padding:32px 40px 60px;max-width:1040px">
-      <div style="flex:1;min-width:420px">
+      <div data-col style="flex:1;min-width:420px">
         <sc-if value="{{ story.hasBlocks }}">
           <sc-for list="{{ story.blocks }}" as="b" hint-placeholder-count="8">
             <sc-if value="{{ b.isH }}"><h2 style="font:600 23px/1.2 Newsreader,serif;color:var(--ink);margin:34px 0 12px">{{ b.text }}</h2></sc-if>
