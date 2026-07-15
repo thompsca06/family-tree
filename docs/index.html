@@ -88,6 +88,42 @@
     img{ max-width:100% }
     a{ color:#000; text-decoration:none }
   }
+
+  /* ---- mobile / tablet --------------------------------------------------
+     The desktop layout is fixed-width and does not reflow on its own. These
+     rules take effect ONLY at <=820px (phones + portrait tablets) and leave
+     the desktop layout untouched. The nav's tabs collapse behind a hamburger
+     (a CSS-only checkbox toggle — no JS), and the card grids that are wider
+     than a phone drop to fewer columns. */
+  #navtoggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+  [data-hamburger]{display:none}
+  @media (max-width:820px){
+    /* --- nav: title + hamburger only, until tapped open --- */
+    [data-nav]{padding:11px 16px;gap:8px 12px}
+    [data-brand]{order:1;min-width:0;flex:0 1 auto}
+    /* let the long title wrap instead of forcing the row wider than the screen,
+       and drop the decorative tagline on phones to keep the bar compact */
+    [data-brand] > span:first-child{white-space:normal !important}
+    [data-brand] > span:nth-child(2){display:none}
+    [data-hamburger]{display:flex;order:2;margin-left:auto;align-items:center;
+      justify-content:center;width:44px;height:38px;cursor:pointer;border-radius:9px;
+      border:1px solid rgba(43,37,28,.16);color:var(--ink);font-size:19px;line-height:1;
+      user-select:none;-webkit-user-select:none}
+    [data-hamburger]::before{content:"\2630"}                       /* hamburger */
+    #navtoggle:checked ~ [data-hamburger]::before{content:"\2715"}  /* close (x) */
+    [data-tabs],[data-navctrls]{display:none !important;width:100%}
+    #navtoggle:checked ~ [data-tabs]{display:flex !important;order:3;
+      flex-direction:column;gap:2px;margin-top:4px}
+    #navtoggle:checked ~ [data-navctrls]{display:flex !important;order:4;
+      flex-direction:column;align-items:stretch;gap:10px;margin-top:6px}
+    /* full-width, finger-sized rows in the open menu */
+    #navtoggle:checked ~ [data-tabs] > div{padding:13px 14px !important;
+      font-size:15px !important;border-radius:9px}
+    #navtoggle:checked ~ [data-tabs] > div:hover{background:var(--surface-2)}
+    [data-search]{width:100% !important}
+    /* --- grids that would overflow a phone --- */
+    [data-grid4]{grid-template-columns:1fr 1fr !important}
+  }
 </style>
 </helmet>
 
@@ -97,11 +133,13 @@
   <!-- flex-wrap: at 150%+ text (or on a phone) the nav is wider than the screen. It
        must wrap onto a second row, not push the whole page sideways. -->
   <div data-nav style="position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 18px;padding:13px 30px;background:rgba(247,243,234,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(43,37,28,.10)">
-    <div onClick="{{ navHome }}" style="display:flex;align-items:baseline;gap:11px;cursor:pointer">
+    <input id="navtoggle" type="checkbox" class="noprint" aria-hidden="true" tabindex="-1" />
+    <label data-hamburger for="navtoggle" class="noprint" title="Menu" aria-label="Menu"></label>
+    <div data-brand onClick="{{ navHome }}" style="display:flex;align-items:baseline;gap:11px;cursor:pointer">
       <span style="font:600 16px/1 Newsreader,serif;letter-spacing:.01em;white-space:nowrap">A Family Across Two Centuries</span>
       <span style="font:400 9.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap">Thompson · Ingleby</span>
     </div>
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+    <div data-tabs style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
       <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="5">
         <div onClick="{{ tab.onClick }}" class="lift" style="position:relative;cursor:pointer;padding:8px 13px;font:600 12px/1 Archivo;color:var(--ink-soft)">
           {{ tab.label }}
@@ -109,8 +147,8 @@
         </div>
       </sc-for>
     </div>
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:9px">
-      <div style="display:flex;align-items:center;gap:8px;background:rgba(43,37,28,.07);border:1px solid rgba(43,37,28,.10);border-radius:9px;padding:8px 12px;width:210px">
+    <div data-navctrls style="display:flex;align-items:center;flex-wrap:wrap;gap:9px">
+      <div data-search style="display:flex;align-items:center;gap:8px;background:rgba(43,37,28,.07);border:1px solid rgba(43,37,28,.10);border-radius:9px;padding:8px 12px;width:210px">
         <span style="color:var(--ink-faint);font:400 13px/1 'IBM Plex Mono',monospace">⌕</span>
         <input value="{{ query }}" onInput="{{ onQuery }}" onFocus="{{ navPeople }}" placeholder="Search people, trades, places, journals…" style="border:0;background:transparent;outline:none;color:var(--ink);font:400 12.5px/1 Archivo;width:100%" />
       </div>
@@ -155,7 +193,7 @@
 
     <!-- stories — all equal -->
     <div style="padding:26px 40px 8px">
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(360px,100%),1fr));gap:16px">
         <sc-for list="{{ storyCards }}" as="c" hint-placeholder-count="5">
           <div onClick="{{ c.onClick }}" class="lift" style="cursor:pointer;background:var(--surface);border:1px solid rgba(43,37,28,.09);border-radius:11px;overflow:hidden;display:flex;flex-direction:column">
             <div style="position:relative;height:130px;background:repeating-linear-gradient(63deg,var(--surface-2),var(--surface-2) 15px,var(--hatch) 15px,var(--hatch) 30px);overflow:hidden;flex:none">
@@ -190,7 +228,7 @@
       <div style="font:400 14.5px/1.65 Newsreader,serif;color:var(--ink-soft);margin-top:16px;max-width:700px">{{ rulesIntro }}</div>
 
       <!-- the four hard rules -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:22px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:14px;margin-top:22px">
         <sc-for list="{{ rulesHard }}" as="h" hint-placeholder-count="4">
           <div style="display:flex;gap:12px;padding:14px 16px;background:var(--surface-2);border-radius:9px">
             <span style="flex:none;width:24px;height:24px;border-radius:50%;background:var(--rust);color:#fff;font:700 12px/24px Archivo;text-align:center">{{ h.n }}</span>
@@ -225,7 +263,7 @@
 
     <!-- explore modes -->
     <div style="padding:14px 40px 48px">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+      <div data-grid4 style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
         <sc-for list="{{ modeCards }}" as="m" hint-placeholder-count="4">
           <div onClick="{{ m.onClick }}" class="lift" style="cursor:pointer;background:linear-gradient(160deg,var(--surface),var(--surface-2));border:1px solid rgba(43,37,28,.10);border-radius:10px;padding:18px 18px 20px">
             <div style="font:500 20px/1 Newsreader,serif;color:var(--rust)">{{ m.glyph }}</div>
@@ -374,7 +412,7 @@
           <span style="font:600 19px/1.1 Newsreader,serif;color:var(--ink)">{{ fam.sur }}</span>
           <span style="font:400 10.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ fam.n }}</span>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:12px">
           <sc-for list="{{ fam.people }}" as="p" hint-placeholder-count="6">
             <div onClick="{{ p.onClick }}" class="lift" style="cursor:pointer;display:flex;gap:12px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:10px;padding:13px 14px">
               <div style="width:42px;height:42px;flex:none;border-radius:8px;background:{{ p.color }};display:flex;align-items:center;justify-content:center;font:600 14px/1 Newsreader,serif;color:var(--bg)">{{ p.initials }}</div>
@@ -395,7 +433,7 @@
     </sc-if>
 
     <sc-if value="{{ flatList }}">
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:12px">
       <sc-for list="{{ people }}" as="p" hint-placeholder-count="12">
         <div onClick="{{ p.onClick }}" class="lift" style="cursor:pointer;display:flex;gap:12px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:10px;padding:13px 14px">
           <div style="width:42px;height:42px;flex:none;border-radius:8px;background:{{ p.color }};display:flex;align-items:center;justify-content:center;font:600 14px/1 Newsreader,serif;color:var(--bg)">{{ p.initials }}</div>
@@ -425,7 +463,7 @@
           <div style="font:500 12px/1 Archivo;background:rgba(179,74,37,.07);border:1px solid rgba(179,74,37,.25);padding:8px 13px;border-radius:20px">{{ u.sur }} <span style="color:var(--ink-faint)">{{ u.n }}</span></div>
         </sc-for>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:18px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:12px;margin-top:18px">
         <sc-for list="{{ unlinkedPeople }}" as="p" hint-placeholder-count="6">
           <div onClick="{{ p.onClick }}" class="lift" style="cursor:pointer;display:flex;gap:12px;background:var(--surface);border:1px dashed rgba(179,74,37,.35);border-radius:10px;padding:13px 14px">
             <div style="width:42px;height:42px;flex:none;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 14px/1 Newsreader,serif;color:var(--ink-faint)">{{ p.initials }}</div>
@@ -449,7 +487,7 @@
       <div style="font:600 22px/1.1 Newsreader,serif;margin-top:6px">{{ workCount }} trades, and who did them</div>
       <div style="font:400 13.5px/1.6 Newsreader,serif;color:var(--ink-soft);margin-top:8px;max-width:700px">Every occupation recorded against anyone in this family, taken verbatim from the census returns and the 1939 Register. Nothing here is inferred — if a man is down as a coal miner it is because an enumerator wrote it.</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;margin-top:22px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:14px;margin-top:22px">
       <sc-for list="{{ workTrades }}" as="w" hint-placeholder-count="8">
         <div style="background:var(--surface);border:1px solid rgba(43,37,28,.10);border-left:3px solid {{ w.color }};border-radius:11px;padding:16px 18px">
           <div style="display:flex;align-items:baseline;gap:8px">
