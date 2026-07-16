@@ -618,6 +618,34 @@
         </sc-if>
       </div>
     </div>
+
+    <!-- resting places — every burial ground the registers name, with who lies
+         there. Grounds the gazetteer can pin also appear on the map as a ✝. -->
+    <sc-if value="{{ hasGraves }}">
+    <div style="margin-top:28px">
+      <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase">Resting places</div>
+      <div style="font:400 12px/1.5 Archivo;color:var(--ink-faint);margin:6px 0 14px;max-width:680px">Where the burial registers place them — nothing is guessed. Where a register names the church itself ("St Mary"), it is shown; a ground the map cannot honestly pin is listed here without one.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:12px">
+        <sc-for list="{{ graves }}" as="gv" hint-placeholder-count="4">
+          <div style="background:var(--surface);border:1px solid rgba(43,37,28,.09);border-radius:10px;padding:14px 16px">
+            <div style="display:flex;align-items:baseline;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(43,37,28,.10)">
+              <span style="font:600 15px/1.2 Newsreader,serif;color:var(--ink)">✝ {{ gv.name }}</span>
+              <span style="font:400 10px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-left:auto">{{ gv.n }}</span>
+            </div>
+            <sc-for list="{{ gv.people }}" as="gp" hint-placeholder-count="3">
+              <div onClick="{{ gp.onClick }}" class="lift" style="cursor:pointer;padding:7px 0;border-bottom:1px solid rgba(43,37,28,.05)">
+                <div style="display:flex;gap:8px;align-items:baseline">
+                  <span style="font:600 12.5px/1.3 Archivo;color:var(--rust)">{{ gp.name }}</span>
+                  <span style="font:400 10.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-left:auto">{{ gp.when }}</span>
+                </div>
+                <sc-if value="{{ gp.hasSaid }}"><div style="font:400 10.5px/1.35 Archivo;color:var(--ink-faint);margin-top:2px">{{ gp.said }}</div></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
   </div>
   </sc-if>
 
@@ -1102,13 +1130,14 @@ class Component extends DCLogic {
   // Already in reading order: each journal declares its own `order` in its .md
   // header, and the build reads them in it. There are no dates to sort on.
   get diaryEntries(){ return (window.FAMILY&&window.FAMILY.diary)||[]; }
+  get graves(){ return (window.FAMILY&&window.FAMILY.graves)||[]; }
   // JOURNAL.md — the notebook. Published as the working record behind the stories.
   get notes(){ return (window.FAMILY&&window.FAMILY.notes)||[]; }
   // read straight out of RULES-AND-INSTRUCTIONS.md at build time
   get rules(){ return (window.FAMILY&&window.FAMILY.rules)||{standing:[],method:'',hard:[]}; }
   resolve(id){ if(!id) return id; const a=window.FAMILY&&window.FAMILY.alias; return (a&&a[id])||id; }
   get storyByPid(){ const m={}; for(const k in this.stories){ const pid=this.resolve(this.stories[k].personId); if(pid) m[pid]=k; } return m; }
-  personFacts(p){ const f=[]; const yrs=(p.years.match(/[0-9]{4}/g)||[]); const bY=yrs[0]; const dY=(p.years.indexOf(String.fromCharCode(8211))>-1)?yrs[1]:null; const born=[bY,p.birtP].filter(Boolean).join(', '); if(born)f.push({k:'Born',v:born}); const died=[dY,p.deatP].filter(Boolean).join(', '); if(died)f.push({k:'Died',v:died}); f.push({k:'Line',v:this.blab(p.branch)}); if(p.occs&&p.occs.length)f.push({k:'Occupation',v:p.occs.join(', ')}); const sp=p.sp&&this.people[p.sp]?this.people[p.sp].name:null; if(sp)f.push({k:'Married',v:sp}); return f; }
+  personFacts(p){ const f=[]; const yrs=(p.years.match(/[0-9]{4}/g)||[]); const bY=yrs[0]; const dY=(p.years.indexOf(String.fromCharCode(8211))>-1)?yrs[1]:null; const born=[bY,p.birtP].filter(Boolean).join(', '); if(born)f.push({k:'Born',v:born}); const died=[dY,p.deatP].filter(Boolean).join(', '); if(died)f.push({k:'Died',v:died}); const buried=p.buriP?[p.buriY,p.buriP+(p.buriC?' — '+p.buriC:'')].filter(Boolean).join(', '):null; if(buried)f.push({k:'Buried',v:buried}); f.push({k:'Line',v:this.blab(p.branch)}); if(p.occs&&p.occs.length)f.push({k:'Occupation',v:p.occs.join(', ')}); const sp=p.sp&&this.people[p.sp]?this.people[p.sp].name:null; if(sp)f.push({k:'Married',v:sp}); return f; }
   personSummary(p){ const yrs=(p.years&&p.years!==String.fromCharCode(8212))?' ('+p.years+')':''; let s=p.name+yrs+(p.birtP?', born at '+p.birtP:'')+'.'; if(p.occs&&p.occs.length) s+=' Recorded as '+p.occs.join(', ')+'.'; const sp=p.sp&&this.people[p.sp]?this.people[p.sp].name:null; if(sp) s+=' Married '+sp+'.'; return s; }
 
   places = {
@@ -1373,6 +1402,19 @@ class Component extends DCLogic {
   }
   allLines(){ return this.allStops().filter(o=>o.stops.length>1).map(o=>({pts:o.stops.map(s=>s.ll),color:this.col(this.people[o.id].branch),opacity:0.28})); }
 
+  // Resting places on the "everyone" map: one cross per burial ground, from the
+  // BURI events. Only grounds the gazetteer can pin appear here; the rest are
+  // still listed under the map. Respects the line filter like everything else.
+  graveMarkers(){
+    const line=this.state.mapLine||'all';
+    return (this.graves||[]).filter(g=>g.ll).map(g=>{
+      const ppl=(g.people||[]).filter(pp=>line==='all'||(this.people[pp.id]&&this.people[pp.id].branch===line));
+      if(!ppl.length) return null;
+      return { ll:g.ll, name:g.name+' — resting place', color:'#59503f', label:'✝',
+        persons:ppl.map(pp=>({id:pp.id,name:pp.name,years:pp.year!=null?[pp.year]:[]})) };
+    }).filter(Boolean);
+  }
+
   popupHtml(m){
     let h='<b style="font-family:Newsreader,serif;font-size:15px;color:#2b251c">'+this.esc(m.name)+'</b>';
     const bits=[];
@@ -1441,7 +1483,7 @@ class Component extends DCLogic {
       return { pins:this.personPins(id), lines: v.length>1?[{pts:v.map(s=>s.ll),color:'#b34a25',opacity:0.9}]:[] }; };
 
     if(S.view==='person'){ const el=document.querySelector('[data-pmap]'); if(el){ const j=journey(S.personId||'chris'); const key='p:'+S.personId+':'+j.pins.length; if(el._key!==key){ el._key=key; this.buildLeaflet(el, j.pins, j.lines); } setTimeout(()=>{try{el._map&&el._map.invalidateSize();}catch(e){}},120); } }
-    else if(S.view==='places'){ const el=document.querySelector('[data-placesmap]'); if(el){ const key='m:'+S.mapPerson+':'+(S.mapLine||'all'); if(el._key!==key){ el._key=key; if(S.mapPerson==='all'){ this.buildLeaflet(el, this.placeMarkers(), this.allLines()); } else { const j=journey(S.mapPerson); this.buildLeaflet(el, j.pins, j.lines); } } setTimeout(()=>{try{el._map&&el._map.invalidateSize();}catch(e){}},120); } }
+    else if(S.view==='places'){ const el=document.querySelector('[data-placesmap]'); if(el){ const key='m:'+S.mapPerson+':'+(S.mapLine||'all'); if(el._key!==key){ el._key=key; if(S.mapPerson==='all'){ this.buildLeaflet(el, this.placeMarkers().concat(this.graveMarkers()), this.allLines()); } else { const j=journey(S.mapPerson); this.buildLeaflet(el, j.pins, j.lines); } } setTimeout(()=>{try{el._map&&el._map.invalidateSize();}catch(e){}},120); } }
   }
   componentDidMount(){
     this.syncMaps();
@@ -2190,6 +2232,10 @@ class Component extends DCLogic {
       groupedBySurname, peopleFamilies, flatList:!groupedBySurname,
       hasUnlinked:unlinkedPeople.length>0, unlinkedCount:unlinkedPeople.length, unlinkedGroups, unlinkedPeople,
       britPlaces, worldPlaces, britRoutes:this.britRoutes, worldRoutes:this.worldRoutes, mapLegend:this.mapLegend, place,
+      // resting places — grouped from the BURI events by the build, never guessed
+      graves:(this.graves||[]).map(g=>({name:g.name, n:g.people.length+(g.people.length===1?' burial':' burials'),
+        people:(g.people||[]).map(pp=>({name:pp.name, when:pp.year!=null?String(pp.year):'', said:pp.said||'', hasSaid:!!pp.said, onClick:()=>this.openPerson(pp.id,'places')}))})),
+      hasGraves:(this.graves||[]).length>0,
       mapGroups, lineFilters, mapAll, mapSelName, mapSelChips, hasMapChips:mapSelChips.length>0, setEveryone:()=>this.setState({view:'places',mapPerson:'all'}), everyoneBg:mapAll?'#b34a25':'transparent', everyoneFg:mapAll?'#fff':'#59503f',
       mapRef:(el)=>{ if(el){ requestAnimationFrame(()=>requestAnimationFrame(()=>this.syncMaps())); } },
       timeline,

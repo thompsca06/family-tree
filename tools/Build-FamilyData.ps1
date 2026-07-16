@@ -93,6 +93,18 @@ function Short-Place {
   return (($raw -split ',')[0]).Trim()
 }
 
+# The church named IN the register's own place string ("Garforth, St Mary, ..."
+# -> "St Mary"). Extraction only — never guessed, never inferred.
+function Church-Part {
+  param([string]$raw)
+  if (-not $raw) { return $null }
+  foreach ($part in ($raw -split ',')) {
+    $t = $part.Trim()
+    if ($t -match '^(?i)(st\.?\s|all saints|holy |christ |sacred )') { return $t }
+  }
+  return $null
+}
+
 # ---------------------------------------------------------------- dates
 function Get-Year {
   param([string]$d)
@@ -419,11 +431,49 @@ foreach ($id in $ids) {
     sibs    = $sibs
     birtP   = Short-Place $birt.place
     deatP   = Short-Place $deat.place
+    # resting place, straight from the BURI event: where, the church the
+    # register itself names (if any), and the burial year
+    buriP   = Short-Place $buri.place
+    buriC   = Church-Part $buri.place
+    buriY   = Get-Year $buri.date
     occs    = @($occs)
     stops   = @($stops)
     rec     = @($recs)
   }
 }
+
+# ---------------------------------------------------------------- graves
+# Resting places, straight from the BURI events: grouped by resolved place, and
+# pinned ONLY where the curated gazetteer knows the spot — a burial place the
+# map cannot honestly pin is still listed, just without a pin. Each person
+# carries the register's own wording ("Garforth, St Mary") — different register
+# strings under one town are NOT merged into one churchyard, because the
+# register did not say that.
+$graveGroups = [ordered]@{}
+foreach ($id in $ids) {
+  $p = $PPL.$id
+  $buri = $p.events | Where-Object { $_.tag -eq 'BURI' } | Select-Object -First 1
+  if (-not $buri -or -not $buri.place) { continue }
+  $r = Resolve-Place $buri.place
+  $key = if ($r) { $r.label } else { (($buri.place -split ',')[0]).Trim() }
+  if (-not $graveGroups.Contains($key)) {
+    $graveGroups[$key] = [ordered]@{
+      name   = $key
+      ll     = $(if ($r) { $r.ll } else { $null })
+      people = [System.Collections.Generic.List[object]]::new()
+    }
+  }
+  $church = Church-Part $buri.place
+  $graveGroups[$key].people.Add([ordered]@{
+      id    = $id
+      name  = $people[$id].name
+      years = $people[$id].years
+      year  = Get-Year $buri.date
+      said  = $(if ($church) { $church } else { $null })   # the register's own words, beyond the place
+    })
+}
+$graves = @($graveGroups.Values | Sort-Object { - $_.people.Count })
+foreach ($g in $graves) { $g.people = @($g.people | Sort-Object { if ($_.year) { $_.year } else { 9999 } }) }
 
 # ---------------------------------------------------------------- alias
 # Slugs the page's hand-written stories and place notes refer to. Verified below.
@@ -1059,6 +1109,7 @@ $doc = [ordered]@{
   people = $people
   alias  = $aliasOut
   geo    = $geo
+  graves = @($graves)         # resting places, grouped from the BURI events
   diary  = @($diary)
   notes  = @($notes)          # JOURNAL.md — the working record, dead ends and all
   rules  = $rules
@@ -1083,6 +1134,7 @@ Write-Host "  branch thompson : $(@($people.Values | Where-Object branch -eq 'th
 Write-Host "  branch ingleby  : $(@($people.Values | Where-Object branch -eq 'ingleby').Count)"
 Write-Host "  branch root     : $(@($people.Values | Where-Object branch -eq 'root').Count)"
 Write-Host "  places pinned   : $($geo.Count)"
+Write-Host "  resting places  : $($graves.Count) grounds, $(@($graves | ForEach-Object { $_.people }).Count) people ($(@($graves | Where-Object { $_.ll }).Count) pinned)"
 Write-Host "  places UNRESOLVED (no pin, listed in data/places-unresolved.json): $($unres.Count)"
 if ($aliasBad.Count) { Write-Host "  !! ALIAS NOT IN TREE: $($aliasBad -join ', ')" -ForegroundColor Red }
 
