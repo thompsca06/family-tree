@@ -127,14 +127,56 @@ foreach ($r in $records) {
   }
 }
 
+# ---------- connected component of the home person ----------
+# The site renders only people with a real PATH to the home person, walked over
+# the person<->family graph: an INDI reaches families via FAMC/FAMS, a FAM
+# reaches people via HUSB/WIFE/CHIL. That keeps the whole component — siblings
+# (via the shared parents), aunts, cousins, spouses and their families — and
+# drops only true islands: research staged in the Ancestry tree that no path
+# reaches yet (e.g. the Eavestone/Ripon Ingleby cluster). NOT ancestors-only.
+#
+# This filters the SITE build only. The Ancestry tree and the GEDCOM keep
+# everyone, and the dropped people are counted here and listed by
+# Find-Problems.ps1 — never dropped silently.
+$HOMEID = 'I352128205181'   # Christopher Anthony Thompson
+if (-not $people.Contains($HOMEID)) { throw "home person $HOMEID is not in the GEDCOM" }
+$totalInFile = $people.Count
+$keepP = @{}; $keepF = @{}
+$queue = [System.Collections.Generic.Queue[string]]::new()
+$queue.Enqueue($HOMEID); $keepP[$HOMEID] = $true
+while ($queue.Count) {
+  $cur = $queue.Dequeue()
+  foreach ($fid in (@($people[$cur].famc) + @($people[$cur].fams))) {
+    if (-not $fid -or $keepF.ContainsKey($fid) -or -not $fams.Contains($fid)) { continue }
+    $keepF[$fid] = $true
+    $fm = $fams[$fid]
+    foreach ($who in (@($fm.husb, $fm.wife) + @($fm.chil))) {
+      if ($who -and $people.Contains($who) -and -not $keepP.ContainsKey($who)) {
+        $keepP[$who] = $true; $queue.Enqueue($who)
+      }
+    }
+  }
+}
+$notConnected = @(foreach ($k in $people.Keys) {
+    if (-not $keepP.ContainsKey($k)) {
+      $p = $people[$k]
+      [ordered]@{ id = $k; name = ((@($p.givn, $p.surn) | Where-Object { $_ }) -join ' ') }
+    }
+  })
+$peopleKept = [ordered]@{}; foreach ($k in $people.Keys) { if ($keepP.ContainsKey($k)) { $peopleKept[$k] = $people[$k] } }
+$famsKept = [ordered]@{}; foreach ($k in $fams.Keys) { if ($keepF.ContainsKey($k)) { $famsKept[$k] = $fams[$k] } }
+$people = $peopleKept; $fams = $famsKept
+
 $head = $records | Where-Object Tag -eq 'HEAD' | Select-Object -First 1
 $doc = [ordered]@{
   meta    = [ordered]@{
-    source     = $Ged
-    exported   = (KidVal $head 'DATE')
-    people     = $people.Count
-    families   = $fams.Count
-    sourceRecs = $sources.Count
+    source       = $Ged
+    exported     = (KidVal $head 'DATE')
+    people       = $people.Count
+    families     = $fams.Count
+    sourceRecs   = $sources.Count
+    totalInFile  = $totalInFile
+    notConnected = $notConnected   # dropped from the site render; Find-Problems lists them
   }
   people  = $people
   fams    = $fams
@@ -142,4 +184,4 @@ $doc = [ordered]@{
 }
 
 [IO.File]::WriteAllText($outPath, ($doc | ConvertTo-Json -Depth 12))
-Write-Host "wrote $Out — $($people.Count) people, $($fams.Count) families, $($sources.Count) sources (exported $($doc.meta.exported))"
+Write-Host "wrote $Out — $($people.Count) people connected to the home person ($totalInFile in the file, $($notConnected.Count) not connected — see problems.txt), $($fams.Count) families, $($sources.Count) sources (exported $($doc.meta.exported))"

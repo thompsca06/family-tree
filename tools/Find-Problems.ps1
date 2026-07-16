@@ -172,6 +172,21 @@ if (Test-Path $upath) {
   foreach ($k in $u.PSObject.Properties.Name) { Say ("  {0,3}x  {1}" -f $u.$k, $k) }
 } else { Say "  (run Build-FamilyData.ps1 first)" }
 
+# ------------------------------------------- 6. not connected to home person
+# People in the Ancestry tree with NO path to the home person over the
+# person<->family graph. Parse-Gedcom drops them from the site render (they are
+# research staged for a connection that is not made yet); they are listed here
+# so the drop is visible, never silent. Connect them on Ancestry and they will
+# appear on the site at the next build.
+Say ""
+Say "=== 6. NOT CONNECTED TO THE HOME PERSON ========================"
+Say "    (in the Ancestry tree but no path to $ROOTID - NOT rendered on the site)"
+$nc = @($G.meta.notConnected)
+if ($nc.Count) {
+  foreach ($x in ($nc | Sort-Object { $_.name })) { Say ("  {0,-16} {1}" -f $x.id, $x.name) }
+} else { Say "  everyone in the file is connected" }
+Say "  -> $($nc.Count) people not connected (of $($G.meta.totalInFile) in the file)"
+
 [IO.File]::WriteAllLines((Join-Path $root 'data/problems.txt'), $report)
 Write-Host ""
 Write-Host "full report -> data/problems.txt"
