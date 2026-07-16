@@ -312,6 +312,10 @@
           <div onClick="{{ setPedigree }}" style="cursor:pointer;font:600 11px/1 Archivo;padding:7px 12px;border-radius:6px;color:{{ pedFg }};background:{{ pedBg }}">Pedigree</div>
           <div onClick="{{ setFull }}" style="cursor:pointer;font:600 11px/1 Archivo;padding:7px 12px;border-radius:6px;color:{{ fullFg }};background:{{ fullBg }}">Full tree</div>
         </div>
+        <!-- siblings are OFF by default: the tree is the direct line. The toggle
+             brings brothers & sisters in beside their ancestor, never guessed —
+             straight from the GEDCOM's family records. -->
+        <div onClick="{{ toggleSibs }}" class="lift" title="Show brothers and sisters" style="cursor:pointer;font:600 11px/1 Archivo;padding:8px 13px;border-radius:7px;color:{{ sibsFg }};background:{{ sibsBg }};border:1px solid rgba(43,37,28,.14);user-select:none">Brothers &amp; sisters</div>
         <sc-if value="{{ isPedigree }}"><sc-if value="{{ canBack }}"><div onClick="{{ treeBack }}" class="lift" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--ink-soft);border:1px solid rgba(43,37,28,.14);padding:8px 13px;border-radius:7px">← Back down</div></sc-if></sc-if>
         <sc-if value="{{ isPedigree }}"><div onClick="{{ treeHome }}" class="lift" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--ink-soft);border:1px solid rgba(43,37,28,.14);padding:8px 13px;border-radius:7px">⌂ Recentre</div></sc-if>
       </div>
@@ -329,6 +333,19 @@
         <sc-if value="{{ t.focus.tag }}"><div style="display:inline-block;margin-top:9px;font:600 8.5px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;color:var(--ink);background:{{ t.focus.color }};padding:4px 8px;border-radius:5px;white-space:nowrap">{{ t.focus.tag }}</div></sc-if>
         <div style="font:600 10.5px/1 Archivo;color:var(--rust);margin-top:11px">Open full record →</div>
       </div>
+
+      <!-- brothers & sisters of the centred person, when the toggle is on -->
+      <sc-if value="{{ t.showSibs }}">
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:620px">
+          <sc-for list="{{ t.sibs }}" as="sb" hint-placeholder-count="3">
+            <div onClick="{{ sb.onClick }}" class="lift" style="cursor:pointer;background:var(--surface);border:1px dashed rgba(43,37,28,.22);border-radius:8px;padding:7px 11px;text-align:center">
+              <div style="font:600 11.5px/1.2 Newsreader,serif;color:var(--ink-soft)">{{ sb.name }}</div>
+              <div style="font:400 9px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-top:3px">{{ sb.years }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font:500 8.5px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--ink-faint);margin-top:7px;text-transform:uppercase">Brothers &amp; sisters</div>
+      </sc-if>
 
       <sc-if value="{{ t.father.exists }}" hint-placeholder-val="{{ true }}">
       <div style="width:2px;height:24px;background:var(--line)"></div>
@@ -399,6 +416,17 @@
           <div onClick="{{ nd.onClick }}" class="lift" style="position:absolute;left:{{ nd.x }}px;top:{{ nd.y }}px;transform:translateX(-50%);width:126px;cursor:pointer;background:var(--surface);border:1px solid rgba(43,37,28,.11);border-top:3px solid {{ nd.color }};border-radius:8px;padding:7px 8px;text-align:center;box-shadow:0 3px 10px rgba(43,37,28,.09)">
             <div style="font:600 11px/1.15 Newsreader,serif;color:var(--ink)">{{ nd.name }}</div>
             <div style="font:400 8.5px/1 'IBM Plex Mono',monospace;color:var(--ink-faint);margin-top:3px">{{ nd.years }}</div>
+            <!-- brothers & sisters, stacked inside the card when toggled on -->
+            <sc-if value="{{ nd.hasSibs }}">
+              <div style="margin-top:6px;border-top:1px dashed rgba(43,37,28,.20);padding-top:4px">
+                <sc-for list="{{ nd.sibs }}" as="sb" hint-placeholder-count="2">
+                  <div onClick="{{ sb.onClick }}" class="lift" style="cursor:pointer;padding:2px 0">
+                    <div style="font:500 9px/1.2 Archivo;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sb.name }}</div>
+                    <div style="font:400 7.5px/1.1 'IBM Plex Mono',monospace;color:var(--ink-faint)">{{ sb.years }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
         </sc-for>
       </div>
@@ -1106,7 +1134,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', mapPerson:'all', mapLine:'all', mapGroup:'line', openJ:{}, lbZoom:1, lbX:0, lbY:0, diaryAt:'', shared:false, textScale:1 };
+  state = { view:'home', focus:'chris', trail:['chris'], personId:null, personBack:'home', storyId:'tommy', branch:'all', query:'', place:'leeds', treeMode:'pedigree', treeSibs:false, mapPerson:'all', mapLine:'all', mapGroup:'line', openJ:{}, lbZoom:1, lbX:0, lbY:0, diaryAt:'', shared:false, textScale:1 };
 
   // which journal chapters are expanded in place on the profile
   toggleJournal = (key) => this.setState(s=>({ openJ: Object.assign({}, s.openJ, {[key]: !s.openJ[key]}) }));
@@ -1728,10 +1756,23 @@ class Component extends DCLogic {
     const ROOTID=this.root; layout(ROOTID,0);
     this._rootX=(pos[ROOTID]?pos[ROOTID].x:0)+PADX;
     const maxGen=Math.max.apply(null,order.map(id=>pos[id].gen));
-    const nodes=order.map(id=>{const p=P[id];return{id,name:p.name,years:p.years,tag:p.tag||'',x:pos[id].x+PADX,y:pos[id].y+PADY,color:this.col(p.branch),onClick:()=>this.openPerson(id,'tree')};});
+
+    // Brothers & sisters, when toggled on: each ancestor's siblings stack in
+    // small rows INSIDE that ancestor's card, so the ancestor layout (the x
+    // positions) is untouched and nothing collides. Each generation's row just
+    // grows tall enough for the deepest stack in it.
+    const SHOW=this.state.treeSibs, SIBH=21;
+    const sibsOf=(id)=>SHOW?(P[id].sibs||[]).filter(k=>P[k]):[];
+    const extra=[]; for(let g=0;g<=maxGen;g++) extra[g]=0;
+    if(SHOW){ order.forEach(id=>{ const n=sibsOf(id).length; if(n) extra[pos[id].gen]=Math.max(extra[pos[id].gen], n*SIBH+12); }); }
+    const yOf=[]; let acc=0; for(let g=0;g<=maxGen;g++){ yOf[g]=acc; acc+=ROW+(extra[g]||0); }
+
+    const nodes=order.map(id=>{const p=P[id];const sb=sibsOf(id);return{id,name:p.name,years:p.years,tag:p.tag||'',x:pos[id].x+PADX,y:yOf[pos[id].gen]+PADY,color:this.col(p.branch),onClick:()=>this.openPerson(id,'tree'),
+      hasSibs:sb.length>0,
+      sibs:sb.map(k=>({name:P[k].name,years:P[k].years,onClick:(e)=>{if(e&&e.stopPropagation)e.stopPropagation();this.openPerson(k,'tree');}}))};});
     const links=[];
-    order.forEach(id=>{const p=P[id];[p.f,p.m].forEach(k=>{if(k&&pos[k]){links.push({x1:pos[id].x+PADX,y1:pos[id].y+PADY+22,x2:pos[k].x+PADX,y2:pos[k].y+PADY-22,color:this.col(P[k].branch)});}});});
-    return {nodes,links,width:Math.max(1,(leaf-1))*GAP+PADX*2,height:maxGen*ROW+PADY*2+40};
+    order.forEach(id=>{const p=P[id];[p.f,p.m].forEach(k=>{if(k&&pos[k]){links.push({x1:pos[id].x+PADX,y1:yOf[pos[id].gen]+PADY+22,x2:pos[k].x+PADX,y2:yOf[pos[k].gen]+PADY-22,color:this.col(P[k].branch)});}});});
+    return {nodes,links,width:Math.max(1,(leaf-1))*GAP+PADX*2,height:acc+PADY*2+40};
   }
   // typing in the nav box searches EVERYTHING, not just names
   onQuery = (e) => { const v=e.target.value; this.setState({view:(v.trim()?'search':'people'), query:v}); };
@@ -1892,12 +1933,16 @@ class Component extends DCLogic {
     const focusNode={...this.node(focusId)};
     const fatherN=this.node(f.f), motherN=this.node(f.m);
     const fp=this.people[f.f]||{}, mp=this.people[f.m]||{};
+    const focusSibs=(f.sibs||[]).filter(id=>this.people[id]);
     const t={
       focus:focusNode,
       father:fatherN, mother:motherN,
       ff:this.node(fp.f), fm:this.node(fp.m),
       mf:this.node(mp.f), mm:this.node(mp.m),
       noParents:!(f.f||f.m),
+      // brothers & sisters of the centred person, straight from the family record
+      showSibs:S.treeSibs&&focusSibs.length>0,
+      sibs:focusSibs.map(id=>({name:this.people[id].name,years:this.people[id].years,onClick:()=>this.openPerson(id,'tree')})),
     };
 
     // people directory
@@ -2226,6 +2271,7 @@ class Component extends DCLogic {
         el.addEventListener('click',(e)=>{ if(el._suppressClick){ e.stopPropagation(); e.preventDefault(); } }, true);
       },
       pedBg:S.treeMode==='pedigree'?'#b34a25':'transparent', pedFg:S.treeMode==='pedigree'?'#fff':'#59503f', fullBg:S.treeMode==='full'?'#b34a25':'transparent', fullFg:S.treeMode==='full'?'#fff':'#59503f',
+      toggleSibs:()=>this.setState({treeSibs:!S.treeSibs}), sibsBg:S.treeSibs?'#b34a25':'transparent', sibsFg:S.treeSibs?'#fff':'#59503f',
       people, peopleCount:Object.keys(this.people).length, branchFilters, noResults:people.length===0&&unlinkedPeople.length===0,
       groupedBySurname, peopleFamilies, flatList:!groupedBySurname,
       hasUnlinked:unlinkedPeople.length>0, unlinkedCount:unlinkedPeople.length, unlinkedGroups, unlinkedPeople,
