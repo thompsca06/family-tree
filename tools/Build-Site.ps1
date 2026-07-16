@@ -26,6 +26,14 @@ if ($LASTEXITCODE -ne 0) { throw "refusing to build: images are missing or trunc
 Write-Host "== rebuilding data"
 & (Join-Path $PSScriptRoot 'Parse-Gedcom.ps1') | Out-Host
 
+# rebuild the FULL data and prove nothing in the sources was lost, BEFORE the
+# old docs/ is touched. The public build is this same data minus the deliberate
+# living-people redaction, so a pass here covers what is about to be published.
+Write-Host "== verifying nothing in the sources is lost"
+& (Join-Path $PSScriptRoot 'Build-FamilyData.ps1') | Out-Host
+pwsh -NoProfile -File (Join-Path $PSScriptRoot 'Verify-Content.ps1') | Out-Host
+if ($LASTEXITCODE -ne 0) { throw "refusing to build: content from the sources is missing from the site (see above)" }
+
 if (Test-Path $dist) { Remove-Item $dist -Recurse -Force }
 New-Item -ItemType Directory -Force $dist | Out-Null
 

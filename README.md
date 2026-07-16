@@ -46,6 +46,10 @@ pwsh tools/Build-Site.ps1 -Private # -> docs/  (full data, local only)
 
 # audit the tree itself
 pwsh tools/Find-Problems.ps1       # duplicates, missing vitals, bad places
+
+# prove nothing in the sources was lost on the way to the site
+# (Build-Site runs this automatically and refuses to publish if it fails)
+pwsh tools/Verify-Content.ps1      # story lines, chapters, events, citations
 ```
 
 `Family Tree.dc.html` is a Claude design component: it uses React but never loads it,
