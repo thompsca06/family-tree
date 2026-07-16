@@ -1033,7 +1033,9 @@
                   <div style="font:400 13.5px/1.6 Newsreader,serif;color:var(--ink-soft);margin-top:6px">{{ jl.excerpt }}</div>
                 </sc-if>
                 <div style="display:flex;gap:16px;align-items:center;margin-top:11px">
-                  <div onClick="{{ jl.onToggle }}" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--rust)">Read the full chapter ↓</div>
+                  <!-- only a chapter ABOUT this person reads in place; a mention
+                       is somebody else's story, so the card only points to it -->
+                  <sc-if value="{{ jl.canExpand }}"><div onClick="{{ jl.onToggle }}" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--rust)">Read the full chapter ↓</div></sc-if>
                   <div onClick="{{ jl.onClick }}" style="cursor:pointer;font:600 11px/1 Archivo;color:var(--ink-faint)">Open in the diary →</div>
                 </div>
               </sc-if>
@@ -2128,11 +2130,17 @@ class Component extends DCLogic {
       // journals that merely mention them. No dates to sort on.
       journal:(p.journal||[]).map((j,i)=>{
         const key=(S.personId||'')+':'+j.j+':'+j.anchor+':'+i;
-        const open=!!S.openJ[key];
+        // Only a chapter that is ABOUT the person reads in place on their
+        // profile. A chapter that merely MENTIONS them is somebody else's
+        // story — the card is just a signpost to it in the Journal, with no
+        // chapter prose (not even the excerpt) on this person's page.
+        const isAbout=j.role==='about';
+        const open=isAbout&&!!S.openJ[key];
         return Object.assign({},j,{
           color:this.col(j.branch),
-          roleLabel:j.role==='about'?'Their story':'Mentioned',
-          hasExcerpt:!!j.excerpt,
+          roleLabel:isAbout?'Their story':'Mentioned',
+          canExpand:isAbout,
+          hasExcerpt:isAbout&&!!j.excerpt,
           open, closed:!open,
           onToggle:()=>this.toggleJournal(key),
           bodyEl: open ? React.createElement('div',{dangerouslySetInnerHTML:{__html:j.html||''}}) : null,
