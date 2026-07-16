@@ -592,7 +592,10 @@ function Get-Excerpt {
 }
 
 function Md-Html {
-  param([string]$md)
+  # -Fragment: rendering a chapter BODY (not a whole journal). A whole journal's
+  # leading H3 is its subtitle and gets dropped; in a fragment every ### is a real
+  # sub-heading and must render, so start as if the H2 has already been seen.
+  param([string]$md, [switch]$Fragment)
   $html = [System.Text.StringBuilder]::new()
   $inList = $false
   $inQuote = $false
@@ -601,7 +604,7 @@ function Md-Html {
   #   ### The Inglebys, from a Nidderdale farm to a Leeds council estate
   # The site already shows that as the entry's subtitle, so rendering it again as
   # a heading printed it twice. Drop an H3 that appears before the first H2.
-  $seenH2 = $false
+  $seenH2 = [bool]$Fragment
   $para = [System.Collections.Generic.List[string]]::new()
 
   function Inline { param([string]$s)
@@ -713,7 +716,8 @@ foreach ($entry in ($found | Sort-Object { $_.meta.order }, { $_.meta.id })) {
   $md = $entry.md
   $sections = @(Split-Sections $md)
 
-  foreach ($sec in $sections) {
+  for ($si = 0; $si -lt $sections.Count; $si++) {
+    $sec = $sections[$si]
     $tag = $sec.tag
     if (-not $tag) {
       if ($sec.level -eq 2) { $untagged += "$($d.id): $($sec.heading)" }
@@ -721,9 +725,23 @@ foreach ($entry in ($found | Sort-Object { $_.meta.order }, { $_.meta.id })) {
     }
     if ($tag.decoy) { $decoyCount++; continue }   # a rejected identification — link to nobody
 
-    $excerpt = Get-Excerpt $sec.lines
-    # the section's own prose, so a profile can show the whole chapter in place
-    $secHtml = Md-Html (($sec.lines) -join "`n")
+    # A chapter (##) reads to the NEXT ## — its ### subsections are part of the
+    # text, not separate chapters. Splitting at ### used to cut every chapter off
+    # at its first sub-heading, so a profile's "full chapter" ended mid-story.
+    # The subsections keep their own tags (and their own profile links); here
+    # they are pulled back in purely as reading matter, wrong turns included.
+    $bodyLines = [System.Collections.Generic.List[string]]::new()
+    $bodyLines.AddRange($sec.lines)
+    if ($sec.level -eq 2) {
+      for ($sj = $si + 1; ($sj -lt $sections.Count) -and ($sections[$sj].level -eq 3); $sj++) {
+        $bodyLines.Add('### ' + $sections[$sj].heading)
+        $bodyLines.AddRange($sections[$sj].lines)
+      }
+    }
+
+    $excerpt = Get-Excerpt $bodyLines
+    # the chapter's whole prose, so a profile can show it in place
+    $secHtml = Md-Html (($bodyLines) -join "`n") -Fragment
     foreach ($role in @('about', 'mentions')) {
       foreach ($personId in $tag.$role) {
         if (-not $people.Contains($personId)) { $tagBadIds += "$($d.id) '$($sec.heading)' -> $personId"; continue }
