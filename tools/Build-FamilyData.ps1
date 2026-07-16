@@ -911,7 +911,8 @@ foreach ($id in $ids) {
 
   $hasBirth = [bool](@($ev | Where-Object { $_.tag -in 'BIRT', 'BAPM', 'CHR' }).Count)
   $hasDeath = [bool](@($ev | Where-Object { $_.tag -in 'DEAT', 'BURI' }).Count)
-  $hasMarr = [bool]($marrEv[$id])
+  # family MARR, or a MARR on the person — a civil-index marriage exports there
+  $hasMarr = [bool]($marrEv[$id]) -or (@($ev | Where-Object { $_.tag -eq 'MARR' }).Count -gt 0)
   $censusYears = @($ev | Where-Object { $_.tag -eq 'RESI' } | ForEach-Object { Get-Year $_.date } | Where-Object { $_ })
 
   $gaps = @()

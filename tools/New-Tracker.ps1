@@ -95,8 +95,10 @@ foreach ($gen in ($gens.Keys | Sort-Object)) {
     $hasBirth = @($tags | Where-Object { $_ -in 'BIRT', 'BAPM', 'CHR' }).Count -gt 0
     $hasDeath = @($tags | Where-Object { $_ -in 'DEAT', 'BURI' }).Count -gt 0
 
-    # marriage lives on the FAMILY, not the person
-    $hasMarr = $false
+    # marriage usually lives on the FAMILY record — but one attached from the
+    # civil marriage index exports as a MARR on the PERSON instead, so count
+    # both or everyone sourced that way reads "missing marriage"
+    $hasMarr = @($tags | Where-Object { $_ -eq 'MARR' }).Count -gt 0
     foreach ($fid in @($who.fams)) {
       if (@($FAMS.$fid.events | Where-Object { $_.tag -eq 'MARR' }).Count) { $hasMarr = $true }
     }

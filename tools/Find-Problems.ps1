@@ -127,6 +127,12 @@ foreach ($fid in $FAMS.PSObject.Properties.Name) {
     foreach ($w in @($f.husb, $f.wife)) { if ($w) { $marrOf[$w] = $true } }
   }
 }
+# ...and by the person's own events: a marriage attached from the civil
+# marriage index exports as a MARR on the INDI, not the FAM — count those too
+# or everyone sourced that way is false-flagged "missing marriage"
+foreach ($pn in $PPL.PSObject.Properties.Name) {
+  if (@($PPL.$pn.events | Where-Object { $_.tag -eq 'MARR' }).Count) { $marrOf[$pn] = $true }
+}
 
 $line = [System.Collections.Generic.List[object]]::new()
 function Climb { param([string]$id, [int]$gen)
