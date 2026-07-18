@@ -669,6 +669,9 @@ function Md-Html {
     $s = $s -replace '\*\*(.+?)\*\*', '<strong>$1</strong>'
     $s = $s -replace '(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', '<em>$1</em>'
     $s = $s -replace '`(.+?)`', '<code>$1</code>'
+    # images BEFORE links — otherwise ![alt](src) matches the link rule and comes
+    # out as "!<a href=src>alt</a>", which is why story images never appeared
+    $s = $s -replace '!\[(.*?)\]\((.+?)\)', '<img src="$2" alt="$1">'
     $s = $s -replace '\[(.+?)\]\((.+?)\)', '<a href="$2">$1</a>'
     return $s
   }
@@ -709,6 +712,17 @@ function Md-Html {
     }
     # person tags are metadata, never rendered
     if ($line -match '^\s*<!--\s*ft:.*-->\s*$') { continue }
+    # an image on a line of its own becomes a captioned figure, the same shape the
+    # hand-written feature stories use — the alt text is the caption
+    if ($line -match '^\s*!\[(.*?)\]\((.+?)\)\s*$') {
+      FlushPara $html $para
+      if ($inList) { [void]$html.Append('</ul>'); $inList = $false }
+      $cap = $matches[1]; $src = $matches[2]
+      [void]$html.Append('<figure><img src="' + $src + '" alt="' + $cap + '">' +
+        $(if ($cap) { '<figcaption>' + (Inline $cap) + '</figcaption>' } else { '' }) + '</figure>')
+      $justHeaded = $false
+      continue
+    }
     # the date line under a heading — styled as a dateline, not a stray italic para
     if ($justHeaded -and $line -match '^\*\s*(\d{1,2}\s+\w+\s+(?:19|20)\d\d)\s*\*\s*$') {
       [void]$html.Append('<div class="secdate">' + (Inline $matches[1]) + '</div>')
@@ -836,6 +850,10 @@ foreach ($entry in ($found | Sort-Object { $_.meta.order }, { $_.meta.id })) {
     branch = $d.branch
     order  = $d.order
     html   = Md-Html $md
+    # first image in the piece heads its own story page. No image, no hero —
+    # the page falls back to the hatched panel rather than borrowing a picture
+    # from somewhere else.
+    hero   = $(if ($md -match '!\[[^\]]*\]\(([^)]+)\)') { $matches[1] } else { $null })
   }
 }
 # already in `order` — the journals were read in it

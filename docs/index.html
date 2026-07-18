@@ -67,6 +67,13 @@
   .diaryprose li{margin:4px 0}
   .diaryprose hr{border:0;border-top:1px solid rgba(43,37,28,.11);margin:22px 0}
   .diaryprose strong{color:var(--ink);font-weight:600}
+  /* pictures written into a story with ![caption](path) — shown inline, the same
+     shape the hand-written feature stories use */
+  .diaryprose figure{margin:24px 0}
+  .diaryprose figure img{width:100%;height:auto;display:block;border-radius:9px;
+    border:1px solid rgba(43,37,28,.11)}
+  .diaryprose figcaption{font:400 12px/1.5 Archivo;color:var(--ink-faint);margin-top:8px}
+  .diaryprose p img{max-width:100%;height:auto}
   /* the date under a section heading, lifted out of the prose */
   .diaryprose .secdate{font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;
     color:var(--rust);text-transform:uppercase;margin:-6px 0 16px}
@@ -1084,6 +1091,8 @@
             <sc-if value="{{ b.isJourney }}"><figure style="margin:26px 0"><div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:10px">{{ b.title }}</div><div style="background:var(--surface-2);border:1px solid rgba(43,37,28,.11);border-radius:10px;padding:12px"><svg viewBox="0 0 100 56" style="width:100%;height:auto;display:block"><defs><pattern id="jgrid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8 0H0V8" fill="none" stroke="rgba(43,37,28,.05)" stroke-width=".3"></path></pattern></defs><rect x="0" y="0" width="100" height="56" fill="url(#jgrid)"></rect><path d="{{ b.path }}" fill="none" stroke="var(--rust)" stroke-width="0.8" stroke-dasharray="{{ b.dash }}" opacity="0.9"></path><path d="{{ b.path2 }}" fill="none" stroke="var(--rust)" stroke-width="0.8" stroke-dasharray="{{ b.dash2 }}" opacity="0.6"></path><sc-for list="{{ b.stops }}" as="st" hint-placeholder-count="6"><circle cx="{{ st.x }}" cy="{{ st.y }}" r="2.5" fill="var(--surface)" stroke="var(--rust)" stroke-width="0.6"></circle><text x="{{ st.x }}" y="{{ st.cy }}" fill="var(--ink)" font-size="2.5" font-family="IBM Plex Mono, monospace" text-anchor="middle">{{ st.n }}</text><text x="{{ st.lx }}" y="{{ st.ly }}" fill="var(--ink-soft)" font-size="2.4" font-family="IBM Plex Mono, monospace" text-anchor="{{ st.anchor }}">{{ st.label }}</text></sc-for></svg></div><figcaption style="font:400 12px/1.5 Archivo;color:var(--ink-faint);margin-top:8px">{{ b.note }}</figcaption></figure></sc-if>
           </sc-for>
         </sc-if>
+        <!-- a story written as its own .md file: its prose, pictures inline -->
+        <sc-if value="{{ story.hasHtml }}">{{ story.htmlEl }}</sc-if>
         <sc-if value="{{ story.hasSections }}">
         <sc-for list="{{ story.sections }}" as="sec" hint-placeholder-count="4">
           <h2 style="font:600 22px/1.2 Newsreader,serif;color:var(--ink);margin:26px 0 12px">{{ sec.h }}</h2>
@@ -1092,6 +1101,9 @@
         </sc-for>
         </sc-if>
       </div>
+      <!-- the facts sidebar belongs to the hand-written stories; a .md story
+           carries its own facts in its prose, so it gets no empty box -->
+      <sc-if value="{{ story.hasSide }}">
       <div style="flex:none;width:240px">
         <div style="position:sticky;top:80px;background:var(--surface);border:1px solid rgba(43,37,28,.10);border-radius:11px;padding:16px 18px">
           <sc-for list="{{ story.meta }}" as="m" hint-placeholder-count="4">
@@ -1103,11 +1115,14 @@
           <sc-if value="{{ story.personId }}"><div onClick="{{ story.onPerson }}" class="lift" style="cursor:pointer;margin-top:12px;text-align:center;font:600 11.5px/1 Archivo;color:var(--ink-soft);border:1px solid rgba(43,37,28,.14);padding:10px;border-radius:8px">Open the record →</div></sc-if>
         </div>
       </div>
+      </sc-if>
     </div>
+    <sc-if value="{{ story.hasSources }}">
     <div style="max-width:1040px;padding:0 40px 60px">
       <div style="font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:10px">Sources</div>
       <sc-for list="{{ story.sources }}" as="s"><div style="font:400 12px/1.6 Archivo;color:var(--ink-faint)">· {{ s }}</div></sc-for>
     </div>
+    </sc-if>
   </div>
   </sc-if>
 
@@ -1717,7 +1732,7 @@ class Component extends DCLogic {
         if(id && this.people[id]) this.setState({view:'person', personId:id, personBack:'people'});
         break;
       }
-      case 'story':  if(this.stories[arg]) this.setState({view:'story', storyId:arg}); break;
+      case 'story':  if(this.stories[arg]||((arg||'').indexOf('md:')===0&&(this.diaryEntries||[]).some(d=>d.id===arg.slice(3)))) this.setState({view:'story', storyId:arg}); break;
       case 'diary':
         if(arg && (this.diaryEntries||[]).some(d=>d.id===arg)) this.openDiaryAt(arg,'');
         else this.setState({view:'diary'});
@@ -1911,18 +1926,14 @@ class Component extends DCLogic {
     ].map(x=>{const s=this.stories[x.id];const img=this.storyHero[x.id]||null;
       return{kicker:s.kicker,title:x.short,dek:s.dek,cta:'Read the story →',color:x.color,img:img,hasImg:!!img,onClick:()=>this.openStory(x.id)};});
 
-    // A card can also point straight at a JOURNAL rather than a hand-written story
-    // page — so a piece of research becomes a story without being written twice.
-    // Only shows if the journal is actually in the build.
-    const journalCards=[
-      {j:'service', kicker:'Domestic service · 1881',
-       title:'Both sides of the kitchen door',
-       dek:'One household kept a servant. Two of the women who married into this family were one. The same census, the same decade.',
-       color:'#b34a25'}
-    ].filter(c=>(this.diaryEntries||[]).some(d=>d.id===c.j))
-     .map(c=>({kicker:c.kicker,title:c.title,dek:c.dek,cta:'Read the story →',color:c.color,
-               img:null,hasImg:false,onClick:()=>this.openDiaryAt(c.j,'')}));
-    storyCards.push(...journalCards);
+    // Every story written as its own .md file gets a card too, and opens its own
+    // feature page — same as the hand-written ones. Written once, in the .md;
+    // the card takes its title, subtitle and first picture straight from it.
+    const mdCards=(this.diaryEntries||[]).map(d=>({
+      kicker:this.blab(d.branch), title:d.title, dek:d.sub||'', cta:'Read the story →',
+      color:this.col(d.branch), img:d.hero||null, hasImg:!!d.hero,
+      onClick:()=>this.openStory('md:'+d.id)}));
+    storyCards.push(...mdCards);
 
     const modeCards=[
       {glyph:'⌘',title:'Family tree',desc:'Click any ancestor to climb seven generations.',onClick:this.navTree},
@@ -2189,11 +2200,34 @@ class Component extends DCLogic {
     pv.hasJumps=pv.jumps.length>1;   // one chip is not a menu
 
     // story view
-    const sty=this.stories[S.storyId]||this.stories.tommy;
-    const rawB=this.storyBlocks[S.storyId];
-    const story={...sty, personId:sty.personId, onPerson:()=>this.openPerson(sty.personId, 'story'),
-      blocks: rawB?rawB.map(b=>this.procBlock(b)):null, hasBlocks:!!rawB, hasSections:!rawB, heroImg:this.storyHero[S.storyId]||null,
-      hasHero:!!this.storyHero[S.storyId], heroEl:this.storyHero[S.storyId]?React.createElement('img',{src:this.storyHero[S.storyId],style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',objectPosition:'center 35%',filter:'saturate(.85)'}}):null};
+    // A story written as its own .md file gets the SAME feature page as the
+    // hand-written ones: hero, kicker, title, dek, and its prose — pictures
+    // included, inline where the writing puts them. Its hero is the first image
+    // in the piece; if it has none the hatched panel stands in.
+    // "md:<id>" keeps .md stories in their own namespace — `whitehead` exists BOTH
+    // as a hand-written story and as a .md file, and a bare id would have let the
+    // .md silently replace the hand-written page.
+    const mdKey=(S.storyId||'').indexOf('md:')===0 ? S.storyId.slice(3) : null;
+    const mdStory=mdKey?(this.diaryEntries||[]).find(d=>d.id===mdKey):null;
+    const heroImg = mdStory ? (mdStory.hero||null) : (this.storyHero[S.storyId]||null);
+    const heroEl = heroImg?React.createElement('img',{src:heroImg,style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',objectPosition:'center 35%',filter:'saturate(.85)'}}):null;
+    let story;
+    if(mdStory){
+      story={ kicker:this.blab(mdStory.branch), title:mdStory.title, dek:mdStory.sub,
+        heroLabel:'', meta:[], sources:null, personId:null, onPerson:null, hasPerson:false,
+        hasBlocks:false, hasSections:false, hasHtml:true,
+        htmlEl:React.createElement('div',{className:'diaryprose',dangerouslySetInnerHTML:{__html:mdStory.html||''}}),
+        heroImg, hasHero:!!heroImg, heroEl,
+        hasSide:false, hasSources:false,
+        onOpenJournal:()=>this.openDiaryAt(mdStory.id,'') };
+    } else {
+      const sty=this.stories[S.storyId]||this.stories.tommy;
+      const rawB=this.storyBlocks[S.storyId];
+      story={...sty, personId:sty.personId, onPerson:()=>this.openPerson(sty.personId, 'story'), hasPerson:!!sty.personId,
+        blocks: rawB?rawB.map(b=>this.procBlock(b)):null, hasBlocks:!!rawB, hasSections:!rawB, hasHtml:false,
+        heroImg, hasHero:!!heroImg, heroEl,
+        hasSide:true, hasSources:!!(sty.sources&&sty.sources.length)};
+    }
 
     return {
       tabs, query:S.query, onQuery:this.onQuery, navWork:this.navWork,
