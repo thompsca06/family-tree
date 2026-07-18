@@ -1520,6 +1520,41 @@ class Component extends DCLogic {
       if(pts.length>1){ map.fitBounds(window.L.latLngBounds(pts).pad(0.35)); }
       else if(pts.length===1){ map.setView(pts[0],8); }
       else { map.setView([50,0],3); }
+
+      // ---- touch: two fingers move the map, one finger scrolls the page ----
+      // Pinch-to-zoom is Leaflet's default and stays on. The problem is DRAGGING:
+      // on a phone these maps are full width and 520-560px tall, so a one-finger
+      // drag pans the map and the page will not scroll past it — you get stuck on
+      // the map. So on a touch-primary device one finger is given back to the page
+      // and two fingers move the map, with a hint the first time you try. The +/-
+      // buttons still zoom, so nothing needs two hands.
+      // `pointer: coarse` is the right test: true on phones and tablets, false on a
+      // desktop with a touchscreen, where a mouse drag should still just work.
+      const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      if(coarse && map.dragging){
+        map.dragging.disable();
+        const hint=document.createElement('div');
+        hint.textContent='Use two fingers to move the map';
+        hint.setAttribute('style','position:absolute;inset:0;z-index:450;display:flex;align-items:center;'
+          +'justify-content:center;text-align:center;padding:20px;pointer-events:none;opacity:0;'
+          +'transition:opacity .18s ease;background:rgba(43,37,28,.45);color:#fff;'
+          +"font:600 14px/1.4 Archivo,sans-serif");
+        el.appendChild(hint);
+        let hideT=null;
+        const showHint=()=>{ hint.style.opacity='1'; clearTimeout(hideT); hideT=setTimeout(()=>{hint.style.opacity='0';},1400); };
+        const hideHint=()=>{ clearTimeout(hideT); hint.style.opacity='0'; };
+        el.addEventListener('touchstart',(e)=>{
+          if(e.touches.length>=2){ map.dragging.enable(); hideHint(); }
+          else { map.dragging.disable(); }
+        },{passive:true});
+        // a one-finger drag that actually tried to move the map earns the hint
+        el.addEventListener('touchmove',(e)=>{
+          if(e.touches.length<2 && !map.dragging.enabled()) showHint();
+        },{passive:true});
+        el.addEventListener('touchend',(e)=>{
+          if(!e.touches || e.touches.length<2) map.dragging.disable();
+        },{passive:true});
+      }
       el._map=map;
     }catch(err){ console.error('map build failed',err); }
   }
