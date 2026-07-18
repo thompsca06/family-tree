@@ -63,10 +63,16 @@ function Get-CheckableLines($lines) {
 
 $fail = 0
 
-# ---- gather the story files (same rule as the build: has a story: header)
-$storyFiles = Get-ChildItem $family -Recurse -Filter *.md |
-  Where-Object { $_.FullName -notmatch '\\_Archive\\|\\site\\' } |
-  Where-Object { (Get-Content $_.FullName -Raw) -match '<!--\s*story:' }
+# ---- gather the story files. This MUST use the same discovery as the build:
+# the branch folders only, not a recursive sweep of the whole Family tree. A
+# verifier that looks wider than the build blocks the publish over files the
+# build never reads — AGENT-NOTES.md quotes the story header to document the
+# format, and a recursive scan duly demanded that the notes file appear on the
+# website.
+$storyFiles = @(
+  Get-ChildItem (Join-Path $family 'Thompson'), (Join-Path $family 'Ingleby') -Filter *.md -EA SilentlyContinue |
+    Where-Object { (Get-Content $_.FullName -Raw) -match '<!--\s*story:' }
+)
 
 # ---- split each story into sections exactly as the build does (## and ###),
 #      and give each ## chapter its full body (subsections included)
