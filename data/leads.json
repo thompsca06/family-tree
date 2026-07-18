@@ -1,0 +1,106 @@
+{
+  "_comment": [
+    "Curated seed for a BLOCKED / WHAT-TO-TRY-NEXT section, same pattern as occupations.json.",
+    "",
+    "WHY THIS EXISTS: TRACKER.md counts what is missing. It cannot tell you whether a gap is a",
+    "five-minute lookup or a person who has vanished. Twice now a 'one missing census' has eaten an",
+    "hour and ended in nothing attached. This file carries what was ALREADY TRIED and what to try",
+    "NEXT, so no one re-runs a failed search or re-derives a dead end.",
+    "",
+    "RULE: 'tried' is a record of searches that FAILED. Nothing here is evidence and nothing here",
+    "may be attached to the tree. If a lead comes good it moves to the journal and the tree, and",
+    "the entry is deleted.",
+    "",
+    "Each entry ticks itself off when the named gap closes in an export - same mechanism as §7."
+  ],
+
+  "blocked": [
+    { "id": "I352548944399", "name": "Alfred Whitehead", "gap": "census 1921",
+      "tried": [
+        "65 Alfred Whiteheads b.1884-88 in coll 63150 - none in the right place",
+        "spouse=Alice and spouse=Emily - nothing (Emily Mallinson is NOT his wife; that was a misread of the next GEDCOM record)",
+        "residence=Leeds exact - returned zero, filter too tight",
+        "birthplace=Canada, which should have been decisive since he was born 27 Dec 1886 at York Mills, Toronto - EXACTLY ONE hit in the whole collection and it is a different man (Alfred B Whitehead b.1866, visitor in Westminster)"
+      ],
+      "found_instead": "Alice's 1921 (rec 36648706): she and baby Annie were at her MOTHER's house, 15 Willington Lane, Leeds. Alfred is not in the household - they were living apart by June 1921. That is why every spouse search failed.",
+      "next": [
+        "Search 1921 on his OCCUPATION - 'Joiner' is now recorded on his profile from the 1893 probate",
+        "Work backwards from the 1939 Register, where he is already attached in the West Riding, to get an address to search from",
+        "Consider that he may simply not be in England in June 1921"
+      ] },
+
+    { "id": "I352794868212", "name": "Elizabeth Weatherill", "gap": "death/burial",
+      "tried": [
+        "55 Elizabeth Weatherill/Wetherill/Weatherall deaths in the 1870-80 civil index - NONE matches b.~1807 in the Easingwold or York districts",
+        "nearest temptations (b.1789 York 1877; b.1793 Sculcoates 1876) are 15+ years out on age - rejected"
+      ],
+      "found_instead": "Bracketed to 1871x1881 by the census itself: James appears in 1881 at Lillings Ambo as head of a household of ONE. Her ABSENCE is the evidence.",
+      "next": [ "The Sheriff Hutton / Lillings Ambo parish BURIAL register, not the civil index" ] },
+
+    { "id": "I352793764566", "name": "Jane Farrar", "gap": "death/burial",
+      "tried": [],
+      "found_instead": "Her age is irreconcilable between censuses: 28 in 1871 (b.~1843) but 49 in 1881 (b.~1832). An 11-year jump, far past normal census slop. The tree carries abt 1832.",
+      "next": [
+        "Her baptism at Wibsey would decide which age is right, and that decides which death to look for",
+        "Do NOT search for a death until the birth year is settled - the wrong year is why nothing matches"
+      ] },
+
+    { "id": "I352793764361", "name": "James R. Best", "gap": "census 1841, 1851, 1861",
+      "tried": [
+        "1851 exact birthplace Tadcaster - zero",
+        "1851 loosened + Yorkshire residence - 52 results, residence filter did not bind, no Tadcaster-born James Best",
+        "1851 EVERY Best resident in Tadcaster - only 12 people, no James and no Thomas Best household at all",
+        "1861 same approaches - 46 results, none Tadcaster-born",
+        "1861 with surname dropped entirely - 191,347 results; without a surname the birth filter stops binding, so the drop-the-surname trick does NOT work here"
+      ],
+      "found_instead": "He is recorded as ROBERT in 1871 and JAMES R. in 1881 - James ROBERT Best, who went by Robert. Also: BEST indexes as BERT (a whole Matthew Bert household sits among the Tadcaster Bests).",
+      "next": [
+        "The 1868 Bradford Cathedral marriage register IMAGE - it should give his father Thomas Best's occupation and residence",
+        "His father Thomas Best I352793764615 is a blank shell with ZERO records; without his household there is no way to recognise James as a child in 1841/1851. Thomas is the real blocker.",
+        "Try searching as ROBERT Best, not James - that is the name the 1871 enumerator used"
+      ] },
+
+    { "id": "I352794459756", "name": "Henry Bausor", "gap": "census, birth, death",
+      "tried": [
+        "1841 Southwell household indexed as BARRSON (HO107/867 bk 12 f.16 p.13) - Henry 45, Anne 45, John 15, Martha 10, George 2. READ THE IMAGE: the ages really are 15 and 10, not 18 and 20.",
+        "Searched every George Bausor baptism in Notts 1813-1922 - only 8 exist, the sole Southwell one is 1861 to JOHN & Anne, so no George to Henry & Ann"
+      ],
+      "found_instead": "REJECTED as a different Henry & Ann Bausor. Our Martha was a MINOR marrying in 1843 and 28 in 1851 (b.~1823); a Martha aged 10 in 1841 would have been twelve at that wedding. Southwell is a Bausor village - there is also a Thomas Bausor household, a Paul Bauser, and John Bausor's family baptising there for twenty years.",
+      "next": [
+        "Ann was at Lambley in 1851 as 'mother-in-law', which reads like a widow - so Henry probably died 1841x1851, but a death in that window would not tell us WHICH Henry",
+        "JOHN CAMPION, who witnessed the 1818 marriage with his mark, is the live lead upward - on a bride's side a same-surname witness is nearly always her father or brother"
+      ] },
+
+    { "id": "I352548956304", "name": "Henry Sturdy Whitehead", "gap": "no mother",
+      "tried": [
+        "East Riding baptisms (coll 62140) for Henry Whitehead b.1814 Holme upon Spalding Moor - 25 results, no match",
+        "same collection searching the given name 'Henry Sturdy' - 38 results, no Sturdy anywhere",
+        "York marriages (62233) for a Sturdy bride marrying a Whitehead - 396 results, spouse filter did not bind"
+      ],
+      "found_instead": "Nothing. The theory is that STURDY is his mother's maiden surname, on the Victorian middle-name convention. Unproven.",
+      "next": [ "A William Whitehead x [someone] Sturdy marriage, c.1810-14, in the East Riding", "His father William Whitehead I352794229738 is a blank shell with zero records - same problem as Thomas Best" ] },
+
+    { "id": "I352548946147", "name": "Thomas LACKEY", "gap": "census 1891",
+      "tried": [
+        "1891 Thomas Lackey b.1863 Birkenhead exact - 19 results, none in Yorkshire",
+        "1891 every LACKEY resident in Hunslet - only 8 people, no Thomas",
+        "1891 every Lackey born BIRKENHEAD in the whole of England - only FOUR exist, and neither Hunslet one is him",
+        "1891 Thomas Lackey across the Leeds district - 123 results, all Lakey/Lockey of the wrong age and birthplace"
+      ],
+      "found_instead": "A cluster of Lackeys boarding together in Hunslet in Mary H Farrar's household (rec 4833266): JAMES Lackey 40 (b.1851 IRELAND), JOHNNY Lackey 27 (b.1864 Birkenhead), WILLIAM Lackey 13 (b.1878 Hunslet). A second household holds William Lackey 35 (b.1855 Birkenhead) and Mary A Lackey 15. Thomas's parents William Lackey and Mary Anne Milligan were BOTH DEAD by 1882, so orphaned siblings boarding together fits.",
+      "next": [
+        "CANDIDATE, NOT PROVEN, DO NOT ATTACH: 'Johnny Lackey, 27, b.1864 Birkenhead' is age-exact for Thomas, who was born 27 Jun 1863 and so was 27 at the April 1891 census. But Johnny is not a transcription slip for Thomas, and a brother John is at least as likely. Reading the IMAGE of that household would settle it.",
+        "He married in OCTOBER 1891 at Hunslet, six months after the census, so in April he was single and probably boarding - check the household his bride Sarah Jane Emms was in",
+        "Work out his siblings first; the boarding cluster is probably the family"
+      ] },
+
+    { "id": "I352551786300", "name": "Emma Ingleby", "gap": "maiden name, marriage, death",
+      "tried": [
+        "four-collection sweep for a Thomas Ingleby x Emma marriage - nothing",
+        "the Pontefract lead - re-tested and rejected on sound grounds: a Q1-1892 registration is chronologically impossible against Arthur's twice-corroborated 4 Oct 1892 birth",
+        "death sweep 1901-1911 - nothing"
+      ],
+      "found_instead": "There is probably no marriage to find - Thomas and Emma may never have married, which is consistent with Arthur's birth registration.",
+      "next": [ "Treat the maiden name as the target, not the marriage. Arthur's birth registration or his own 1913 marriage lines may name her." ] }
+  ]
+}

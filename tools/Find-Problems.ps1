@@ -285,6 +285,82 @@ if (Test-Path $occPath) {
   Say "  recorded now: $($allOcc.Count) occupation entries, $($distinctOcc.Count) distinct, across $($occOf.Count) people"
 }
 
+# ---------------------------------------------------- 10. blocked / what next
+# TRACKER.md counts what is missing; it cannot say whether a gap is a five-minute
+# lookup or a man who has vanished. data/leads.json carries what was ALREADY
+# TRIED and what to try next, so a failed search is never re-run.
+#
+# NOTHING IN leads.json IS EVIDENCE AND NOTHING IN IT MAY BE ATTACHED. It is a
+# record of dead ends. That rule is enforced structurally: leads.json is read
+# HERE and nowhere else — Build-FamilyData never opens it, so not one word of it
+# can reach the website. If a lead comes good it goes to the tree and the
+# journal, and the entry is deleted.
+$leadPath = Join-Path $root 'data/leads.json'
+if (Test-Path $leadPath) {
+  $LEADS = Get-Content $leadPath -Raw -Encoding UTF8 | ConvertFrom-Json
+
+  # Is the named gap closed in this export? Returns 'closed', 'open', or
+  # 'manual' for anything that cannot honestly be checked from the data.
+  function Test-Gap {
+    param($person, [string]$gap, $parents, $hasMarr)
+    $ev = @($person.events)
+    $yrsResi = @($ev | Where-Object { $_.tag -in 'RESI', 'CENS' } | ForEach-Object { Yr $_.date } | Where-Object { $_ })
+    $parts = @($gap -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    $states = @()
+    $lastWasCensus = $false
+    foreach ($p in $parts) {
+      $t = $p.ToLower()
+      if ($t -match '^census\s+(\d{4})$') { $lastWasCensus = $true; $states += $(if ($yrsResi -contains [int]$matches[1]) { 'closed' } else { 'open' }); continue }
+      if ($t -match '^(\d{4})$' -and $lastWasCensus) { $states += $(if ($yrsResi -contains [int]$matches[1]) { 'closed' } else { 'open' }); continue }
+      $lastWasCensus = $false
+      switch -regex ($t) {
+        '^census'            { $lastWasCensus = $true; $states += $(if ($yrsResi.Count) { 'closed' } else { 'open' }) }
+        'birth|bapti'        { $states += $(if (@($ev | Where-Object { $_.tag -in 'BIRT', 'BAPM', 'CHR' }).Count) { 'closed' } else { 'open' }) }
+        'death|burial'       { $states += $(if (@($ev | Where-Object { $_.tag -in 'DEAT', 'BURI' }).Count) { 'closed' } else { 'open' }) }
+        'marriage'           { $states += $(if ($hasMarr) { 'closed' } else { 'open' }) }
+        'mother'             { $states += $(if ($parents -and $parents.m) { 'closed' } else { 'open' }) }
+        'father'             { $states += $(if ($parents -and $parents.f) { 'closed' } else { 'open' }) }
+        default              { $states += 'manual' }
+      }
+    }
+    if (-not $states.Count) { return 'manual' }
+    if ($states -contains 'open') { return 'open' }
+    if ($states -contains 'manual') { return 'manual' }
+    return 'closed'
+  }
+
+  Say ""
+  Say "=== 10. BLOCKED - WHAT TO TRY NEXT ============================="
+  Say "    (searches already run and FAILED, so nobody re-runs them.)"
+  Say "    !! NOTHING HERE IS EVIDENCE. Nothing in this section may be attached."
+  $open = 0; $shut = 0
+  foreach ($b in @($LEADS.blocked)) {
+    $who = $PPL.($b.id)
+    if (-not $who) { Say ("  ?? {0,-24} {1} - not in this export" -f $b.name, $b.id); continue }
+    $state = Test-Gap $who $b.gap $parentsOf[$b.id] $marrOf[$b.id]
+    if ($state -eq 'closed') {
+      $shut++
+      Say ("  [x] {0,-24} {1} - CLOSED in this export. Delete the entry from data/leads.json." -f $b.name, $b.gap)
+      continue
+    }
+    $open++
+    $flag = $(if ($state -eq 'manual') { ' (close this one by hand)' } else { '' })
+    Say ""
+    Say ("  [ ] {0}  -  {1}{2}" -f $b.name, $b.gap, $flag)
+    if (@($b.tried).Count) {
+      Say "        ALREADY TRIED AND FAILED:"
+      foreach ($x in @($b.tried)) { Say ("          - {0}" -f $x) }
+    }
+    if ($b.found_instead) { Say ("        FOUND INSTEAD: {0}" -f $b.found_instead) }
+    if (@($b.next).Count) {
+      Say "        TRY NEXT:"
+      foreach ($x in @($b.next)) { Say ("          -> {0}" -f $x) }
+    }
+  }
+  Say ""
+  Say "  -> $open still blocked, $shut closed$(if($shut){' (delete the closed entries from data/leads.json)'})"
+}
+
 [IO.File]::WriteAllLines((Join-Path $root 'data/problems.txt'), $report)
 Write-Host ""
 Write-Host "full report -> data/problems.txt"
