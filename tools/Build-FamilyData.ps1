@@ -45,6 +45,17 @@ $SYNONYM = @{
   'kirkbymoorside'        = 'kirkby moorside'
   'newcastle'             = 'newcastle nsw'   # only one Newcastle in this tree, and it is NSW
   'melton'                = 'melton mowbray'
+  # How the enumerators and indexers actually wrote these. A synonym records that
+  # a spelling MEANS a known parish — it invents nothing, unlike a new pin.
+  'long colingham'        = 'north collingham'   # the 1851 spelling; historically Long Collingham
+  'long collingham'       = 'north collingham'
+  'collingham'            = 'north collingham'   # this family's Collingham is the North one (All Saints)
+  'blegdworth'            = 'blidworth'          # as indexed on Martha's birthplace
+  'casingwold'            = 'easingwold'         # one census only; 1871 and 1881 spell it correctly
+  # Lillings Ambo is the PARISH (West + East Lilling); West Lilling is the village
+  # that survives, East Lilling deserted by ~1625. Same spot on any map.
+  'lillings ambo'         = 'west lilling'
+  'east lilling'          = 'west lilling'
 }
 
 # County- and country-only strings ("Yorkshire, England") are deliberately NOT

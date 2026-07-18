@@ -52,6 +52,15 @@
 
   "beverley":              { "label": "Beverley",             "ll": [53.8420, -0.4270] },
   "wetwang":               { "label": "Wetwang",              "ll": [54.0130, -0.5810] },
+
+  "_comment_bausor": "Added for the Bausor / Campion / Weatherill / Liddle records. Every coordinate below is from the settlement's Wikipedia article, decimal form, checked against the county the record names. Coordinates are of the settlement, not the address. The enumerators' spellings are handled as SYNONYMs in Build-FamilyData.ps1, not as separate pins - a synonym says 'this spelling means that parish', which invents nothing. NOTE on 'west lilling': the coordinate is the LILLINGS AMBO parish figure (the parish is West + East Lilling), which sits about 1.5 miles south of Sheriff Hutton where the village itself is 0.75 miles south. Parish-centre, not village-centre - kept because it is the sourced number rather than one I adjusted by eye.",
+  "north collingham":      { "label": "North Collingham",     "ll": [53.1478, -0.7592] },
+  "blidworth":             { "label": "Blidworth",            "ll": [53.0980, -1.1165] },
+  "lambley":               { "label": "Lambley",              "ll": [53.0010, -1.0630] },
+  "easingwold":            { "label": "Easingwold",           "ll": [54.1214, -1.1922] },
+  "sheriff hutton":        { "label": "Sheriff Hutton",       "ll": [54.0892, -1.0050] },
+  "west lilling":          { "label": "West Lilling",         "ll": [54.0670, -1.0110] },
+  "saxton":                { "label": "Saxton",               "ll": [53.8250, -1.2777] },
   "garton on the wolds":   { "label": "Garton on the Wolds",  "ll": [54.0110, -0.4650] },
   "driffield":             { "label": "Driffield",            "ll": [54.0060, -0.4390] },
   "little driffield":      { "label": "Little Driffield",     "ll": [54.0060, -0.4600] },
