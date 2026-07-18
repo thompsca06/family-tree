@@ -61,6 +61,12 @@ function Cites ([Node]$n) {
 function Ev ([Node]$n) {
   [ordered]@{
     tag   = $n.Tag
+    # The event's OWN value, on the tag line itself. Census facts carry their
+    # occupation in the NOTE ("Occupation: Boilermaker; Marital Status: ..."),
+    # but a fact entered directly on Ancestry exports as "1 OCCU Joiner" — the
+    # trade is the value and nowhere else. This used to be dropped, so adding an
+    # Occupation fact by hand did nothing at all and said nothing about it.
+    value = $n.Value
     type  = (KidVal $n 'TYPE')
     date  = (KidVal $n 'DATE')
     place = (KidVal $n 'PLAC')

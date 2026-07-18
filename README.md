@@ -50,7 +50,23 @@ pwsh tools/Find-Problems.ps1       # duplicates, missing vitals, bad places
 # prove nothing in the sources was lost on the way to the site
 # (Build-Site runs this automatically and refuses to publish if it fails)
 pwsh tools/Verify-Content.ps1      # story lines, chapters, events, citations
+
+# the tracker — GENERATED (Build-Site refreshes this and problems.txt too)
+pwsh tools/New-Tracker.ps1         # -> TRACKER.md
 ```
+
+`TRACKER.md` and `data/problems.txt` are generated and refreshed on every publish, so
+they tick themselves off as you work and can never go stale.
+
+`problems.txt` §7–9 are the **occupations worklist**: trades proven in a record but never
+entered as a fact (so absent from the Work page), Ancestry transcriptions to correct, and
+trade words used in the writing that are recorded against nobody. The hand-written part —
+a trade read in a record and attributed to a person — lives in `data/occupations.json`;
+edit that, never the report.
+
+**Occupations reach the site two ways and the build reads both:** in a census note
+(`Occupation: Boilermaker; Marital Status: …`) and as an Occupation fact's own value
+(`1 OCCU Joiner`). The second used to be dropped silently.
 
 `Family Tree.dc.html` is a Claude design component: it uses React but never loads it,
 because the claude.ai design host injects React for it. `Build-Preview` / `Build-Site` add

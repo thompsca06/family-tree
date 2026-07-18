@@ -187,6 +187,104 @@ if ($nc.Count) {
 } else { Say "  everyone in the file is connected" }
 Say "  -> $($nc.Count) people not connected (of $($G.meta.totalInFile) in the file)"
 
+# ---------------------------------------------------------- 7. occupations
+# The Work page is built ONLY from occupations in the export. A trade read in a
+# record and written up in the journal, but never entered as a fact on Ancestry,
+# cannot reach the site at all. The curated list of those lives in
+# data/occupations.json; this checks it against the live tree and TICKS OFF
+# anything now recorded, so it can never sit here stale telling you to do
+# something you have already done.
+#
+# Occupations arrive TWO ways and both are read here, exactly as the build reads
+# them: in a census note ("Occupation: Boilermaker; Marital Status: ...") and as
+# an Occupation fact's own value ("1 OCCU Joiner").
+$occPath = Join-Path $root 'data/occupations.json'
+if (Test-Path $occPath) {
+  $OCCDATA = Get-Content $occPath -Raw -Encoding UTF8 | ConvertFrom-Json
+
+  $occOf = @{}
+  $allOcc = [System.Collections.Generic.List[string]]::new()
+  foreach ($pn in $PPL.PSObject.Properties.Name) {
+    $list = [System.Collections.Generic.List[string]]::new()
+    foreach ($ev in @($PPL.$pn.events)) {
+      if (-not $ev) { continue }
+      if ($ev.tag -eq 'OCCU' -and $ev.value) {
+        $t = ($ev.value -replace '\s+', ' ').Trim()
+        if ($t -and -not ($list -contains $t)) { $list.Add($t) }
+        $allOcc.Add($t)
+      }
+      if (-not $ev.note) { continue }
+      foreach ($seg in ($ev.note -split ';')) {
+        if ($seg -match '(?i)^\s*Occupation:\s*(.+?)\s*$') {
+          $t = ($matches[1] -replace '\s+', ' ').Trim()
+          if ($t -and -not ($list -contains $t)) { $list.Add($t) }
+          $allOcc.Add($t)
+        }
+      }
+    }
+    if ($list.Count) { $occOf[$pn] = @($list) }
+  }
+  $distinctOcc = @($allOcc | Sort-Object -Unique)
+
+  Say ""
+  Say "=== 7. OCCUPATIONS — TRADES TO ADD ============================="
+  Say "    (proven in a record, never entered as a fact, so absent from the site)"
+  $left = 0
+  foreach ($it in @($OCCDATA.add)) {
+    $done = $false; $now = ''
+    if ($it.id -and $it.match -and $occOf.ContainsKey($it.id)) {
+      $hit = @($occOf[$it.id] | Where-Object { $_ -match $it.match })
+      if ($hit.Count) { $done = $true; $now = ($hit -join ', ') }
+    }
+    if ($done) { Say ("  [x] {0,-24} {1}  -- now recorded as: {2}" -f $it.name, $it.trade, $now); continue }
+    $left++
+    Say ("  [ ] {0,-24} {1}" -f $it.name, $it.trade)
+    Say ("        {0}" -f $it.evidence)
+    if ($it.id -and -not $PPL.($it.id)) { Say "        !! not in this export - check the ID, or they may be unconnected" }
+    if ($it.warn) { Say ("        !! {0}" -f $it.warn) }
+  }
+  Say "  -> $left of $(@($OCCDATA.add).Count) still to add"
+
+  Say ""
+  Say "=== 8. OCCUPATIONS — TRANSCRIPTIONS TO CORRECT ================="
+  Say "    (Ancestry's census wording, carried through verbatim as the rule requires)"
+  $fleft = 0
+  foreach ($it in @($OCCDATA.fix)) {
+    if (-not ($distinctOcc -contains $it.recorded)) { Say ("  [x] {0,-20} '{1}' is gone from the export" -f $it.name, $it.recorded); continue }
+    $fleft++
+    $to = $(if ($it.suggest) { " -> $($it.suggest)" } else { '' })
+    Say ("  [ ] {0,-20} {1} census: '{2}'{3}" -f $it.name, $it.year, $it.recorded, $to)
+    if ($it.warn) { Say ("        !! {0}" -f $it.warn) }
+  }
+  Say "  -> $fleft of $(@($OCCDATA.fix).Count) still to correct"
+
+  # trade words used in the writing that are in NOBODY's recorded occupations
+  $prose = ''
+  foreach ($mdf in @(Get-ChildItem (Split-Path -Parent $root) -Recurse -Filter *.md -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch '\\_Archive\\|\\site\\' })) {
+    $prose += "`n" + ([IO.File]::ReadAllText($mdf.FullName, [Text.Encoding]::UTF8))
+  }
+  $flat = { param($s) ($s -replace '[^A-Za-z]', '').ToLower() }
+  $recordedBlob = & $flat ($distinctOcc -join ' ')
+  $curatedBlob = & $flat ((@($OCCDATA.add | ForEach-Object { "$($_.trade) $($_.match)" }) -join ' ') -replace '[.?*|]', ' ')
+  $spotted = @()
+  foreach ($w in @($OCCDATA.vocabulary)) {
+    $wl = & $flat $w
+    if (-not $wl -or $recordedBlob.Contains($wl) -or $curatedBlob.Contains($wl)) { continue }
+    $n = @([regex]::Matches($prose, [regex]::Escape($w), 'IgnoreCase')).Count
+    if ($n -gt 0) { $spotted += , @{ w = $w; n = $n } }
+  }
+  Say ""
+  Say "=== 9. OCCUPATIONS — IN THE WRITING, RECORDED NOWHERE =========="
+  Say "    (trade words used in the journal or stories but in nobody's occupations."
+  Say "     Most will be background or a man ruled out - read the context first.)"
+  foreach ($s in @($spotted | Sort-Object { - $_.n })) { Say ("  {0,3}x  {1}" -f $s.n, $s.w) }
+  Say "  -> $(@($spotted).Count) trade words to check"
+  foreach ($x in @($OCCDATA.ruledOut)) { Say ("  RULED OUT: {0}" -f ($x -replace '\*\*', '')) }
+  Say ""
+  Say "  recorded now: $($allOcc.Count) occupation entries, $($distinctOcc.Count) distinct, across $($occOf.Count) people"
+}
+
 [IO.File]::WriteAllLines((Join-Path $root 'data/problems.txt'), $report)
 Write-Host ""
 Write-Host "full report -> data/problems.txt"

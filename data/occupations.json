@@ -1,0 +1,85 @@
+{
+  "_comment": [
+    "Curated seed for tools/New-OccupationsWorklist.ps1. THIS is the hand part - a trade read in a",
+    "record and attributed to a person. The script does the mechanical part: checks the live GEDCOM,",
+    "ticks off anything now recorded, and scans the journal and stories for trades not yet on the list.",
+    "",
+    "Add an item when you find a trade in a record that is not yet an Occupation fact on Ancestry.",
+    "'match' is what the script looks for in that person's recorded occupations to call it done -",
+    "keep it a short distinctive stem (regex, case-insensitive)."
+  ],
+
+  "add": [
+    { "id": "I352794101334", "name": "Thomas Champion", "trade": "plate-layer", "match": "plate.?layer",
+      "group": "The three \"doorways\" - where a trade is nearly all we have",
+      "evidence": "The 1889 marriage register. One line, and the only thing it says about him." },
+
+    { "id": "I352794100804", "name": "John Discombe", "trade": "bootmaker", "match": "boot.?maker",
+      "group": "The three \"doorways\" - where a trade is nearly all we have",
+      "evidence": "His daughter's wedding line - \"John Discombe, bootmaker\". No dates, no birthplace, nothing else." },
+
+    { "id": "I352551660363", "name": "William Constantine", "trade": "policeman", "match": "police",
+      "group": "The three \"doorways\" - where a trade is nearly all we have",
+      "evidence": "Hannah Mills's marriage lines, 2 Aug 1902, Leeds St John - \"William Constantine (deceased), POLICEMAN\"." },
+
+    { "id": "I352548956304", "name": "Henry Sturdy Whitehead", "trade": "wood sawyer", "match": "sawyer",
+      "group": "The Whitehead wood trades - three generations, straight down the line",
+      "evidence": "Probate, 10 Apr 1893 - \"formerly wood sawyer\". Currently recorded only as \"Woodman\"." },
+
+    { "id": "I352548944399", "name": "Alfred Whitehead", "trade": "joiner", "match": "joiner",
+      "group": "The Whitehead wood trades - three generations, straight down the line",
+      "evidence": "The same probate - \"to Alfred Whitehead joiner\". Henry sawed the wood; Alfred joined it; Henry jr was a wheelwright (already recorded)." },
+
+    { "id": "I352551786299", "name": "Thomas Ingleby", "trade": "horseman on a farm", "match": "horse",
+      "group": "The horse trades",
+      "evidence": "1901 census, Eastrington, with Emma and young Arthur. Currently only Scholar / Railway Worker / Goods Porter." },
+
+    { "id": "I352794347301", "name": "John Mills", "trade": "drayman", "match": "drayman",
+      "group": "The horse trades",
+      "evidence": "His daughter Hannah's marriage lines. A dray is a horse-drawn cart - he is a railway porter in the censuses and a drayman on the wedding line." },
+
+    { "id": "I352793559056", "name": "Thomas Ingleby", "trade": "cordwainer", "match": "cordwainer|shoe.?maker",
+      "group": "The rest",
+      "evidence": "Kirkby Malzeard baptism - \"Cordwainer, of Mickley\". NB: this is the SHOEMAKER Thomas (b. ~1812), not the horseman." },
+
+    { "id": "I352551577622", "name": "John Blagg", "trade": "railway policeman", "match": "police",
+      "group": "The rest",
+      "evidence": "Written up in story-up-the-midland-line.md - he guarded the goods yards." },
+
+    { "id": "I352548945570", "name": "Arthur Ingleby", "trade": "stoker (Sto. 2 -> Sto. 1 -> Leading Stoker)", "match": "stoker",
+      "group": "The rest",
+      "evidence": "Royal Navy service record, TNA ADM 188/1117, SS 111246. Currently recorded only as \"Boilermaker\"." },
+
+    { "id": null, "name": "Robert Best, and his wife Jane", "trade": "mason (Tadcaster) / woollen weaver (Wibsey)", "match": null,
+      "group": "The rest",
+      "evidence": "Ann Elizabeth Best's origins - born Wibsey, autumn 1870, daughter of Robert Best, a mason from Tadcaster, and Jane, a woollen weaver from Wibsey.",
+      "warn": "NEITHER IS IN THE TREE YET - the only Bests in the export are Ann Elizabeth, James R. and Thomas. Add the people first, then their trades. That also closes Ann Elizabeth's \"no father / no mother\" gap on the tracker." }
+  ],
+
+  "fix": [
+    { "name": "Jessie Champion",  "year": "1911", "recorded": "Fronser Presser",                "suggest": "Trouser Presser" },
+    { "name": "Hannah Mills",     "year": "1911", "recorded": "Taitoris Finisher",              "suggest": "Tailoress Finisher" },
+    { "name": "Thomas Lackey",    "year": "1921", "recorded": "Machine Revitor",                "suggest": "Machine Riveter" },
+    { "name": "William Blagg",    "year": "1921", "recorded": "Engine Driver, Midland Tailway", "suggest": "Engine Driver, Midland Railway" },
+    { "name": "Lily Constantine", "year": "1921", "recorded": "Baister",                        "suggest": null,
+      "warn": "READ THE IMAGE FIRST. This may not be an error at all - a \"baister\" is a real tailoring job, the hand who puts in the basting stitches, and this is a family already in the clothing trade. Do not change it on a guess." }
+  ],
+
+  "ruledOut": [
+    "\"groom\" - appears a dozen times in the journal, every one of them **bride**groom in a marriage record. Not the stable trade.",
+    "\"shepherd\" - the only hit is the surname **Shepherdson** (Thomas Shepherdson, the householder young Henry Whitehead boarded with). Not a trade."
+  ],
+
+  "vocabulary": [
+    "agricultural labourer","ag lab","farm servant","farm labourer","labourer","coal miner","miner","hewer","collier",
+    "charwoman","housekeeper","laundress","washerwoman","dressmaker","seamstress","tailoress","tailor","presser","baister",
+    "weaver","spinner","mill hand","cordwainer","shoemaker","bootmaker","clogger","blacksmith","farrier","wheelwright",
+    "joiner","carpenter","cabinet maker","stonemason","mason","bricklayer","brickmaker","plasterer","plumber","glazier",
+    "slater","engine driver","engine cleaner","loco fireman","fireman","stoker","boilermaker","boiler maker","riveter",
+    "fitter","turner","moulder","puddler","railway porter","platelayer","plate-layer","signalman","shunter","carter",
+    "carrier","drayman","waggoner","wagoner","horseman","ostler","coachman","gardener","butcher","baker","confectioner",
+    "grocer","draper","publican","innkeeper","brewer","maltster","cooper","sawyer","woodman","gamekeeper","mariner",
+    "seaman","policeman","police constable","clerk","bookkeeper","schoolmaster","warehouseman","packer","picture framer",
+    "dray checker","lamp man","screen boy","electrical engineer","motor driver","chauffeur","millwright","mill wright"
+  ]
+}

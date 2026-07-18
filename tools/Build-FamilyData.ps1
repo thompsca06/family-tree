@@ -326,15 +326,22 @@ foreach ($id in $ids) {
   elseif ($dy) { $years = "d. $dy" }
   else { $years = "$EM_DASH" }
 
-  # --- occupations, verbatim from census / 1939 Register notes
+  # --- occupations, verbatim. TWO places carry them and both must be read:
+  #   1. a census/1939 fact puts it in the NOTE — "Occupation: Boilermaker; Marital Status: ..."
+  #   2. an Occupation fact entered on Ancestry exports as "1 OCCU Joiner" — the trade is the
+  #      event's own VALUE. Reading only the notes meant adding a trade by hand did nothing,
+  #      silently, and the Work page never changed.
   $occs = [System.Collections.Generic.List[string]]::new()
+  $addOcc = {
+    param([string]$o)
+    $o = ($o -replace '\s+', ' ').Trim()
+    if ($o -and -not ($occs | Where-Object { $_ -ieq $o })) { $occs.Add($o) }
+  }
   foreach ($e in ($p.events | Sort-Object { Get-Year $_.date })) {
+    if ($e.tag -eq 'OCCU' -and $e.value) { & $addOcc $e.value }
     if (-not $e.note) { continue }
     foreach ($seg in ($e.note -split ';')) {
-      if ($seg -match '(?i)^\s*Occupation:\s*(.+?)\s*$') {
-        $o = $matches[1].Trim()
-        if ($o -and -not ($occs | Where-Object { $_ -ieq $o })) { $occs.Add($o) }
-      }
+      if ($seg -match '(?i)^\s*Occupation:\s*(.+?)\s*$') { & $addOcc $matches[1] }
     }
   }
 
@@ -357,6 +364,8 @@ foreach ($id in $ids) {
     switch ($e.tag) {
       'RESI' { $lab = Resi-Label $title }
       'EVEN' { $lab = if ($e.type) { $e.type } else { 'Event' } }
+      # an Occupation fact reads as the trade itself, not a bare "OCCU"
+      'OCCU' { $lab = if ($e.value) { $e.value } else { 'Occupation' } }
       'MARR' {
         $other = ($marrEv[$id] | Where-Object { $_.ev -eq $e } | Select-Object -First 1).other
         $oname = if ($other -and $PPL.$other) { (Title-Case $PPL.$other.givn) + ' ' + (Title-Case $PPL.$other.surn) } else { $null }

@@ -34,6 +34,19 @@ Write-Host "== verifying nothing in the sources is lost"
 pwsh -NoProfile -File (Join-Path $PSScriptRoot 'Verify-Content.ps1') | Out-Host
 if ($LASTEXITCODE -ne 0) { throw "refusing to build: content from the sources is missing from the site (see above)" }
 
+# TRACKER.md and problems.txt are regenerated from the same fresh export, so they
+# can never sit there stale telling you to do something you have already done.
+# They are notes for the research, not part of the published site — a failure here
+# must not stop a publish, so it is reported and stepped over.
+Write-Host "== refreshing the tracker and the problem report"
+try {
+  & (Join-Path $PSScriptRoot 'New-Tracker.ps1') | Out-Host
+  & (Join-Path $PSScriptRoot 'Find-Problems.ps1') | Out-Null
+  Write-Host "  wrote data/problems.txt"
+} catch {
+  Write-Host "  !! report refresh failed (the site build is unaffected): $($_.Exception.Message)" -ForegroundColor Yellow
+}
+
 if (Test-Path $dist) { Remove-Item $dist -Recurse -Force }
 New-Item -ItemType Directory -Force $dist | Out-Null
 
