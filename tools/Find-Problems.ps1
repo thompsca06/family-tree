@@ -93,6 +93,60 @@ foreach ($id in $PPL.PSObject.Properties.Name) {
 }
 Say "  -> $split people affected"
 
+# ------------------------------ 2b. one parent missing, the other family has one
+# The blind spot between §2 and §4, found by eye on the tree view and not by this
+# report. A child sits in a family that has a FATHER BUT NO WIFE, while the same
+# father has ANOTHER family that does have one — so the child is parked in a
+# wifeless duplicate and their real mother is a click away.
+#
+# §2 could not see it: it compares a father and a mother in different families,
+# and here there is no mother at all, so it has nothing to compare and says 0.
+# §4 does report "no mother" but only walks the DIRECT LINE, and these are
+# usually collateral children.
+#
+# It happens for an ordinary reason and will recur: children attached from a
+# census taken AFTER their mother died are created motherless, because she is not
+# on the page to attach. Thomas Ingleby's sons Thomas (1847) and William (1851)
+# came off the 1861 census; Dorothy Tomlinson died in 1854.
+#
+# Precise by design: a man with children by two women has two families that BOTH
+# have wives, so he never fires here.
+Say ""
+Say "=== 2b. ONE PARENT MISSING, THE OTHER FAMILY HAS ONE ==========="
+Say "    (child is in a family with only a father (or only a mother), while that"
+Say "     parent has ANOTHER family that does have a spouse - the child is in a"
+Say "     duplicate family and the real parent is on the other one)"
+$halfFam = 0
+foreach ($id in $PPL.PSObject.Properties.Name) {
+  $p = $PPL.$id
+  foreach ($fid in @($p.famc)) {
+    $f = $FAMS.$fid
+    if (-not $f) { continue }
+    # which single parent is present, and who is the other family's spouse?
+    $lone = $null; $loneRole = ''; $missing = ''
+    if ($f.husb -and -not $f.wife) { $lone = $f.husb; $loneRole = 'father'; $missing = 'mother' }
+    elseif ($f.wife -and -not $f.husb) { $lone = $f.wife; $loneRole = 'mother'; $missing = 'father' }
+    if (-not $lone) { continue }
+    $lp = $PPL.$lone
+    if (-not $lp) { continue }
+    # does that parent have ANOTHER family that does carry a spouse?
+    $elsewhere = @()
+    foreach ($ofid in @($lp.fams)) {
+      if ($ofid -eq $fid) { continue }
+      $of = $FAMS.$ofid
+      if (-not $of) { continue }
+      $spouse = $(if ($loneRole -eq 'father') { $of.wife } else { $of.husb })
+      if ($spouse -and $PPL.$spouse) { $elsewhere += , @{ fam = $ofid; who = $spouse } }
+    }
+    if (-not $elsewhere.Count) { continue }
+    $halfFam++
+    $names = @($elsewhere | ForEach-Object { "$(Nm $PPL.($_.who)) [$($_.fam)]" }) -join ', '
+    Say ("  {0}  {1,-28} in {2} with {3} {4} and NO {5}" -f $id, (Nm $p), $fid, $loneRole, (Nm $lp), $missing)
+    Say ("        {0} also has: {1}  <- the {2} is probably there" -f (Nm $lp), $names, $missing)
+  }
+}
+Say "  -> $halfFam children in a one-parent duplicate family"
+
 # ---------------------------------------------------- 3. undated people
 Say ""
 Say "=== 3. PEOPLE WITH NO BIRTH AND NO BAPTISM ====================="
