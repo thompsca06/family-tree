@@ -39,12 +39,19 @@ if ($LASTEXITCODE -ne 0) { throw "refusing to build: content from the sources is
 # They are notes for the research, not part of the published site — a failure here
 # must not stop a publish, so it is reported and stepped over.
 Write-Host "== refreshing the tracker and the problem report"
+# Separate try blocks on purpose. Sharing one meant a broken data/leads.json
+# aborted New-Tracker AND skipped Find-Problems, leaving problems.txt quietly
+# stale — one bad comma taking out a report that had nothing to do with it.
 try {
   & (Join-Path $PSScriptRoot 'New-Tracker.ps1') | Out-Host
+} catch {
+  Write-Host "  !! TRACKER.md NOT REFRESHED - IT IS NOW STALE: $($_.Exception.Message)" -ForegroundColor Red
+}
+try {
   & (Join-Path $PSScriptRoot 'Find-Problems.ps1') | Out-Null
   Write-Host "  wrote data/problems.txt"
 } catch {
-  Write-Host "  !! report refresh failed (the site build is unaffected): $($_.Exception.Message)" -ForegroundColor Yellow
+  Write-Host "  !! problems.txt NOT REFRESHED - IT IS NOW STALE: $($_.Exception.Message)" -ForegroundColor Red
 }
 
 if (Test-Path $dist) { Remove-Item $dist -Recurse -Force }

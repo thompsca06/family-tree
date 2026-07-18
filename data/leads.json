@@ -77,8 +77,29 @@
         "same collection searching the given name 'Henry Sturdy' - 38 results, no Sturdy anywhere",
         "York marriages (62233) for a Sturdy bride marrying a Whitehead - 396 results, spouse filter did not bind"
       ],
-      "found_instead": "Nothing. The theory is that STURDY is his mother's maiden surname, on the Victorian middle-name convention. Unproven.",
-      "next": [ "A William Whitehead x [someone] Sturdy marriage, c.1810-14, in the East Riding", "His father William Whitehead I352794229738 is a blank shell with zero records - same problem as Thomas Best" ] },
+      "found_instead": "The 1844 Howden marriage register (coll 62141, rec 105674426, PE121/21) names his father as WILLIAM WHITEHEAD, INNKEEPER, and Henry himself as a GENTLEMAN'S SERVANT of Howden. It does NOT name his mother - an 1837-form register names fathers only - so the STURDY-as-maiden-name theory is untouched. But his father is no longer a blank name.",
+      "next": [
+        "STRONG NEW ANCHOR: hunt a WILLIAM WHITEHEAD, INNKEEPER, at HOWDEN marrying c.1810-14. An innkeeper is licensed, rated and listed in trade directories - he leaves far more paper than a labourer, and that is a much better search than the blind East Riding baptism sweep that already failed.",
+        "Alehouse recognizances / victuallers' licences for Howden, and any Howden trade directory of the 1820s-40s, should name the inn and place the family",
+        "If the marriage is found it should name the bride - and the test of the whole theory is whether her surname is STURDY"
+      ] },
+
+    { "id": "I352794229738", "name": "William Whitehead", "gap": "birth, marriage, death",
+      "tried": [],
+      "found_instead": "Was a zero-record shell existing only as a name in a citation. Now carries his first ever fact: INNKEEPER, 1844, from his son's Howden marriage register. Nothing else is known - no birth, no marriage, no death, no census, and no wife on the tree.",
+      "next": [
+        "His marriage c.1810-14 is the single most valuable record on this branch: it would give his wife, and her surname is the test of whether STURDY is the mother's maiden name (see Henry Sturdy Whitehead)",
+        "Search him as an INNKEEPER/VICTUALLER at Howden - licensing records, rate books, trade directories, and the 1841/1851 censuses where an innkeeper is easy to spot",
+        "He should be findable in the 1841 census at Howden if still living - his son married there in 1844"
+      ] },
+
+    { "id": "I352794567377", "name": "William Laverack", "gap": "birth, marriage, death",
+      "tried": [],
+      "found_instead": "Also a zero-record shell until the same 1844 register gave him GAMEKEEPER, 1844. His daughter Martha was baptised 25 Jan 1818 at Snaith (Cowick), and the tree carries a wife, Ann Wright, whose maiden name came off that baptism transcription.",
+      "next": [
+        "A gamekeeper works for a named estate - the Howden/Cowick area landowner's records may place him",
+        "William x Ann Wright's own marriage, c.1810s, Snaith/Cowick - it would also cross-check the Wright surname, which currently rests only on a baptism transcription"
+      ] },
 
     { "id": "I352548946147", "name": "Thomas LACKEY", "gap": "census 1891",
       "tried": [

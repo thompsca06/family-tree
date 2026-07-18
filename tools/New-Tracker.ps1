@@ -130,7 +130,7 @@ foreach ($gen in ($gens.Keys | Sort-Object)) {
     $rows.Add([pscustomobject]@{
         Gen = $gen; Id = $id; Name = (Get-Name $who)
         Born = $birthYear; Died = $deathYear
-        Status = $status; Gaps = @($gaps); Sources = $srcCount; Media = $mediaCount
+        Status = $status; Gaps = @($gaps); Sources = $srcCount; Media = $mediaCount; HasMarr = $hasMarr
       })
   }
 }
@@ -153,6 +153,76 @@ $md.Add('> counting it would mark most of this line incomplete for no reason. Tr
 $md.Add('> *are* proven in a record but not yet entered are listed in')
 $md.Add('> `site/data/problems.txt` **§7–9**.')
 $md.Add('')
+
+# ---------------------------------------------------------------- leads
+# data/leads.json carries what was ALREADY TRIED for a gap and what to try next.
+# It belongs HERE, beside the person, not in problems.txt: a lead is not a defect,
+# it is the plan for a gap that is already correctly recorded. Note this does NOT
+# affect anyone's status - a lead annotates a gap, it never creates or closes one.
+#
+# NOTHING IN leads.json IS EVIDENCE AND NONE OF IT MAY BE ATTACHED. Enforced
+# structurally: this file and this file alone reads it. Build-FamilyData never
+# opens it, so not one word can reach the published website.
+#
+# A broken leads.json must be LOUD. Silently swallowing a parse error means the
+# leads vanish from the tracker and nobody notices - which has already happened
+# once, to a missing comma.
+$leadsFor = @{}
+# parent lookup, so a "no father" / "no mother" lead can close itself
+$PARENTOF = @{}
+foreach ($fid in $FAMS.PSObject.Properties.Name) {
+  $fam = $FAMS.$fid
+  foreach ($c in @($fam.chil)) {
+    if (-not $c) { continue }
+    if (-not $PARENTOF.ContainsKey($c)) { $PARENTOF[$c] = @{ f = $null; m = $null } }
+    if ($fam.husb -and -not $PARENTOF[$c].f) { $PARENTOF[$c].f = $fam.husb }
+    if ($fam.wife -and -not $PARENTOF[$c].m) { $PARENTOF[$c].m = $fam.wife }
+  }
+}
+$leadPath = Join-Path $siteDir 'data/leads.json'
+if (Test-Path $leadPath) {
+  $raw = Get-Content $leadPath -Raw -Encoding UTF8
+  try { $LEADS = $raw | ConvertFrom-Json }
+  catch {
+    Write-Host ""
+    Write-Host "  !! data/leads.json IS NOT VALID JSON - NO LEADS ARE IN THIS TRACKER" -ForegroundColor Red
+    Write-Host "     $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "     Fix the file and re-run; a trailing or missing comma is the usual cause." -ForegroundColor Red
+    throw "leads.json is not valid JSON - refusing to write a tracker that silently drops the leads"
+  }
+  foreach ($b in @($LEADS.blocked)) {
+    if ($b.id) { $leadsFor[$b.id] = $b }
+  }
+}
+
+# Has the gap a lead names already closed? Then the lead is spent and says so,
+# rather than sitting there sending you after something you have found.
+function Test-LeadClosed {
+  param($who, [string]$gap, [bool]$hasMarr)
+  if (-not $who -or -not $gap) { return $false }
+  $ev = @($who.events)
+  $yrs = @($ev | Where-Object { $_.tag -in 'RESI', 'CENS' } | ForEach-Object { Get-Year $_.date } | Where-Object { $_ })
+  $parents = $PARENTOF[$who.id]
+  $states = @(); $lastCensus = $false
+  foreach ($p in @($gap -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
+    $t = $p.ToLower()
+    if ($t -match '^census\s+(\d{4})$') { $lastCensus = $true; $states += [bool]($yrs -contains [int]$matches[1]); continue }
+    if ($t -match '^(\d{4})$' -and $lastCensus) { $states += [bool]($yrs -contains [int]$matches[1]); continue }
+    $lastCensus = $false
+    switch -regex ($t) {
+      '^census'      { $lastCensus = $true; $states += [bool]$yrs.Count }
+      'birth|bapti'  { $states += [bool]@($ev | Where-Object { $_.tag -in 'BIRT', 'BAPM', 'CHR' }).Count }
+      'death|burial' { $states += [bool]@($ev | Where-Object { $_.tag -in 'DEAT', 'BURI' }).Count }
+      'marriage'     { $states += $hasMarr }
+      'mother'       { $states += [bool]($parents -and $parents.m) }
+      'father'       { $states += [bool]($parents -and $parents.f) }
+      default        { $states += $false }   # not machine-checkable: never auto-close
+    }
+  }
+  if (-not $states.Count) { return $false }
+  return (-not ($states -contains $false))
+}
+
 $done = @($rows | Where-Object Status -eq 'DONE').Count
 $partial = @($rows | Where-Object Status -eq 'PARTIAL').Count
 $notStarted = @($rows | Where-Object Status -eq 'NOT STARTED').Count
@@ -175,6 +245,25 @@ foreach ($gen in ($rows.Gen | Sort-Object -Unique)) {
     $md.Add("- $mark **$($row.Name)** ($life) $BT$($row.Id)$BT")
     $md.Add("  - $($row.Status) | $($row.Sources) sources | $($row.Media) documents attached")
     if ($row.Gaps.Count) { foreach ($gap in $row.Gaps) { $md.Add("  - **missing:** $gap") } }
+
+    # what has already been tried for this person's gap, and what to try next
+    $lead = $leadsFor[$row.Id]
+    if ($lead) {
+      $spent = Test-LeadClosed $PPL.($row.Id) $lead.gap ([bool]$row.HasMarr)
+      if ($spent) {
+        $md.Add("  - ✅ **lead spent** - *$($lead.gap)* is now recorded. Delete this entry from ``site/data/leads.json``.")
+      } else {
+        if (@($lead.tried).Count) {
+          $md.Add("  - **tried, and failed:**")
+          foreach ($x in @($lead.tried)) { $md.Add("    - $x") }
+        }
+        if ($lead.found_instead) { $md.Add("  - **found instead:** $($lead.found_instead)") }
+        if (@($lead.next).Count) {
+          $md.Add("  - **try next:**")
+          foreach ($x in @($lead.next)) { $md.Add("    - $x") }
+        }
+      }
+    }
   }
   $md.Add('')
 }
