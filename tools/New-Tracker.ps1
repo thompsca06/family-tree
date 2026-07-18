@@ -145,6 +145,13 @@ $md.Add('>')
 $md.Add('> It reports only what the tree can prove: what is attached and what is missing.')
 $md.Add('> *Why* an identification was accepted, and who was rejected, belongs in the')
 $md.Add('> journals. What to search next belongs in the worklist.')
+$md.Add('>')
+$md.Add('> **Occupations are deliberately NOT tracked here.** This file lists what *must*')
+$md.Add('> exist and is not attached yet — everyone was born, married and died. A trade')
+$md.Add('> may genuinely never have existed (most wives and children have none), so')
+$md.Add('> counting it would mark most of this line incomplete for no reason. Trades that')
+$md.Add('> *are* proven in a record but not yet entered are listed in')
+$md.Add('> `site/data/problems.txt` **§7–9**.')
 $md.Add('')
 $done = @($rows | Where-Object Status -eq 'DONE').Count
 $partial = @($rows | Where-Object Status -eq 'PARTIAL').Count
