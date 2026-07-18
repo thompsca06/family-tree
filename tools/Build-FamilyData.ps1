@@ -473,7 +473,10 @@ foreach ($id in $ids) {
     })
 }
 $graves = @($graveGroups.Values | Sort-Object { - $_.people.Count })
-foreach ($g in $graves) { $g.people = @($g.people | Sort-Object { if ($_.year) { $_.year } else { 9999 } }) }
+# NB: never name a loop variable $g here — PowerShell variables are case-insensitive,
+# so $g overwrites $G, the parsed GEDCOM, and everything reading $G.meta afterwards
+# silently gets nothing (this is how meta.exported was published as null).
+foreach ($grp in $graves) { $grp.people = @($grp.people | Sort-Object { if ($_.year) { $_.year } else { 9999 } }) }
 
 # ---------------------------------------------------------------- alias
 # Slugs the page's hand-written stories and place notes refer to. Verified below.
@@ -732,7 +735,15 @@ function Md-Html {
 
 $diary = @()
 $journalLinks = @{}      # personId -> list of links
-$tagBadIds = @()         # tagged IDs that are not in the tree
+$tagBadIds = @()         # tagged IDs that are in NO export at all — a real error
+$tagParked = @()         # tagged IDs that ARE in the tree but not connected yet
+# People in the Ancestry tree with no path to the home person. A tag pointing at
+# one of them is NOT a mistake: the chapter is right, the person is simply
+# parked until the connecting record is found (the Eavestone Inglebys). Keep the
+# tag, stay quiet about it — and keep shouting about an ID in no export at all,
+# which is the merge-retired-ID case that has bitten before.
+$notConnectedIds = @{}
+foreach ($x in @($G.meta.notConnected)) { if ($x -and $x.id) { $notConnectedIds[$x.id] = $x.name } }
 $untagged = @()          # ##-level sections with no tag at all
 $taggedCount = 0
 $decoyCount = 0
@@ -794,7 +805,11 @@ foreach ($entry in ($found | Sort-Object { $_.meta.order }, { $_.meta.id })) {
     $secHtml = Md-Html (($bodyLines) -join "`n") -Fragment
     foreach ($role in @('about', 'mentions')) {
       foreach ($personId in $tag.$role) {
-        if (-not $people.Contains($personId)) { $tagBadIds += "$($d.id) '$($sec.heading)' -> $personId"; continue }
+        if (-not $people.Contains($personId)) {
+          if ($notConnectedIds.ContainsKey($personId)) { $tagParked += $personId }
+          else { $tagBadIds += "$($d.id) '$($sec.heading)' -> $personId" }
+          continue
+        }
         if (-not $journalLinks[$personId]) { $journalLinks[$personId] = [System.Collections.Generic.List[object]]::new() }
         $journalLinks[$personId].Add([ordered]@{
             j       = $d.id
@@ -997,7 +1012,7 @@ foreach ($id in $ids) {
   # SINGLE-element array into a bare object. Both break `p.docs.map(...)` in the
   # browser. A List<object> always serialises as a proper JSON array.
   $gapList = [System.Collections.Generic.List[object]]::new()
-  foreach ($g in $gaps) { $gapList.Add($g) }
+  foreach ($gapItem in $gaps) { $gapList.Add($gapItem) }
   $p.gaps = $gapList
 
   $docList = [System.Collections.Generic.List[object]]::new()
@@ -1008,7 +1023,7 @@ foreach ($id in $ids) {
   if ($photosFor.ContainsKey($id)) {
     $p.photo = $photosFor[$id].portrait
     $gal = [System.Collections.Generic.List[object]]::new()
-    foreach ($g in @($photosFor[$id].all)) { $gal.Add($g) }
+    foreach ($ph in @($photosFor[$id].all)) { $gal.Add($ph) }
     $p.gallery = $gal
   }
   else {
@@ -1142,6 +1157,10 @@ Write-Host ""
 Write-Host "  journals        : $($diary.Count)"
 Write-Host "  section links   : $taggedCount  (to $($journalLinks.Count) people)"
 Write-Host "  decoy sections  : $decoyCount  (deliberately linked to nobody)"
+if ($tagParked.Count) {
+  $n = @($tagParked | Sort-Object -Unique).Count
+  Write-Host "  parked tags     : $($tagParked.Count) links to $n people not yet connected to the tree (tags kept; they return when the line joins up)" -ForegroundColor DarkGray
+}
 if ($tagBadIds.Count) {
   Write-Host "  !! TAGGED ID NOT IN TREE ($($tagBadIds.Count)) — fix the tag or re-export:" -ForegroundColor Red
   $tagBadIds | ForEach-Object { Write-Host "       $_" -ForegroundColor Red }
