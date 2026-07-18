@@ -71,6 +71,12 @@
   .diaryprose figure img{width:100%;height:auto;display:block;border-radius:9px;
     border:1px solid rgba(43,37,28,.11)}
   .diaryprose figcaption{font:400 12px/1.5 Archivo;color:var(--ink-faint);margin-top:8px}
+  /* who made the picture, when, and under what licence — read from the folder's
+     CREDITS.md and shown with the picture, not in a file the reader can't open */
+  .diaryprose .imgcredit{display:block;margin-top:4px;font:400 10.5px/1.5 'IBM Plex Mono',monospace;
+    color:var(--ink-faint);opacity:.85}
+  .diaryprose .imgcredit a{color:var(--ink-faint);text-decoration:underline}
+  .diaryprose .imgcredit a:hover{color:var(--rust)}
   .diaryprose p img{max-width:100%;height:auto}
   /* the date under a section heading, lifted out of the prose */
   .diaryprose .secdate{font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;

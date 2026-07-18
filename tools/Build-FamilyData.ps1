@@ -718,8 +718,12 @@ function Md-Html {
       FlushPara $html $para
       if ($inList) { [void]$html.Append('</ul>'); $inList = $false }
       $cap = $matches[1]; $src = $matches[2]
-      [void]$html.Append('<figure><img src="' + $src + '" alt="' + $cap + '">' +
-        $(if ($cap) { '<figcaption>' + (Inline $cap) + '</figcaption>' } else { '' }) + '</figure>')
+      $credit = Credit-Line $src
+      $capHtml = ''
+      if ($cap -or $credit) {
+        $capHtml = '<figcaption>' + $(if ($cap) { Inline $cap } else { '' }) + $credit + '</figcaption>'
+      }
+      [void]$html.Append('<figure><img src="' + $src + '" alt="' + $cap + '">' + $capHtml + '</figure>')
       $justHeaded = $false
       continue
     }
@@ -748,6 +752,90 @@ function Md-Html {
   if ($inList) { [void]$html.Append('</ul>') }
   if ($inQuote) { [void]$html.Append('</blockquote>') }
   return $html.ToString()
+}
+
+# ---- picture credits ---------------------------------------------------------
+# Every img/<folder>/CREDITS.md holds a table: file | what it is | creator | date
+# | licence | source. The credit belongs UNDER THE PICTURE, where a reader
+# actually is — not in a file they cannot open — so it is read from there and
+# rendered into the caption. Written once, in the CREDITS.md, like everything
+# else on this site. Anything the table does not name simply gets no credit line
+# rather than an invented one.
+# A markdown link whose URL may itself contain brackets — Wikimedia paths do:
+#   [Wikimedia Commons](https://.../File:HMS_Endymion_(1865).jpg)
+# A lazy \((.+?)\) stops at the FIRST ")" and leaves ".jpg)" trailing in the text.
+$LINKRE = '\[([^\]]*)\]\((https?://(?:[^()\s]|\([^()\s]*\))*)\)'
+function Md-Plain { param([string]$s)
+  if (-not $s) { return '' }
+  $s = $s -replace $LINKRE, '$1'
+  $s = $s -replace '\*\*|\*|`|_', ''
+  return ($s -replace '\s+', ' ').Trim()
+}
+# Columns differ between CREDITS files (one has a Creator column, one does not),
+# so read them BY HEADER NAME, never by position.
+$IMGCREDIT = @{}
+foreach ($cf in @(Get-ChildItem (Join-Path $root 'img') -Recurse -Filter 'CREDITS.md' -ErrorAction SilentlyContinue)) {
+  $cols = $null
+  foreach ($row in ([IO.File]::ReadAllLines($cf.FullName, [Text.Encoding]::UTF8))) {
+    if ($row -notmatch '^\s*\|') { $cols = $null; continue }
+    if ($row -match '^\s*\|[\s\-:|]+\|\s*$') { continue }               # the |---|---| rule
+    $cells = @(($row -split '\|'))
+    if ($cells.Count -gt 2) { $cells = $cells[1..($cells.Count - 2)] }  # drop the outer empties
+    $cells = @($cells | ForEach-Object { $_.Trim() })
+    if (-not $cols) {                                                   # first row of a table = its header
+      $cols = @{}
+      for ($i = 0; $i -lt $cells.Count; $i++) {
+        switch -regex ((Md-Plain $cells[$i]).ToLower()) {
+          '^file'            { $cols.file = $i }
+          '^creator|^artist' { $cols.creator = $i }
+          '^date'            { $cols.date = $i }
+          '^licen'           { $cols.licence = $i }
+          '^source'          { $cols.source = $i }
+        }
+      }
+      continue
+    }
+    if ($null -eq $cols.file -or $cells.Count -le $cols.file) { continue }
+    $file = (Md-Plain $cells[$cols.file])
+    if ($file -notmatch '(?i)\.(jpg|jpeg|png|gif|webp)$') { continue }
+    $get = { param($k) if ($null -ne $cols.$k -and $cells.Count -gt $cols.$k) { $cells[$cols.$k] } else { '' } }
+
+    $rawSource = (& $get 'source')
+    $srcUrl = $(if ($rawSource -match $LINKRE) { $matches[2] } else { $null })
+    $srcName = $(if ($rawSource -match $LINKRE) { (Md-Plain $matches[1]) } else { '' })
+    # who to name: the creator if the table has one, else the holding institution
+    # (the source text before the link) — never invented.
+    $who = (Md-Plain (& $get 'creator'))
+    if (-not $who) {
+      $who = (Md-Plain (($rawSource -replace $LINKRE, '|LINK|') -split '\|LINK\|')[0])
+      $who = $who -replace '(?i)\s*,?\s*via\s*$', ''
+    }
+    $who = $who -replace '\s*\([^)]*\d{4}[^)]*\)', ''       # drop a lifespan anywhere in the name
+    $who = ($who -split ',')[0].Trim()                       # "Grimshaw, the Leeds painter" -> "Grimshaw"
+    # "Public domain — LoC states..." / "Public domain (artist d. 1893)" -> "Public domain"
+    $lic = ((Md-Plain (& $get 'licence')) -split '[—(;]')[0].Trim()
+    $IMGCREDIT[$file.ToLower()] = [ordered]@{
+      creator = $who; date = (Md-Plain (& $get 'date')); licence = $lic
+      srcName = $srcName; srcUrl = $srcUrl
+    }
+  }
+}
+function Credit-Line {
+  param([string]$src)
+  if (-not $src) { return '' }
+  $key = ([IO.Path]::GetFileName($src)).ToLower()
+  if (-not $IMGCREDIT.ContainsKey($key)) { return '' }
+  $c = $IMGCREDIT[$key]
+  $bits = @($c.creator, $c.date) | Where-Object { $_ }
+  $who = ($bits -join ', ')
+  $tail = @()
+  if ($c.licence) { $tail += $c.licence.ToLower() }
+  if ($c.srcName) {
+    $tail += $(if ($c.srcUrl) { '<a href="' + $c.srcUrl + '" target="_blank" rel="noopener">' + $c.srcName + '</a>' } else { $c.srcName })
+  }
+  $line = @($who, ($tail -join ' · ')) | Where-Object { $_ }
+  if (-not $line.Count) { return '' }
+  return '<span class="imgcredit">' + ($line -join ' — ') + '</span>'
 }
 
 $diary = @()
