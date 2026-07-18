@@ -50,24 +50,27 @@
       "group": "The rest",
       "evidence": "Royal Navy service record, TNA ADM 188/1117, SS 111246. Currently recorded only as \"Boilermaker\"." },
 
-    { "id": null, "name": "Robert Best, and his wife Jane", "trade": "mason (Tadcaster) / woollen weaver (Wibsey)", "match": null,
+    { "id": "I352793764361", "name": "James R. Best", "trade": "Bricklayer / Mason", "match": "mason",
       "group": "The rest",
-      "evidence": "Ann Elizabeth Best's origins - born Wibsey, autumn 1870, daughter of Robert Best, a mason from Tadcaster, and Jane, a woollen weaver from Wibsey.",
-      "warn": "NEITHER IS IN THE TREE YET - the only Bests in the export are Ann Elizabeth, James R. and Thomas. Add the people first, then their trades. That also closes Ann Elizabeth's \"no father / no mother\" gap on the tracker." }
+      "evidence": "1871 census, Horton/Bradford (7619:26022846) - \"Robert Best, Head, 32, Bricklayer / Mason, born Tadcaster\". He is recorded as ROBERT in 1871 and as JAMES R. in 1881 (7572:24491886, \"James R. 43, b. Tadcaster\") - same man, same birthplace, ages ten years apart. James ROBERT Best, who went by Robert. His 1881 census note already carries \"Bricklayer\"; the 1871 entry is what adds mason." },
+
+    { "id": "I352793764566", "name": "Jane Farrar", "trade": "Woollen Weaver", "match": "weaver",
+      "group": "The rest",
+      "evidence": "1871 census, Horton/Bradford - \"Jane Best, Wife, 28, Woollen Weaver, born Wibsey\". She is Ann Elizabeth's mother and James R. Best's wife (married 30 May 1868, Bradford Cathedral). Brings Bradford's worsted trade into the family.",
+      "warn": "Her age is inconsistent between censuses - 28 in 1871 (b.~1843) but 49 in 1881 (b.~1832), an 11-year gap. The tree carries abt 1832. Not resolved; do not treat either as proven." }
   ],
 
   "fix": [
     { "name": "Jessie Champion",  "year": "1911", "recorded": "Fronser Presser",                "suggest": "Trouser Presser" },
     { "name": "Hannah Mills",     "year": "1911", "recorded": "Taitoris Finisher",              "suggest": "Tailoress Finisher" },
     { "name": "Thomas Lackey",    "year": "1921", "recorded": "Machine Revitor",                "suggest": "Machine Riveter" },
-    { "name": "William Blagg",    "year": "1921", "recorded": "Engine Driver, Midland Tailway", "suggest": "Engine Driver, Midland Railway" },
-    { "name": "Lily Constantine", "year": "1921", "recorded": "Baister",                        "suggest": null,
-      "warn": "READ THE IMAGE FIRST. This may not be an error at all - a \"baister\" is a real tailoring job, the hand who puts in the basting stitches, and this is a family already in the clothing trade. Do not change it on a guess." }
+    { "name": "William Blagg",    "year": "1921", "recorded": "Engine Driver, Midland Tailway", "suggest": "Engine Driver, Midland Railway" }
   ],
 
   "ruledOut": [
     "\"groom\" - appears a dozen times in the journal, every one of them **bride**groom in a marriage record. Not the stable trade.",
-    "\"shepherd\" - the only hit is the surname **Shepherdson** (Thomas Shepherdson, the householder young Henry Whitehead boarded with). Not a trade."
+    "\"shepherd\" - the only hit is the surname **Shepherdson** (Thomas Shepherdson, the householder young Henry Whitehead boarded with). Not a trade.",
+    "\"Baister\" (Lily Constantine, 1921) - NOT AN ERROR, leave it exactly as it stands. Settled by the 1921 index, which carries her EMPLOYER: **Burton & Burton Clothiers, Byron St Mills** (employer code 341), with occupation code **404/6**, at 55 Monkton St, Hunslet, aged 16. She worked for a Leeds clothing manufacturer, so the basting hand is precisely the job - a baister tacks a garment together before it is machined. \"baister\" is a real trade word and is already in this file's own vocabulary list. Caveat recorded honestly: I could NOT read the census image - the 1921 viewer (588-page filmstrip) defeats the screenshot tool, which is a different failure from the fresh-tab fix. But the employer field settles the question better than handwriting would, because the doubt was whether the WORD is a trade, not what the enumerator's pen looked like."
   ],
 
   "vocabulary": [

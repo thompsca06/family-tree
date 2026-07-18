@@ -85,12 +85,19 @@
       ] },
 
     { "id": "I352794229738", "name": "William Whitehead", "gap": "birth, marriage, death",
-      "tried": [],
-      "found_instead": "Was a zero-record shell existing only as a name in a citation. Now carries his first ever fact: INNKEEPER, 1844, from his son's Howden marriage register. Nothing else is known - no birth, no marriage, no death, no census, and no wife on the tree.",
+      "tried": [
+        "WHICH INN DID HE KEEP? Not found. The 1844 Howden marriage register gives his rank as 'Innkeeper' and stops there - marriage registers name the trade, never the premises.",
+        "1841 census, every WHITEHEAD resident in Howden - only THREE exist (indexed as WHITCHEAD): John abt 1821, Hannah abt 1811, Ellen abt 1840. NO WILLIAM. So he had probably died before 1841, or was living outside Howden.",
+        "UK City and County Directories (coll 3145), Whitehead + Howden exact - ZERO. With name+residence unfiltered it returns 2,835 Leeds hits, so the residence filter is not binding in that collection.",
+        "NOTE: the 1844 register did NOT annotate him 'deceased' - but many registers omit that, so it is NOT evidence he was alive in 1844."
+      ],
+      "found_instead": "*** SOLVED: HE KEPT THE 'HARE AND HOUNDS' AT HOLME UPON SPALDING MOOR. *** East Riding Archives CalmView catalogue, Quarter Sessions QDT/2/10 (Alehouse Recognizances, Holme Beacon Division) - FOUR annual recognizances, all the same man: 1822 QDT/2/10/18, 1823 QDT/2/10/61, 1825 QDT/2/10/104, 1826 QDT/2/10/145. Access Open. The 1822 surety is JOHN SMITH of Holme, carrier. THE CLINCHER IS THE PLACE: Henry Sturdy Whitehead was BORN AT HOLME UPON SPALDING MOOR in 1814, so William kept the pub in the very village his son was born in. That is why every Howden search failed - he was never a Howden innkeeper; he was a HOLME innkeeper whose son later moved to Howden (~7 miles). These four dates, 1822-1826, are the FIRST DATES THIS MAN HAS EVER HAD.",
       "next": [
-        "His marriage c.1810-14 is the single most valuable record on this branch: it would give his wife, and her surname is the test of whether STURDY is the mother's maiden name (see Henry Sturdy Whitehead)",
-        "Search him as an INNKEEPER/VICTUALLER at Howden - licensing records, rate books, trade directories, and the 1841/1851 censuses where an innkeeper is easy to spot",
-        "He should be findable in the 1841 census at Howden if still living - his son married there in 1844"
+        "*** SEARCH HOLME UPON SPALDING MOOR, NOT HOWDEN. *** Everything was looked for in the wrong parish. His marriage c.1810-14 and his burial are most likely at HOLME, and so is HENRY STURDY WHITEHEAD'S BAPTISM (b.1814 Holme) - which is the record that would finally name his MOTHER and settle the 'Sturdy = maiden name' theory. That baptism is now the single most valuable target on this branch.",
+        "Check the alehouse recognizances EITHER SIDE of 1822-1826 - the series is annual, so his licence probably starts earlier and ends later. The end date may effectively date his death or his giving up the house. Series is QDT/2/10, Holme Beacon Division, East Riding Archives, and it is catalogued ITEM BY ITEM online and free.",
+        "JOHN SMITH of Holme, CARRIER - his 1822 surety. Sureties are usually neighbours, kin or fellow tradesmen; worth a look for a family connection.",
+        "Order copies of the four recognizances from East Riding Archives (AccessStatus: Open) - the documents themselves may give more than the catalogue title, and would be a lovely thing to have for a story.",
+        "METHOD NOTE FOR THE WHOLE PROJECT: this was found in a FREE PUBLIC LOCAL-AUTHORITY ARCHIVE CATALOGUE (calmview.eastriding.gov.uk) after three Ancestry collections failed. When a trade is known, search the county archive catalogue EARLY - Quarter Sessions papers list tradesmen by name and often name their premises."
       ] },
 
     { "id": "I352794567377", "name": "William Laverack", "gap": "birth, marriage, death",
@@ -113,6 +120,38 @@
         "CANDIDATE, NOT PROVEN, DO NOT ATTACH: 'Johnny Lackey, 27, b.1864 Birkenhead' is age-exact for Thomas, who was born 27 Jun 1863 and so was 27 at the April 1891 census. But Johnny is not a transcription slip for Thomas, and a brother John is at least as likely. Reading the IMAGE of that household would settle it.",
         "He married in OCTOBER 1891 at Hunslet, six months after the census, so in April he was single and probably boarding - check the household his bride Sarah Jane Emms was in",
         "Work out his siblings first; the boarding cluster is probably the family"
+      ] },
+
+    { "id": "I352548957320", "name": "WILLIAM SAWDON", "gap": "no mother",
+      "tried": [
+        "coll 62230 (York CoE Baptisms/Marriages/Burials 1538-1812) for a William Sawdon baptism c.1745 Weaverthorpe - the date filter does not bind and every INDEXED Weaverthorpe Sawdon baptism it returns starts in the 1780s (1784, 1786, 1787, 1789, 1797, 1811, 1812). The 1730s-50s stretch of that register is barely indexed - normal for pre-1754.",
+        "One 1740s entry did surface, almost by accident: Rebekah Sawdon, bapt 2 Nov 1744 Weaverthorpe, father Wm Sawdon (rec 610198, Borthwick PR/WEA/1). So a Wm Sawdon WAS fathering children at Weaverthorpe in the 1740s - but that record is about Rebekah, not about our William, and proves nothing on its own."
+      ],
+      "found_instead": "FATHER SOLVED - it was in a record ALREADY ATTACHED to him and never opened: William Sawden, bapt 1737 Weaverthorpe, FATHER WILLIAM SAWDEN (Borthwick PR/WEA/1, coll 62230 rec 610044). The parent link had simply never been made. Father now on the tree as a new gen 10. Two things this exposed, BOTH STILL OPEN: (1) his birth is recorded as 1745 but he was BAPTISED 1737 - impossible, and the 1745 is the one resting on Geneanet/tree sources while 1737 comes from the register, so he was probably born c.1737; (2) his profile DISPLAYS the baptism as '8 May 1737 North Burton, York' but the attached register entry says WEAVERTHORPE - the fact carries two sources that disagree on the parish, and the derivative index looks to be the one that is wrong.",
+      "next": [
+        "FIX THE BIRTH YEAR: 1745 cannot stand against a 1737 baptism. A register beats a derivative index. This is a deliberate fact edit on a direct ancestor, so it needs doing on purpose rather than as a side effect.",
+        "FIX OR SPLIT THE BAPTISM PLACE: North Burton vs Weaverthorpe. Read the image at coll 62230 rec 610044 and let the register decide.",
+        "MOTHER: adding the father surfaced an Ancestry hint 'Francis Tindall - Potential mother', and one of the floating Geneanet imports in the tree is 'Frances Tindale b.1690 Weaverthorpe'. The hint and the junk import AGREE, which proves nothing - they are probably the same strangers' tree feeding both. DO NOT LINK HER. Prove it instead from a William Sawden x [bride] marriage at Weaverthorpe before 1737.",
+        "The 7 floating Sawdons baptised Weaverthorpe 1737-1756 are sourced ONLY to Geneanet, not to any register, and the register has Rebekah 1744 where the import has Ann 1744. Do not link them on a name-and-date match - prove them from PR/WEA/1 or leave them."
+      ] },
+
+    { "id": null, "name": "William Sawden (the elder, gen 10)", "gap": "close this one by hand",
+      "tried": [
+        "coll 62230 for a William Sawden marriage c.1723-1743 - only TWO turned up in the whole collection, and neither is at Weaverthorpe"
+      ],
+      "found_instead": "CANDIDATE, NOT ATTACHED: William Sawden x SARAH BELL, 14 Oct 1732, WHARRAM PERCY (Borthwick PR/WP/1, coll 62230 rec 1371656). Right name, five years before the 1737 baptism, and Wharram Percy is about 4 miles from Weaverthorpe - but it is a DIFFERENT PARISH and nothing ties this William to the Weaverthorpe one. The rival, William Sawdon x Ann, 2 Jun 1752 Appleton le Street, is too late for a son baptised 1737 and is rejected.",
+      "next": [
+        "!! SARAH BELL (from a parish register) CONTRADICTS Ancestry's hint of 'Francis Tindall - potential mother', which merely agrees with a Geneanet import already floating in problems.txt §6 (Frances Tindale b.1690 Weaverthorpe). Two copies of the same unsourced tree are not corroboration. DO NOT LINK TINDALL.",
+        "To settle it: find other children baptised to William Sawden at Weaverthorpe in the 1730s-40s where the register names a MOTHER. Note the 1737 baptism names only the father - pre-1813 registers usually do - so the marriage may be the only route to her.",
+        "Borthwick PR/WEA/1 (Weaverthorpe) needs reading by eye for the 1720s-40s; the index does not reach it. Rebekah Sawdon bapt 2 Nov 1744 father Wm (rec 610198) is in that register and is probably a daughter of the same man."
+      ] },
+
+    { "id": "I352794100912", "name": "Edith Champion", "gap": "no father",
+      "tried": [],
+      "found_instead": "DELIBERATELY LEFT UNLINKED - we do not know, and Chris's call is to leave her that way. Her mother Annie Discombe married TWICE: William Mayne 12 Oct 1884 Leeds (he DIED March 1888), then Charlie Champion 3 Feb 1889 Buslingthorpe. Edith was born abt 1888, which falls in the ELEVEN-MONTH GAP between the two. So she is either William Mayne's posthumous child or Charlie Champion's born before the wedding. Her four siblings are settled - Emily Mayne (b.1887) to Mayne, Willie/Jessie/Walter to Champion - she is the only one that cannot be placed by date.",
+      "next": [
+        "ONLY her birth registration settles it - exact date, and whether a father is named. Do not assign one on the surname: 'recorded as Champion' is a surname on a tree, not evidence, and a birth a few months before a marriage is a pattern this family already supplies once (Arthur Ingleby).",
+        "If she was born Sep-Dec 1888 she was conceived before William Mayne's March 1888 death, which would favour Mayne; a birth early in 1888 favours the same. A late-1888 conception would favour Champion. The registration quarter is therefore the whole question."
       ] },
 
     { "id": "I352551786300", "name": "Emma Ingleby", "gap": "maiden name, marriage, death",
