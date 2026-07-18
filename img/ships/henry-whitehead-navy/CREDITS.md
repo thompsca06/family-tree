@@ -1,8 +1,11 @@
 # Ship & port images — sources and licences
 
-These are used in `Thompson/story-whitehead-and-champion.md` (Henry Whitehead's Royal Navy service,
-1878–79). **All are verified public domain.** The site publishes publicly, so nothing goes in here
-without a checked licence.
+These are used in **`Thompson/story-henry-whitehead-the-navy.md`** — *"The Navy That Never Left the
+Humber"*, the standalone story of Henry Whitehead's Royal Navy service, 1878–79.
+**All are verified public domain.** The site publishes publicly, so nothing goes in here without a
+checked licence.
+
+Referenced from the story as `img/ships/henry-whitehead-navy/<file>`.
 
 | File | What it is | Creator | Date | Licence | Source |
 |---|---|---|---|---|---|

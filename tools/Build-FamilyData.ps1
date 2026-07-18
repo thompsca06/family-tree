@@ -489,7 +489,10 @@ $ALIAS = [ordered]@{
   charlie = 'I352794093690'; annieD = 'I352794093801'; arthurI = 'I352548945570'
   lilyLackey = 'I352548945571'; williamBlagg = 'I352551576887'; johnBlagg = 'I352551577622'
   georgeB = 'I352551574185'; thomasI = 'I352551786299'; josephI = 'I352551788878'
-  thomasI_cord = 'I352793559056'; johnIngleby = 'I352552812685'
+  thomasI_cord = 'I352793559056'
+  # johnIngleby (I352552812685) removed: that John was a REAL but WRONG man Thomas
+  # Ingleby had been mis-grafted onto. The untangle cut him loose, so he is no
+  # longer connected to the home person and no story referenced the slug.
   # was I352551664279 — retired by an Ancestry merge on 14 Jul (a merge keeps one of
   # the two IDs and you don't get to choose which). This is the surviving record.
   wblowman = 'I352794101968'
