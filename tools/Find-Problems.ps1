@@ -400,6 +400,165 @@ if (Test-Path $occPath) {
 }
 
 
+# ------------------------------------------------- 10/11. chronology
+# Chris: "a check that looks at the age and records that occur before it etc."
+# Every date in the tree was trusted; nothing asked whether the dates on ONE
+# person agreed with each other, or with their parents.
+#
+# Two rules this section is built around, both requested and both right:
+#   1. PRINT THE DATES AND THEIR SOURCES, so it can be judged without opening
+#      Ancestry. Half of these will be one bad transcription and the citation
+#      says which.
+#   2. IMPOSSIBLE and UNLIKELY are different things. A child born before its
+#      mother is a fact error. A mother of 49 is just uncommon. They get
+#      separate sections so the second never dilutes the first.
+#
+# These are SUSPICIONS. This family breaks gentle rules honestly: "abt 1786" is
+# a census age rounded to the nearest 5, and a 14-week gap between marriage and
+# a first baptism is ordinary for the period. So anything resting on an
+# approximate date is demoted to UNLIKELY, and years are compared as years -
+# a bare 1893 birth and an 1893 baptism must never fire.
+function ChronDate {
+  param([string]$d)
+  if (-not $d) { return $null }
+  $approx = [bool]($d -match '(?i)\b(abt|about|circa|est|bef|aft|before|after)\b\.?|(?i)\bc\d{4}')
+  $mon = @{ jan = 1; feb = 2; mar = 3; apr = 4; may = 5; jun = 6; jul = 7; aug = 8; sep = 9; oct = 10; nov = 11; dec = 12 }
+  $y = $null; $m = $null; $dy = $null
+  if ($d -match '(\d{1,2})\s+([A-Za-z]{3})[A-Za-z]*\.?\s*(\d{4})') { $dy = [int]$matches[1]; $m = $mon[$matches[2].ToLower()]; $y = [int]$matches[3] }
+  elseif ($d -match '([A-Za-z]{3})[A-Za-z]*\.?\s*(\d{4})') { $m = $mon[$matches[1].ToLower()]; $y = [int]$matches[2] }
+  elseif ($d -match '(\d{4})') { $y = [int]$matches[1] }
+  if (-not $y) { return $null }
+  # decimal year for ordering; precision says how far it can be trusted
+  $prec = if ($dy) { 'day' } elseif ($m) { 'month' } else { 'year' }
+  $val = $y + $(if ($m) { ($m - 1) / 12.0 } else { 0 }) + $(if ($dy) { ($dy - 1) / 365.0 } else { 0 })
+  return [pscustomobject]@{ y = $y; m = $m; d = $dy; val = $val; prec = $prec; approx = $approx; raw = $d }
+}
+# Compare only as precisely as the COARSER of the two dates allows.
+function ChronBefore { param($a, $b)
+  if (-not $a -or -not $b) { return $false }
+  if ($a.prec -eq 'year' -or $b.prec -eq 'year') { return $a.y -lt $b.y }
+  return $a.val -lt $b.val
+}
+function SrcOf { param($ev)
+  $c = @($ev.cites) | Where-Object { $_ -and $_.sid } | Select-Object -First 1
+  if ($c -and $G.sources.($c.sid)) { $G.sources.($c.sid).title } else { '' }
+}
+function EvWithDate { param($p, [string[]]$tags) @($p.events | Where-Object { $_ -and $_.tag -in $tags -and $_.date }) | Select-Object -First 1 }
+
+$impossible = [System.Collections.Generic.List[string]]::new()
+$unlikely = [System.Collections.Generic.List[string]]::new()
+function ChronSay {
+  param([string]$who, [string]$what, $evA, $evB, [bool]$soft)
+  $lines = @("  $who - $what")
+  foreach ($e in @($evA, $evB)) {
+    if (-not $e) { continue }
+    $s = SrcOf $e.ev
+    $lines += ("        {0,-22} {1}{2}" -f $e.label, $e.ev.date, $(if ($s) { "   [$s]" } else { '   [no source]' }))
+  }
+  if ($soft) { foreach ($l in $lines) { $unlikely.Add($l) } } else { foreach ($l in $lines) { $impossible.Add($l) } }
+}
+
+$EVLAB = @{ BIRT = 'born'; BAPM = 'baptised'; CHR = 'christened'; DEAT = 'died'; BURI = 'buried'; RESI = 'census/residence'; MARR = 'married'; PROB = 'probate'; OCCU = 'occupation'; EMIG = 'emigrated'; IMMI = 'immigrated'; CENS = 'census'; _MILT = 'military'; EVEN = 'event' }
+$AFTER_DEATH_OK = @('DEAT', 'BURI', 'PROB')     # a burial and a probate follow a death by design
+
+foreach ($id in $PPL.PSObject.Properties.Name) {
+  $p = $PPL.$id
+  $nm = Nm $p
+  $bEv = EvWithDate $p @('BIRT', 'BAPM', 'CHR')
+  $dEv = EvWithDate $p @('DEAT', 'BURI')
+  $b = if ($bEv) { ChronDate $bEv.date } else { $null }
+  $dd = if ($dEv) { ChronDate $dEv.date } else { $null }
+
+  # The birth/death pair is checked FIRST, and when it is itself impossible the
+  # per-event checks are skipped for this person. One transposed death date
+  # otherwise reports every later census as "after the death" as well - eight
+  # lines for one fault, which buries the actual cause. Report the cause.
+  $spanBad = $false
+  if ($b -and $dd) {
+    $span = $dd.y - $b.y
+    if ($span -lt 0) {
+      ChronSay $nm "died BEFORE born - every other date for this person is unchecked until this is settled" @{label = 'born'; ev = $bEv } @{label = 'died'; ev = $dEv } ($b.approx -or $dd.approx)
+      $spanBad = $true
+    }
+    elseif ($span -gt 105) { ChronSay $nm "lived $span years" @{label = 'born'; ev = $bEv } @{label = 'died'; ev = $dEv } $true }
+  }
+
+  if (-not $spanBad) {
+    foreach ($e in @($p.events)) {
+      if (-not $e -or -not $e.date) { continue }
+      $ed = ChronDate $e.date
+      if (-not $ed) { continue }
+      $lab = $(if ($EVLAB[$e.tag]) { $EVLAB[$e.tag] } else { $e.tag })
+      if ($b -and $e.tag -notin @('BIRT', 'BAPM', 'CHR') -and (ChronBefore $ed $b)) {
+        ChronSay $nm "$lab is dated BEFORE the birth" @{label = $lab; ev = $e } @{label = 'born'; ev = $bEv } ($ed.approx -or $b.approx)
+      }
+      if ($dd -and $e.tag -notin $AFTER_DEATH_OK -and (ChronBefore $dd $ed)) {
+        ChronSay $nm "$lab is dated AFTER the death" @{label = $lab; ev = $e } @{label = 'died'; ev = $dEv } ($ed.approx -or $dd.approx)
+      }
+    }
+  }
+}
+
+# parents vs children, walked over the families
+foreach ($fid in $FAMS.PSObject.Properties.Name) {
+  $f = $FAMS.$fid
+  foreach ($role in @('husb', 'wife')) {
+    $parentId = $f.$role
+    if (-not $parentId -or -not $PPL.$parentId) { continue }
+    $par = $PPL.$parentId
+    $pbEv = EvWithDate $par @('BIRT', 'BAPM', 'CHR'); $pdEv = EvWithDate $par @('DEAT', 'BURI')
+    $pb = if ($pbEv) { ChronDate $pbEv.date } else { $null }
+    $pd = if ($pdEv) { ChronDate $pdEv.date } else { $null }
+    $isMum = ($role -eq 'wife')
+    foreach ($cid in @($f.chil)) {
+      if (-not $cid -or -not $PPL.$cid) { continue }
+      $ch = $PPL.$cid
+      $cbEv = EvWithDate $ch @('BIRT', 'BAPM', 'CHR')
+      if (-not $cbEv) { continue }
+      $cb = ChronDate $cbEv.date
+      if (-not $cb) { continue }
+      $soft = ($cb.approx -or $pb.approx -or $pd.approx)
+      if ($pb) {
+        $age = $cb.y - $pb.y
+        $who = "$(Nm $par) -> child $(Nm $ch)"
+        if ($age -lt 0) { ChronSay $who "child born BEFORE the $(if($isMum){'mother'}else{'father'})" @{label = "$(if($isMum){'mother'}else{'father'}) born"; ev = $pbEv } @{label = 'child born'; ev = $cbEv } $soft }
+        elseif ($age -lt 14) { ChronSay $who "$(if($isMum){'mother'}else{'father'}) was $age at this birth" @{label = 'parent born'; ev = $pbEv } @{label = 'child born'; ev = $cbEv } $true }
+        elseif ($isMum -and $age -gt 50) { ChronSay $who "mother was $age at this birth" @{label = 'mother born'; ev = $pbEv } @{label = 'child born'; ev = $cbEv } $true }
+        elseif (-not $isMum -and $age -gt 70) { ChronSay $who "father was $age at this birth" @{label = 'father born'; ev = $pbEv } @{label = 'child born'; ev = $cbEv } $true }
+      }
+      if ($pd) {
+        # a mother cannot die before the birth at all; a father may, but not by
+        # more than about nine months
+        $gap = $cb.y - $pd.y
+        if ($isMum -and (ChronBefore $pd $cb) -and $gap -ge 1) {
+          ChronSay "$(Nm $par) -> child $(Nm $ch)" "mother died $gap year(s) before this birth" @{label = 'mother died'; ev = $pdEv } @{label = 'child born'; ev = $cbEv } $soft
+        }
+        elseif (-not $isMum -and $gap -ge 2) {
+          ChronSay "$(Nm $par) -> child $(Nm $ch)" "father died $gap year(s) before this birth" @{label = 'father died'; ev = $pdEv } @{label = 'child born'; ev = $cbEv } $soft
+        }
+      }
+    }
+  }
+}
+
+Say ""
+Say "=== 10. CHRONOLOGY - IMPOSSIBLE ==============================="
+Say "    (a date that cannot be true, so something is factually wrong. The two"
+Say "     dates and their sources are printed - half will be one bad"
+Say "     transcription, and the citation says which.)"
+if ($impossible.Count) { foreach ($l in $impossible) { Say $l } } else { Say "  none" }
+Say "  -> $(@($impossible | Where-Object { $_ -notmatch '^ {8}' }).Count) impossible dates"
+
+Say ""
+Say "=== 11. CHRONOLOGY - UNLIKELY ================================="
+Say "    (uncommon but possible, or resting on an approximate date. Judge it -"
+Say "     do NOT assume it is wrong. 'abt 1786' is often a census age rounded"
+Say "     to the nearest five.)"
+if ($unlikely.Count) { foreach ($l in $unlikely) { Say $l } } else { Say "  none" }
+Say "  -> $(@($unlikely | Where-Object { $_ -notmatch '^ {8}' }).Count) to judge"
+Say "  NOTE: census age drift is NOT checked - the export carries no age field."
+Say "        Ages live only in the census image, so the pipeline cannot see them."
+
 [IO.File]::WriteAllLines((Join-Path $root 'data/problems.txt'), $report)
 Write-Host ""
 Write-Host "full report -> data/problems.txt"
