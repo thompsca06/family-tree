@@ -82,12 +82,14 @@
   ],
   "synonyms": [
     ["publican", "innkeeper", "licensed victualler", "victualler", "inn keeper"],
-    ["agricultural labourer", "ag lab", "farm labourer", "farm ag labourer", "ag labourer"]
+    ["agricultural labourer", "ag lab", "farm labourer", "farm ag labourer", "ag labourer"],
+    ["domestic servant", "general servant", "general domestic serv", "general domestic servant", "servant dom", "house servant"]
   ],
 
   "vocabulary": [
     "agricultural labourer","ag lab","farm servant","farm labourer","labourer","coal miner","miner","hewer","collier",
     "charwoman","housekeeper","laundress","washerwoman","dressmaker","seamstress","tailoress","tailor","presser","baister",
+    "gentleman's servant","domestic servant","general servant",
     "weaver","spinner","mill hand","cordwainer","shoemaker","bootmaker","clogger","blacksmith","farrier","wheelwright",
     "joiner","carpenter","cabinet maker","stonemason","mason","bricklayer","brickmaker","plasterer","plumber","glazier",
     "slater","engine driver","engine cleaner","loco fireman","fireman","stoker","boilermaker","boiler maker","riveter",
