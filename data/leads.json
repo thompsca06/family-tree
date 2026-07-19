@@ -15,6 +15,18 @@
   ],
 
   "blocked": [
+    { "id": "I352548958611", "name": "Ann Fage (gen 9) - and the Sawdon 'siblings'", "gap": "she is UNUSABLE as she stands; and the disconnected Sawdons are not ours",
+      "tried": [
+        "Searched the real Weaverthorpe register - York CoE Baptisms Marriages Burials 1538-1812, coll 62230, Borthwick Institute PR/WEA/1"
+      ],
+      "found_instead": "PROVEN AND ATTACHED: William Sawden bapt 1737 WEAVERTHORPE, FATHER WILLIAM SAWDEN (coll 62230 rec 610044). The gen-9 placeholder father had ZERO sources and his name is now record-backed - citation attached with everything unticked except the name cite, so he did not inherit his own son's baptism. THIS ALSO KILLS the 'Richard Sawdon' parentage from the Pearce Family Tree hint and its Brompton-by-Sawdon baptism: different parish, North Riding, and the register plainly says WILLIAM.",
+      "next": [
+        "🚨 ANN FAGE IS SOURCED ONLY TO GENEANET (_APID 1,62476), which is NOT a record. That is why her birth reads 1782 while her son John is born 1783 - an impossible date imported unchecked. Do not build on her. THE FIX: find WILLIAM SAWDON b.1737's MARRIAGE in the Weaverthorpe register, which will name the actual mother of John b.1783",
+        "⛔ DO NOT LINK THE DISCONNECTED WEAVERTHORPE SAWDONS AS SIBLINGS. An earlier note called them 'the cheapest real wins in section 6'. They are not. Every one is sourced ONLY to Geneanet, and the register shows TWO Sawdon families in that village - one under WILLIAM, one under JAMES. Francis 1742, Frances 1752, Ann 1744 and Barbara 1754 match the JAMES children by date, so linking them would graft another family onto the line, exactly as happened twice with the Inglebys",
+        "OUR William's true siblings, from the register, are Ann Sawden bapt 22 May 1739 and Rebekah Sawdon bapt 2 Nov 1744 (both father William). Out of scope under the direct-line rule, but that is who they are if collaterals are ever wanted",
+        "NOTE these people do NOT belong in not-relevant.json - that file's bar is DISPROVED, and 'sourced only to Geneanet' is UNEVIDENCED, which is a different thing",
+        "TIDY - the father I352795276394 now lists the same coll 62230 source twice; the untick-to-cite save appears to have added a second copy. Harmless, remove when convenient"
+      ] },
     { "id": "I352794603636", "name": "William Ingleby (Thomas b.1812's father - PLACEHOLDER)", "gap": "identity - and it gates 34 disconnected people",
       "tried": [
         "Mapped section 6 in full: the 72 disconnected people are 22 ISLANDS, not one problem. Island 2 is 34 people - the whole upper Ingleby line plus the Abbotts - and it hangs off THIS ONE PERSON"

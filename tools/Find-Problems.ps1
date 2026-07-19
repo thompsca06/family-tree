@@ -343,10 +343,34 @@ if (Test-Path $occPath) {
     $flatGrp = @(@($grp) | ForEach-Object { & $flat $_ } | Where-Object { $_ })
     if ($flatGrp.Count) { $synGroups += , $flatGrp }
   }
-  $spotted = @()
+  # Words already RULED OUT. These were only ever printed, never subtracted, so a
+  # word got LOUDER the more thoroughly it was disproved: writing up the disproof
+  # put more occurrences in the journal, and the tally counts the journal. §9
+  # could never reach zero. Ruled-out words now drop out of the tally and are
+  # counted separately, so nothing is hidden - it is reported as settled, not
+  # outstanding.
+  #
+  # Terms are taken from the LEADING quoted words of each ruledOut entry, i.e.
+  # everything before the first " - ". An entry may lead with more than one
+  # ("carrier" and "brewer"), and the prose that follows often quotes other
+  # things ('Hare and Hounds'), which is why only the lead is read.
+  $ruledWords = @()
+  foreach ($x in @($OCCDATA.ruledOut)) {
+    $lead = (($x -split ' - ', 2)[0])
+    foreach ($m in [regex]::Matches($lead, '"([^"]+)"')) {
+      $rw = & $flat $m.Groups[1].Value
+      if ($rw) { $ruledWords += $rw }
+    }
+  }
+  $spotted = @(); $ruledHits = @()
   foreach ($w in @($OCCDATA.vocabulary)) {
     $wl = & $flat $w
     if (-not $wl -or $recordedBlob.Contains($wl) -or $curatedBlob.Contains($wl)) { continue }
+    if ($ruledWords -contains $wl) {
+      $n = @([regex]::Matches($prose, [regex]::Escape($w), 'IgnoreCase')).Count
+      if ($n -gt 0) { $ruledHits += , @{ w = $w; n = $n } }
+      continue
+    }
     # is a synonym of it recorded?
     $covered = $false
     foreach ($grp in $synGroups) {
@@ -365,7 +389,11 @@ if (Test-Path $occPath) {
   Say "    (trade words used in the journal or stories but in nobody's occupations."
   Say "     Most will be background or a man ruled out - read the context first.)"
   foreach ($s in @($spotted | Sort-Object { - $_.n })) { Say ("  {0,3}x  {1}" -f $s.n, $s.w) }
-  Say "  -> $(@($spotted).Count) trade words to check"
+  $rOut = @($ruledHits | Sort-Object { - $_.n })
+  if ($rOut.Count) {
+    Say ("  (settled, not counted: {0})" -f (@($rOut | ForEach-Object { "$($_.w) $($_.n)x" }) -join ', '))
+  }
+  Say "  -> $(@($spotted).Count) trade words to check$(if($rOut.Count){" ($($rOut.Count) ruled out)"})"
   foreach ($x in @($OCCDATA.ruledOut)) { Say ("  RULED OUT: {0}" -f ($x -replace '\*\*', '')) }
   Say ""
   Say "  recorded now: $($allOcc.Count) occupation entries, $($distinctOcc.Count) distinct, across $($occOf.Count) people"
