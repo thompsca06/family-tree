@@ -321,10 +321,28 @@ if (Test-Path $occPath) {
   $flat = { param($s) ($s -replace '[^A-Za-z]', '').ToLower() }
   $recordedBlob = & $flat ($distinctOcc -join ' ')
   $curatedBlob = & $flat ((@($OCCDATA.add | ForEach-Object { "$($_.trade) $($_.match)" }) -join ' ') -replace '[.?*|]', ' ')
+  # One job can have more than one word. "Publican" is not missing when the register
+  # says "Innkeeper" — same man, same trade, different pen. So a word is only
+  # reported if NOTHING in its synonym group is recorded against anybody.
+  $synGroups = @()
+  foreach ($grp in @($OCCDATA.synonyms)) {
+    $flatGrp = @(@($grp) | ForEach-Object { & $flat $_ } | Where-Object { $_ })
+    if ($flatGrp.Count) { $synGroups += , $flatGrp }
+  }
   $spotted = @()
   foreach ($w in @($OCCDATA.vocabulary)) {
     $wl = & $flat $w
     if (-not $wl -or $recordedBlob.Contains($wl) -or $curatedBlob.Contains($wl)) { continue }
+    # is a synonym of it recorded?
+    $covered = $false
+    foreach ($grp in $synGroups) {
+      if ($grp -notcontains $wl) { continue }
+      foreach ($alt in $grp) {
+        if ($alt -ne $wl -and ($recordedBlob.Contains($alt) -or $curatedBlob.Contains($alt))) { $covered = $true; break }
+      }
+      if ($covered) { break }
+    }
+    if ($covered) { continue }
     $n = @([regex]::Matches($prose, [regex]::Escape($w), 'IgnoreCase')).Count
     if ($n -gt 0) { $spotted += , @{ w = $w; n = $n } }
   }

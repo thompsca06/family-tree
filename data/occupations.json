@@ -73,6 +73,18 @@
     "\"Baister\" (Lily Constantine, 1921) - NOT AN ERROR, leave it exactly as it stands. Settled by the 1921 index, which carries her EMPLOYER: **Burton & Burton Clothiers, Byron St Mills** (employer code 341), with occupation code **404/6**, at 55 Monkton St, Hunslet, aged 16. She worked for a Leeds clothing manufacturer, so the basting hand is precisely the job - a baister tacks a garment together before it is machined. \"baister\" is a real trade word and is already in this file's own vocabulary list. Caveat recorded honestly: I could NOT read the census image - the 1921 viewer (588-page filmstrip) defeats the screenshot tool, which is a different failure from the fresh-tab fix. But the employer field settles the question better than handwriting would, because the doubt was whether the WORD is a trade, not what the enumerator's pen looked like."
   ],
 
+  "_synonyms_comment": [
+    "One job, more than one word. A trade is NOT missing just because the writing calls it something",
+    "the enumerator did not: 'publican' and 'innkeeper' are the same man's job, so §9 must not ask for",
+    "it twice. Groups are unordered - if ANY word in a group is recorded against anybody, none of the",
+    "others is reported as missing. Only put words here that mean the SAME job; near-relations",
+    "(carter/carrier, fireman/stoker) are different work and belong apart."
+  ],
+  "synonyms": [
+    ["publican", "innkeeper", "licensed victualler", "victualler", "inn keeper"],
+    ["agricultural labourer", "ag lab", "farm labourer", "farm ag labourer", "ag labourer"]
+  ],
+
   "vocabulary": [
     "agricultural labourer","ag lab","farm servant","farm labourer","labourer","coal miner","miner","hewer","collier",
     "charwoman","housekeeper","laundress","washerwoman","dressmaker","seamstress","tailoress","tailor","presser","baister",
