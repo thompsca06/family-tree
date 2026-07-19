@@ -15,6 +15,27 @@
   ],
 
   "blocked": [
+    { "id": "I352793765203", "name": "John Farrar", "gap": "birth, marriage, death, all censuses",
+      "tried": [
+        "1851 name=John Farrar + birth=1805 +/-5 and +/-10 - 10 hits, none in the Bradford area, none with a wife Hannah. The filter was the problem: his birth year 1805 is ITSELF unsourced, so I was filtering real records out using an invented number",
+        "1851 name=Jane Farrar + birth=1832 Wibsey - 7 hits, no Wibsey Jane (and 1832 is unsourced too; the register says she was 31 in May 1868, so abt 1837)",
+        "1851 name=Hannah Farrar + birth=1803 Low Moor - ONE hit, a Newcastle woman. Wrong on every axis",
+        "1851 name=John Farrar + residence=Bradford, NO birth year - this finally bound properly and returned 50 real Bradford-area hits, 20 of them heads of household. Only one had a wife Hannah: John Farrar 38, b. Heptonstall, Halifax St James - opened it, and the household is a SCHOOL (ten boarders aged 7-12 plus a servant). Not him"
+      ],
+      "found_instead": "The 1868 marriage register (coll 2253 rec 4810060, Bradford St Peter, entry 286) READ FROM THE IMAGE proves the man himself: Jane Farrar, 31, spinster, weaver, of Bradford - father JOHN FARRAR, BLACKSMITH. The index does not carry the bride's father at all; only the image does. So 'blacksmith' is real and record-proven, but it is the ONLY thing about him that is.",
+      "next": [
+        "DONE - the 1851 image was read and the household IS Farrar. Attached to Jane AND to Hannah, so Hannah went from ZERO sources to one. The image corrected two of my index-based guesses: Hannah is 'Mar' (MARRIED, husband absent) NOT a widow, and 'Wettey M Bradford' is 'WIBSEY nr BRADFORD'",
+        "CHRIS TO DECIDE - Hannah's birthplace: the tree says 1803 Low Moor (unsourced, origin unknown); the 1851 census image says abt 1804, Wibsey nr Bradford. I did NOT overwrite it and did NOT let the census cite the Low Moor value, because changing a direct ancestor's birthplace is your call",
+        "TRIED AND FAILED - hunting John in the 1851 census ELSEWHERE (Hannah is 'Mar' with husband absent, so he is enumerated somewhere else that night). Searched coll 8860 name=John Farrar + keyword=blacksmith: the keyword param does NOT bind, returned the same generic 50, and there is no John Farrar lodging or heading a household anywhere in the Bradford/Bowling area. Halifax has several but none tie to Hannah",
+        "NEXT ON JOHN - try the trade from the other end: UK City and County Directories (coll 3145) for a FARRAR, blacksmith, Bradford/Bowling/Wibsey 1840s-60s. A blacksmith is a rated, listed tradesman. Also worth a Bradford burial search for John Farrar 1851-1868 in case he died before the daughter's wedding (the register names a father whether alive or dead)",
+        "NEXT - read Rachel's surname off the image at higher magnification (cropped the canvas but not enough to be certain). Ancestry read 'Rachel Segltowler'; it is probably LIGHTOWLER",
+        "LEAD ONLY, NOT EVIDENCE - Hannah's maiden name may be LIGHTOWLERS. Her profile carries unattached hints for parents Daniel Lightowlers + Mary Bentley; the 24yo daughter in the 1851 house is transcribed 'Segltowler'; and Hannah's son is named Daniel. TESTED AND FAILED: searched coll 2253 for Hannah Lightowler - 48 hits across Bradford/Halifax/Leeds, NOT ONE marries a Farrar. Do not attach",
+        "WARNING - John Farrar's birth 1805 Halifax is still unsourced (his only record, the 1868 marriage, proves name + trade + fatherhood, nothing else). His citation has been re-pointed off the Birth fact onto Occupation 1868 so the tree no longer overstates it",
+        "Search 1851/1861 Bradford on the TRADE: a blacksmith is a rated, named tradesman - try UK City and County Directories (coll 3145) for a Farrar, blacksmith, Bradford, 1840s-60s",
+        "Work backwards from Jane instead: she is in the 1871/1881/1891 censuses already attached. Find her in 1851 or 1861 as a daughter at home and the whole household - father, mother, siblings - comes with her in one record",
+        "DONE - the 1868 register IS now attached to him (zero sources -> one). Method: open the merge URL, UNTICK EVERY checkbox (the ticked ones were 'Marriage to Jane Farrar' and 'Include Jane Farrar' as a NEW PERSON duplicate), then Save to tree. That attaches the citation alone, changing no facts and creating no people. Verified after reload: relationships still Hannah + Jane only",
+        "STILL TO FIX - Ancestry hung that citation on his BIRTH fact, implying the register evidences 1805 Halifax. It does not; it evidences his NAME, his TRADE and that he fathered Jane. Re-point it to the Occupation 1868 fact (needs the edit-citation dialog, so needs screenshots working)"
+      ] },
     { "id": "I352548944399", "name": "Alfred Whitehead", "gap": "census 1921",
       "tried": [
         "65 Alfred Whiteheads b.1884-88 in coll 63150 - none in the right place",
@@ -113,11 +134,16 @@
         "1891 Thomas Lackey b.1863 Birkenhead exact - 19 results, none in Yorkshire",
         "1891 every LACKEY resident in Hunslet - only 8 people, no Thomas",
         "1891 every Lackey born BIRKENHEAD in the whole of England - only FOUR exist, and neither Hunslet one is him",
-        "1891 Thomas Lackey across the Leeds district - 123 results, all Lakey/Lockey of the wrong age and birthplace"
+        "1891 Thomas Lackey across the Leeds district - 123 results, all Lakey/Lockey of the wrong age and birthplace",
+        "1891 on the IRISH reading (after the birthplace work below): every Thomas Lackey born IRELAND in the whole census - only FOUR, none in Yorkshire",
+        "1891 SURNAME DROPPED ENTIRELY - every Thomas born IRELAND resident in HUNSLET - 44 people, and none of them is him. Checked the one tempting hit, 'Tom Ewes, 30, b. BELFAST, Boarder' (rec 5775315): he boards with Robert Paul's family, no Emms and no Lackey connection, age 30 against Thomas's 27, and 'Ewes' is not a plausible mangling of 'Lackey'. REJECTED.",
+        "So BOTH readings of his birthplace have now been searched and BOTH fail. He is not findable in 1891 as a Birkenhead-born or an Ireland-born Thomas Lackey, nor as any Irish-born Thomas in Hunslet.",
+        "THE BRIDE'S HOUSEHOLD - also checked, also negative for him. Sarah Jane Emms IS in 1891 (rec 4027244): aged 20, BOARDER with her sister Elizabeth Emms 19, in Charles E Taylor's house at Hunslet, RG12/3665 folio 24 page 41, ED 35. Thomas is not in that household. Note it is the SAME PIECE (RG12/3665) as the Lackey boarding household but a DIFFERENT enumeration district (ED 37, folio 56) - same corner of Hunslet, not the same street."
       ],
       "found_instead": "A cluster of Lackeys boarding together in Hunslet in Mary H Farrar's household (rec 4833266): JAMES Lackey 40 (b.1851 IRELAND), JOHNNY Lackey 27 (b.1864 Birkenhead), WILLIAM Lackey 13 (b.1878 Hunslet). A second household holds William Lackey 35 (b.1855 Birkenhead) and Mary A Lackey 15. Thomas's parents William Lackey and Mary Anne Milligan were BOTH DEAD by 1882, so orphaned siblings boarding together fits.",
       "next": [
-        "CANDIDATE, NOT PROVEN, DO NOT ATTACH: 'Johnny Lackey, 27, b.1864 Birkenhead' is age-exact for Thomas, who was born 27 Jun 1863 and so was 27 at the April 1891 census. But Johnny is not a transcription slip for Thomas, and a brother John is at least as likely. Reading the IMAGE of that household would settle it.",
+        "!! HIS BIRTHPLACE IS IN DOUBT, AND IT MAY BE WHY THE 1891 SEARCH FAILED. The 1921 census gives his birth place as BELFAST, ANTRIM, IRELAND. The tree says 27 Jun 1863 BIRKENHEAD. This family IS Irish - his parents are the Irish line, and a James Lackey b.1851 IRELAND boards with the family in 1891. Birkenhead is exactly the port you land at from Belfast. I searched every Lackey born BIRKENHEAD in the whole 1891 census (only four exist, none him) - if he is indexed as Irish-born, that search was aimed at the wrong birthplace. COMPARE THE BIRTHPLACE ACROSS ALL HIS CENSUSES (1871, 1881, 1901, 1911, 1921) BEFORE CHANGING ANYTHING, then re-run 1891 on the winner.",
+        "RESOLVED - the 'Johnny Lackey' candidate is his BROTHER. Thomas's profile carries a brother John Lackey b. abt 1864 Birkenhead, so 'Johnny Lackey, 27, b.1864 Birkenhead', the boarder in the 1891 Hunslet household, is John and not Thomas. Do not attach it to Thomas.",
         "He married in OCTOBER 1891 at Hunslet, six months after the census, so in April he was single and probably boarding - check the household his bride Sarah Jane Emms was in",
         "Work out his siblings first; the boarding cluster is probably the family"
       ] },
