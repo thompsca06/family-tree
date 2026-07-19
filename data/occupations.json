@@ -56,8 +56,17 @@
 
     { "id": "I352793764566", "name": "Jane Farrar", "trade": "Woollen Weaver", "match": "weaver",
       "group": "The rest",
-      "evidence": "1871 census, Horton/Bradford - \"Jane Best, Wife, 28, Woollen Weaver, born Wibsey\". She is Ann Elizabeth's mother and James R. Best's wife (married 30 May 1868, Bradford Cathedral). Brings Bradford's worsted trade into the family.",
-      "warn": "Her age is inconsistent between censuses - 28 in 1871 (b.~1843) but 49 in 1881 (b.~1832), an 11-year gap. The tree carries abt 1832. Not resolved; do not treat either as proven." }
+      "evidence": "1871 census, Horton/Bradford - \"Jane Best, Wife, 28, Woollen Weaver, born Wibsey\". She is Ann Elizabeth's mother and James R. Best's wife (married 30 May 1868, Bradford Cathedral). Brings Bradford's worsted trade into the family. NOW A THREE-CENSUS TRADE LINE, all read off images: STUFF WEAVER 1851 (Bowling) -> WORSTED WEAVER 1861 (Little Horton) -> WOOLLEN WEAVER 1871. One job, three wordings - a synonym group candidate.",
+      "warn": "Her age is inconsistent between censuses - 28 in 1871 (b.~1843) but 49 in 1881 (b.~1832), an 11-year gap. The tree carries abt 1832. PARTLY RESOLVED: 1851 gives 20 (b.~1831) and 1861 gives 29 (b.~1832), so THREE returns agree on ~1831-32 and 1871's '28' is the outlier. Separately, the 1861 IMAGE gives her birthplace as HALIFAX where every other source says WIBSEY - unresolved, do not change the tree." },
+
+    { "id": "I352793765252", "name": "Hannah Farrar", "trade": "Charwoman", "match": "char",
+      "group": "The rest",
+      "evidence": "1861 census image, RG9/3330 f.104 p.5 sch.26, 24 1/2 Clayton Lane, Little Horton, Bradford - \"Hannah Farrar, Head, Mar, 58, Charwoman, born Yorkshire Bradford Wibsey\". A married woman keeping her own house with a grown daughter and no husband present in either 1851 or 1861. She had ZERO sources before this session." },
+
+    { "id": "I352794571121", "name": "George Nicholson", "trade": "Agricultural Labourer", "match": "ag.?.?lab|agricultural",
+      "group": "The rest",
+      "evidence": "1871 census image, RG10/4808 f.83 p.17 sch.92, Front St North Side, Wetwang - \"George Nicholson, Head, Mar, 58, Ag. Lab.\". He is Mary Jane Blowman's father and had NO occupation recorded at all. Read off the image; the index does not carry it.",
+      "warn": "The same image retracts an earlier guess of mine: his condition reads 'Mar', so his wife Fanny was ALIVE in 1871 and merely absent that night. Do not infer her death from her absence." }
   ],
 
   "fix": [

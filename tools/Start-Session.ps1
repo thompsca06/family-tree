@@ -71,13 +71,35 @@ Write-Host '     If ANY tree edit has happened since the timestamp above, EXPORT
 Write-Host '     Settings -> Export tree -> Export -> (~30s) -> Download your GEDCOM file' -ForegroundColor Yellow
 
 if ($Install) {
-    if (-not $newer) { Write-Host ''; Write-Host '  -Install given but nothing newer found in Downloads.' -ForegroundColor Red; exit 1 }
+    # Edge on this machine saves straight to the Family folder, NOT to Downloads - so the zip
+    # at the root can itself BE the new export, already overwritten in place. Check whether it
+    # differs from the installed GEDCOM's source before declaring nothing to do.
+    if (-not $newer -and $zipInfo) {
+        $tmpChk = Join-Path ([System.IO.Path]::GetTempPath()) ("gedchk-" + (Get-Date -Format 'yyyyMMddHHmmss'))
+        Remove-Item $tmpChk -Recurse -Force -ErrorAction SilentlyContinue
+        try {
+            Expand-Archive -Path $zip -DestinationPath $tmpChk -Force
+            $chk = Get-ChildItem $tmpChk -Filter *.ged -Recurse | Select-Object -First 1
+            if ($chk -and (Get-FileHash $chk.FullName).Hash -ne (Get-FileHash $ged).Hash) {
+                Write-Host ''
+                Write-Host '  Root zip differs from the installed GEDCOM - treating it as the new export.' -ForegroundColor Yellow
+                $newer = @($zipInfo)
+            }
+        } catch { }
+        Remove-Item $tmpChk -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    if (-not $newer) { Write-Host ''; Write-Host '  -Install given but no new export found (checked Downloads AND the root zip).' -ForegroundColor Red; exit 1 }
     $src = $newer[0]
+    # If the "new" export IS the root zip, there is nothing to move - skip the Move-Item below.
+    $srcIsZip = ($src.FullName -eq $zip)
     Head 'INSTALLING NEW EXPORT'
     $stamp = Get-Date -Format 'yyyyMMdd-HHmm'
     Copy-Item $ged "$ged.bak-$stamp" -Force
     Write-Host "  backed up -> thompson_tree.ged.bak-$stamp"
-    Copy-Item $src.FullName $zip -Force
+    # MOVE, don't copy: the download must not be left behind in Downloads, which otherwise
+    # fills up with numbered zips and unnamed .tmp files and makes "which is newest?" ambiguous.
+    Move-Item $src.FullName $zip -Force
+    Write-Host "  moved to root -> Thompson Family Tree.zip (Downloads left clean)"
     $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("ged-" + $stamp)
     Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
     Expand-Archive -Path $zip -DestinationPath $tmpDir -Force

@@ -15,6 +15,64 @@
   ],
 
   "blocked": [
+    { "id": "I352794090880", "name": "Henry Whitehead", "gap": "death",
+      "tried": [
+        "His HINTS hold no death - only a family tree, and an obituary for a 'Sir Henry Whitehead' of Bradford who died abt 1928 at 'Siagenhoe Park'. Different man; do not attach",
+        "death index 1916-2007 (coll 7579) name + birth 1859 +/-2 AND +/-5 - both returned the SAME 7 rows, so that birth filter is not binding. A frozen result set that ignores a widened range is a broken filter, not an absence",
+        "coll 7579 + death place = Durham (he was at Sunderland in 1911) - 50 rows, no Henry Whitehead of the right age died in Sunderland or anywhere in Durham",
+        "coll 7579 + death place = Yorkshire West Riding, scanned for Thorne/Doncaster/Goole and for the b.1855-64 age bracket - nothing at Thorne. A Henry Whitehead abt 1859 died Sheffield Q4 1923, but Sheffield is nowhere in his life",
+        "⭐ THE DEFINITIVE ENGLISH SWEEP, DONE ON GRO - every death registered in England and Wales 1911-1957 (he is alive at the 1911 census, so 1911 is a hard floor), surname WHITEHEAD exact, forename Henry WITH derivative variations so HARRY is included, male: 434 rows, age read off every one. 39 men compute to b.1855-1863 and NOT ONE dies in his geography - nothing at Doncaster, Thorne, Goole, Grimsby, Sunderland, Durham or York. English deaths are now COVERED AND EMPTY; do not re-run them",
+        "The only four northern hits, none of them attachable: Sheffield 1918 M (b.1863, age 55) / SHEFFIELD 1923 D vol 09C p.490 (b.1859, age 64 - a PERFECT age fit and still rejected, because Sheffield appears nowhere in his life and an age match on a name this common proves nothing) / Leeds North 1938 J HARRY (b.1862) / Worksop 1946 D (b.1859)",
+        "NOT COVERED, and I would rather say so - GRO TIMES OUT on sound-alike surname variants (>45s, wedges the evaluate channel), so a badly mangled WHITEHEAD would have slipped the sweep. Get variant spellings from Ancestry and re-test those few by hand"
+      ],
+      "found_instead": "The reason earlier searches failed: HE LEFT YORKSHIRE. His residences run Beverley 1861 -> York 1871 -> Cottingham 1881 -> Quebec 1886 -> York 1891 and 1901 -> SUNDERLAND, Co. Durham 1911 -> and an undated GREAT GRIMSBY, Lincolnshire. Meanwhile his wife ADA died Jan 1927 at THORNE, Yorkshire West Riding - so the family came back south at some point.",
+      "next": [
+        "⭐ THE REAL PATTERN - THREE WHITEHEADS ARE ALL MISSING FROM 1921: Henry, his wife ADA, and their son ALFRED (see Alfred's own entry - 65 candidates searched, none right). Three absences across two generations is not three coincidences, it is ONE cause. Stop hunting them individually and find the cause: were they abroad in June 1921 (Henry had already emigrated to Quebec once, in 1886), or is the household mis-indexed under a mangled surname? Alice's 1921 shows her at her MOTHER's house without Alfred, which fits a family scattered or away",
+        "1921 SEARCHES TRIED AND FAILED: name+birth 1859 +/-3 (no place) and name+birth+Beverley BOTH returned the SAME 7 rows - the 1921 collection's birth filter FREEZES the result set exactly like the death index does. A frozen count is a broken filter, not an absence. Also tried residence=Great Grimsby (50 rows, no Ada) and Ada+birthplace=Wetwang (filter did not bind)",
+        "ANCHOR ON ADA. She died Jan 1927 at Thorne (Doncaster area). Find HER death record and check whether she is described as a WIDOW - that alone brackets Henry's death before or after Jan 1927",
+        "⛔ STOP SEARCHING ENGLISH DEATHS. The GRO sweep above covered the whole country for 46 years. Two absences now point the same way - missing from the 1921 census AND missing from the national death register - and GRO covers England and Wales ONLY. He crossed to Quebec once already, in 1886. Look at SCOTTISH (ScotlandsPeople), IRISH and CANADIAN records, and at deaths at sea",
+        "GRO caveat for whoever runs it next - its Age field is BROKEN and returns zero rows even for ages that plainly exist. Leave Age blank, pull every row, and filter the age yourself in script"
+      ] },
+    { "id": "I352548950140", "name": "Ann Emms - almost certainly Ann POTTLE", "gap": "maiden name, parents, death, censuses 1841/1861-1891",
+      "tried": [
+        "Norfolk BT transcripts (coll 61636) for a marriage - the record already on her is NOT a marriage, it is son John Robert's baptism. Found a second baptism the same way (son William, BT ANF 1846)",
+        "coll 61636 with a marriage-year filter - returned ZERO; that filter is too tight, drop it and scan"
+      ],
+      "found_instead": "SOLVED - IT IS PROVEN. The civil index only gave a 50/50 (page 439 carried one man and two women: Thomas Emms / Ann Pottle / Rachel Sadler, second groom untranscribed). The PARISH REGISTER settles it - found in Thomas Emms's hints, coll 61043 rec 629479, Norfolk RO PD 66/8: 'Thomas Emms, Full Age, 14 May 1843, NORWICH ST MICHAEL AT PLEA, Father ROBERT EMMS, Spouse ANN POTTLE'. It names BOTH PARTIES. Attached, and the marriage date upgraded from the vague 'April 1843' registration quarter to 14 May 1843. Her baptism (5 Apr 1818 Wymondham) and her parents WILLIAM POTTLE + RHODA MAYES are now on the tree.",
+      "next": [
+        "⭐ SHE MARRIED TWICE - SHE IS 'ANN WRIGHT' AFTER c.1860. Thomas died Jan 1855; she remarried a WRIGHT and by 1871 is HEAD at York, St John Micklegate (RG10/4747 f.18 p.30) with her sons James Emms 19 and Thomas Emms 18, born Wymondham - so widowed a SECOND time. Attached. HER DEATH WILL BE INDEXED UNDER WRIGHT, not Emms or Pottle - that is why it was never found",
+        "TRIED - death index (8914) Ann Wright b.1819 +/-5: 50 rows, none at York in the right window. But the result is CAPPED at 50 and 'Ann Wright' is extremely common. Narrow by York district, and by 1901+ once her 1881/1891 censuses are found",
+        "NOT ATTACHED, needs the image - 1901 York (coll 7814 rec 28471228) has an 'Ann Wright, 77, born Windham Norfolk' living with Thomas Emms 46 (Head) and wife Jane. Thomas 46 fits her son exactly. BUT she is entered as MOTHER-IN-LAW of the head, which makes her the wife's mother, not his. Either a loose entry or a different family - read the household off the image before touching it",
+        "STILL MISSING for her: 1881 and 1891 censuses (search Ann WRIGHT at York), and her death",
+        "DONE - RENAMED to Ann POTTLE, with the name cited to the 14 May 1843 parish register that proves it. Chris's instruction: 'if it's proven you should be doing it.' The gate is the EVIDENCE, not how permanent the button feels - a rename is reversible, and parking a proven fact leaves the tree wrong in the meantime",
+        "Thomas and Ann still need deaths and censuses 1861-1891. Norwich St Peter Mancroft in 1851 is the anchor"
+      ] },
+    { "id": "I352794569498", "name": "William Mills (and Sarah Mills I352794569499)", "gap": "marriage, death, censuses 1841/1861/1871/1881/1891",
+      "tried": [
+        "1861 surname=Mills + residence=Barkby, and again + residence=Barrow upon Soar - BOTH returned the SAME generic 50 Leicestershire Millses. The residence filter does not bind for these Leicestershire districts; a nil result from it means nothing",
+        "1861 Sarah Mills + birthplace=Doveridge Derbyshire - filter loosened to all Derbyshire, no Doveridge Sarah among them",
+        "1861 William Mills + birthplace=Sussex - found ONE interesting man (below) but could not corroborate him"
+      ],
+      "found_instead": "1851 (already attached) anchors them: Barkby, Leicestershire, Barrow upon Soar RD. William 37 head b. 'Walverton, Sussex'; Sarah 33 wife; Eliza 8, JOHN 6 (our ancestor), William 4, Maryan 1 month. ALSO: a William Mills aged 45 b. 'Warburton, Sussex' is a live-in SERVANT in the Morton household at Leicester St Martin in 1861 (rec 21643361, coll 8767). Age is 2 years out and the spelling differs, and I could NOT find Sarah heading a household anywhere to corroborate a family split. NOT ATTACHED.",
+      "next": [
+        "STRONG HUNCH WORTH TESTING: 'Walverton' and 'Warburton' are both probably manglings of WARBLETON, SUSSEX, which is a real parish. Search Sussex baptisms/parish registers for a William Mills bapt. abt 1814 at Warbleton - that would settle his origin and give his parents (gen 8)",
+        "Find Sarah first, not William. She is the one with the distinctive birthplace (Doveridge, Derbys) and she would have the children with her. Try 1861/1871 on the CHILDREN's names instead - Eliza b.1843, John b.1845, William b.1847, Mary Ann b.1851, all born Leicestershire",
+        "Their marriage should be findable ~1841-42 (Eliza b.1843), and a Sussex man marrying a Derbyshire woman in Leicestershire is an unusual enough combination to search on"
+      ] },
+    { "id": "I352794571122", "name": "Fanny Nicholson - really FANNY BURTON", "gap": "censuses 1871+1881, surname, father",
+      "tried": [
+        "death index (coll 8914) name=Fanny Nicholson, death 1868 +/-5 - ONE hit, a Gateshead woman b.1781. Wrong",
+        "death index name=Frances Nicholson, death 1868 +/-10 - only TWO hits in all England across twenty years, which is not credible for this surname. The death-year filter on this collection throttles far too hard; do not trust a small result set from it"
+      ],
+      "found_instead": "SOLVED. She is FRANCES 'FANNY' BURTON, married GEORGE NICHOLSON 28 JUL 1838 AT WETWANG aged 21, father JOHN BURTON (Wetwang parish register, East Riding Archives PE48/8, coll 62141 rec 90061011). She OUTLIVED GEORGE BY TWELVE YEARS: 1891 Stockton on Tees with her son HENRY, 41 (RG12/4050 f.57 p.10); 1901 Stockton on Tees aged 84 b.Cottingham with her daughter SARAH, now Sarah Colley (RG13/4622 f.17 p.25); DIED Q1 1904 STOCKTON aged 82 (GRO 10A/50, the only one in the district in a decade). Marriage, both censuses and the death are ATTACHED. Proof is a HOUSEHOLD match not a name match - the Henry and the Sarah sheltering her in 1891/1901 are both children in the 1851 Wetwang census.",
+      "next": [
+        "🚨 RETRACTED, SAME DAY - I attached George's 1881 census, read MARITAL STATUS: WIDOWER, and bracketed her death to 1871x1881. SHE WAS ALIVE AND OUTLIVED HIM BY TWELVE YEARS. The 1881 'Widower' is simply FALSE - one man's answer on one night, from a household his wife had left. Every 1871-1881 death sweep I ran was doomed by my own bracket. NO SINGLE CENSUS FIELD ENDS A SEARCH",
+        "☠️ CANDIDATE KILLED - 'Francis Nicholson, age 77, Q4 1894, DRIFFIELD, vol 9d p.213' IS A MAN. GRO holds sex, and a volume+page lookup on that exact reference returns it only when Gender=M. Do not revisit it",
+        "⭐ FOR CHRIS TO DECIDE - HER SURNAME SHOULD BE BURTON. It is record-proven by the Wetwang register, and the tree's convention is maiden names (Jane Farrar, Ann Pottle, Elizabeth Weatherill). Not renamed on my own initiative because she is a 4th-great-grandmother. Likewise her FATHER, JOHN BURTON, is named in that register and could be added as a new person - also Chris's call",
+        "⛔ DO NOT ATTACH the 1871 Woolton (Lancashire) or 1881 Richmond census hints - they are DIFFERENT WOMEN. Wrong birthplaces, and our George was at Wetwang in 1871. Ancestry is conflating several Frances Nicholsons; her real 1871 and 1881 are still unfound and are the remaining gap",
+        "Her mother 'Frances Fanny Eldrington' is TREE-HINT ONLY. Not evidence, do not attach",
+        "Where to look for the missing 1871/1881: she is somewhere between Wetwang and Teesside, and by 1891 she is with son Henry at Stockton. Work forward from the CHILDREN's households - Henry b.1849 and Sarah b.1846 - not from her own name"
+      ] },
     { "id": "I352793765203", "name": "John Farrar", "gap": "birth, marriage, death, all censuses",
       "tried": [
         "1851 name=John Farrar + birth=1805 +/-5 and +/-10 - 10 hits, none in the Bradford area, none with a wife Hannah. The filter was the problem: his birth year 1805 is ITSELF unsourced, so I was filtering real records out using an invented number",
@@ -22,15 +80,26 @@
         "1851 name=Hannah Farrar + birth=1803 Low Moor - ONE hit, a Newcastle woman. Wrong on every axis",
         "1851 name=John Farrar + residence=Bradford, NO birth year - this finally bound properly and returned 50 real Bradford-area hits, 20 of them heads of household. Only one had a wife Hannah: John Farrar 38, b. Heptonstall, Halifax St James - opened it, and the household is a SCHOOL (ten boarders aged 7-12 plus a servant). Not him"
       ],
-      "found_instead": "The 1868 marriage register (coll 2253 rec 4810060, Bradford St Peter, entry 286) READ FROM THE IMAGE proves the man himself: Jane Farrar, 31, spinster, weaver, of Bradford - father JOHN FARRAR, BLACKSMITH. The index does not carry the bride's father at all; only the image does. So 'blacksmith' is real and record-proven, but it is the ONLY thing about him that is.",
+      "found_instead": "MOSTLY SOLVED. The 1830 MARRIAGE REGISTER, read from the image (coll 2253 rec 16131190, Bradford St Peter entry 36, WYAS BDP14 / 40D90/1/3/14): 'John Farrar, of this Parish, BLACKSMITH and Hannah Lightowlers, of this Parish, Spinster, married by Banns 1 February 1830' - BOTH SIGNED WITH A CROSS. Same trade and same church as Jane's 1868 wedding, 38 years apart, so it is provably the same man. AND THE 1871 CENSUS HAS HIM AT HOME: RG10/4476 f.9 p.12 sch.72, All Saints Horton - John Farrar 66 HEAD b.Halifax, Hannah 68 wife, Daniel Farrer 36 son. John went from ONE source to three; Hannah from zero to a complete life (birth, marriage, 1851, 1861, 1871, 1881, death Q4 1882 Bradford aged 81, GRO 09B/119). Hannah's 1881: 34 Berwick St Bradford, 79, WIDOW, ANNUITANT, living with daughter Jane Best.",
       "next": [
+        "🚨 RETRACTED - I had written 'LEAD ONLY, NOT EVIDENCE... TESTED AND FAILED... Do not attach' about Hannah's maiden name LIGHTOWLERS. IT IS RECORD-PROVEN, and the record was in collection 2253 all along - the very collection I said I had searched. My query missed it (singular 'Lightowler' against the register's 'Lightowlers'). A FAILED SEARCH IS NOT A DISPROOF; I turned one null result into a prohibition",
+        "🚨 RETRACTED - 'a man working away, or living in at a forge' was a theory built on his absence from 1851 and 1861. In 1871 he is HEAD of his own household with wife and son. Do not build character theories on absences",
+        "DONE - John Farrar's birth 1805 HALIFAX IS NOW SOURCED by the 1871 census (age 66, born Halifax). The old WARNING note about it being unsourced can come off",
+        "STILL MISSING - JOHN'S DEATH. Hannah is 'Widow' in April 1881, which is a LEAD NOT PROOF (George Nicholson was a 'Widower' with a living wife). If right, he died Apr 1871 x Apr 1881 aged 66-75",
+        "BEST CIVIL CANDIDATE, NOT ATTACHED - John Farrar age 64, Q1 1873, BRADFORD 09B/133. Three to four years out on an age that is now census-anchored, and Bradford is thick with Farrars. Needs corroboration before it goes anywhere near the tree",
+        "SEARCHED AND EMPTY - West Yorkshire burials (coll 2254) 1871-1881: nine John Farrars in the b.1799-1812 band, ALL in the Calder Valley or Wakefield, NONE at Bradford or Horton. Same Bradford coverage hole that blocked Jane Farrar's burial. He also has NO HINTS AT ALL",
+        "NEXT ON JOHN - Bradford's own cemetery registers (Undercliffe, Bowling), which coll 2254 does not cover",
         "DONE - the 1851 image was read and the household IS Farrar. Attached to Jane AND to Hannah, so Hannah went from ZERO sources to one. The image corrected two of my index-based guesses: Hannah is 'Mar' (MARRIED, husband absent) NOT a widow, and 'Wettey M Bradford' is 'WIBSEY nr BRADFORD'",
-        "CHRIS TO DECIDE - Hannah's birthplace: the tree says 1803 Low Moor (unsourced, origin unknown); the 1851 census image says abt 1804, Wibsey nr Bradford. I did NOT overwrite it and did NOT let the census cite the Low Moor value, because changing a direct ancestor's birthplace is your call",
+        "DECIDED AND DONE - Chris ruled 'put wibsey'. Hannah's birthplace is now Wibsey, Yorkshire, England (matching the tree's existing spelling so no new unresolved place), cited to the 1851 census. The unsourced 'Low Moor' is gone",
+        "SMALL TIDY-UP OUTSTANDING - her birth DATE is still 1803, but the census gives age 47 = abt 1804, and the census is now cited against that fact. Set it to 'abt 1804' when the fact-edit dialog works (it refuses input while screenshots are down). One-year census drift, not a problem, just unfinished",
+        "WIBSEY NOW DOUBLY CONFIRMED - the 1861 image (RG9/3330 f.104 p.5) independently gives her birthplace as 'Bradford, Wibsey'. And note where the old wrong value probably came from: LOW MOOR is on the SAME PAGE, as the birthplace of Rachel Phillips two doors up",
+        "NEW FACTS needing the Add-fact dialog: Hannah was a CHARWOMAN (1861). Her daughter Jane was a WORSTED WEAVER (1861) - completing stuff weaver 1851 / worsted weaver 1861 / woollen weaver 1871, one trade under three wordings",
+        "TIDY-UP - when attaching the 1861 I cited it against JANE's birth, but that image says Jane was born HALIFAX while the tree (and the 1851 image) say WIBSEY. The 1861 INDEX contradicts its own image on this. Either untick that citation or record the variant; do not change Jane's birthplace, which has the 1851 image behind it",
         "TRIED AND FAILED - hunting John in the 1851 census ELSEWHERE (Hannah is 'Mar' with husband absent, so he is enumerated somewhere else that night). Searched coll 8860 name=John Farrar + keyword=blacksmith: the keyword param does NOT bind, returned the same generic 50, and there is no John Farrar lodging or heading a household anywhere in the Bradford/Bowling area. Halifax has several but none tie to Hannah",
+        "IMPORTANT - HE WAS STILL ALIVE IN 1861. The 1861 image (RG9/3330 f.104 p.5 sch.26, Little Horton) has Hannah as Head, condition 'Mar' AGAIN, ten years after 1851 - so do NOT bound his death before 1861. He is absent from her household in BOTH censuses, which is a pattern worth explaining rather than a gap: a man working away, or living in at a forge",
         "NEXT ON JOHN - try the trade from the other end: UK City and County Directories (coll 3145) for a FARRAR, blacksmith, Bradford/Bowling/Wibsey 1840s-60s. A blacksmith is a rated, listed tradesman. Also worth a Bradford burial search for John Farrar 1851-1868 in case he died before the daughter's wedding (the register names a father whether alive or dead)",
         "NEXT - read Rachel's surname off the image at higher magnification (cropped the canvas but not enough to be certain). Ancestry read 'Rachel Segltowler'; it is probably LIGHTOWLER",
-        "LEAD ONLY, NOT EVIDENCE - Hannah's maiden name may be LIGHTOWLERS. Her profile carries unattached hints for parents Daniel Lightowlers + Mary Bentley; the 24yo daughter in the 1851 house is transcribed 'Segltowler'; and Hannah's son is named Daniel. TESTED AND FAILED: searched coll 2253 for Hannah Lightowler - 48 hits across Bradford/Halifax/Leeds, NOT ONE marries a Farrar. Do not attach",
-        "WARNING - John Farrar's birth 1805 Halifax is still unsourced (his only record, the 1868 marriage, proves name + trade + fatherhood, nothing else). His citation has been re-pointed off the Birth fact onto Occupation 1868 so the tree no longer overstates it",
+        "NOW WORTH REVISITING - her parents DANIEL LIGHTOWLERS + MARY BENTLEY are hint-only, but the maiden name that underpinned them is now proven, and her son is named Daniel. Her baptism hint (25 Sep 1803, WIBSEY, father Daniel Lightowlers) matches the birthplace Chris ruled on. Attach the baptism and the parents become a real question for Chris rather than a guess",
         "Search 1851/1861 Bradford on the TRADE: a blacksmith is a rated, named tradesman - try UK City and County Directories (coll 3145) for a Farrar, blacksmith, Bradford, 1840s-60s",
         "Work backwards from Jane instead: she is in the 1871/1881/1891 censuses already attached. Find her in 1851 or 1861 as a daughter at home and the whole household - father, mother, siblings - comes with her in one record",
         "DONE - the 1868 register IS now attached to him (zero sources -> one). Method: open the merge URL, UNTICK EVERY checkbox (the ticked ones were 'Marriage to Jane Farrar' and 'Include Jane Farrar' as a NEW PERSON duplicate), then Save to tree. That attaches the citation alone, changing no facts and creating no people. Verified after reload: relationships still Hannah + Jane only",
@@ -50,20 +119,22 @@
         "Consider that he may simply not be in England in June 1921"
       ] },
 
-    { "id": "I352794868212", "name": "Elizabeth Weatherill", "gap": "death/burial",
-      "tried": [
-        "55 Elizabeth Weatherill/Wetherill/Weatherall deaths in the 1870-80 civil index - NONE matches b.~1807 in the Easingwold or York districts",
-        "nearest temptations (b.1789 York 1877; b.1793 Sculcoates 1876) are 15+ years out on age - rejected"
-      ],
-      "found_instead": "Bracketed to 1871x1881 by the census itself: James appears in 1881 at Lillings Ambo as head of a household of ONE. Her ABSENCE is the evidence.",
-      "next": [ "The Sheriff Hutton / Lillings Ambo parish BURIAL register, not the civil index" ] },
-
-    { "id": "I352793764566", "name": "Jane Farrar", "gap": "death/burial",
+    { "id": "I352794868212", "name": "Elizabeth Weatherill", "gap": "baptism, maiden name",
       "tried": [],
-      "found_instead": "Her age is irreconcilable between censuses: 28 in 1871 (b.~1843) but 49 in 1881 (b.~1832). An 11-year jump, far past normal census slop. The tree carries abt 1832.",
+      "found_instead": "SOLVED AND ATTACHED - BURIED 2 MAY 1883 AT SHERIFF HUTTON (coll 62235 rec 529069), death registered Q2 1883 Malton age 77 (GRO 09D/283), plus a NEW 1881 census: Roans Cottage, Sheriff Hutton West Cornbrough, age 74, MONTHLY NURSE, living as mother-in-law with Thomas and Hannah Rowlay (RG11/4814 f.104 p.10). Sheriff Hutton W Cornbrough registered at MALTON, which is why Easingwold and York searches missed her.",
       "next": [
-        "Her baptism at Wibsey would decide which age is right, and that decides which death to look for",
-        "Do NOT search for a death until the birth year is settled - the wrong year is why nothing matches"
+        "🚨 THE OLD BRACKET WAS WRONG AND COST THE EARLIER SEARCHES - I had 'died 1871x1881, because James is alone at Lillings Ambo in 1881'. His 1881 entry says MARITAL STATUS: MARRIED. They simply LIVED APART. She died 1883, outside the window I was searching, so 'none of 55 candidates match' was guaranteed before I started. THIRD time this tree has fooled me this way (also George x Fanny Nicholson, John x Hannah Farrar) - AN ABSENCE FROM A HOUSEHOLD IS NOT A DEATH, read the condition column",
+        "AND CHECK THE HINTS FIRST - the burial was sitting in her Hints list with the exact date and parish the whole time, while I swept the national civil index across five spellings on two sites. One page load would have done it",
+        "STILL OPEN - her BAPTISM (23 Mar 1806, Sheriff Hutton, father Thomas Webster) is a hint, not attached, and it makes her b.1806 not the 'abt 1807' the tree carries. Her maiden name WEBSTER is hint-only too, though four separate hints agree. Attach the baptism and both are settled"
+      ] },
+
+    { "id": "I352793764566", "name": "Jane Farrar", "gap": "birth/baptism, burial",
+      "tried": [],
+      "found_instead": "DEATH IS NOW SETTLED AND ATTACHED - June 1896, Bradford (civil index 8914 rec 2710469). GRO broke the tie the index could not: its free search gives AGE AT DEATH 63, which the index does not carry. 63 in 1896 = b. 1832/33, matching 20 in 1851 and 29 in 1861. The rival Q4 1891 candidate was b. abt 1828, and GRO shows only ONE Jane Best in Bradford across 1892-96. The old 'do not attach either candidate' caution is DISCHARGED.",
+      "next": [
+        "Her age is still irreconcilable across censuses: 28 in 1871 (b.~1843) against 49 in 1881 (b.~1832). 1851, 1861, the 1868 register and now GRO all support ~1832, so 1871 is the outlier - treat it as a transcription/enumerator error, not a rival birth year",
+        "Her baptism at Wibsey would settle the birth outright. That is the remaining gap, not the death",
+        "Her BURIAL is still unfound - West Yorkshire burials (coll 2254) has no Bradford coverage for 1896. Try the Bradford cemetery registers, and note her husband James R. Best died Sep 1898, so the same ground likely holds both"
       ] },
 
     { "id": "I352793764361", "name": "James R. Best", "gap": "census 1841, 1851, 1861",
