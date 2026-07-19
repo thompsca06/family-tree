@@ -169,6 +169,58 @@ $notConnected = @(foreach ($k in $people.Keys) {
       [ordered]@{ id = $k; name = ((@($p.givn, $p.surn) | Where-Object { $_ }) -join ' ') }
     }
   })
+
+# ---- data/not-relevant.json: people PROVED not to be family -------------------
+# §6 counts everyone with no path to the home person. Some of them were severed
+# DELIBERATELY after being disproved, and a generated count cannot know that -
+# so it reported parked work as the largest outstanding bucket and cost two
+# sessions re-deriving the same conclusion. This splits them out.
+#
+# Excluding is NOT deleting: they stay in the Ancestry tree. And it must never be
+# silent - a hidden exclusion would recreate the very problem it is here to fix.
+$notRelevant = @()
+$nrPath = Join-Path $root 'data/not-relevant.json'
+if (Test-Path $nrPath) {
+  $nr = $null
+  # A broken file must be LOUD. Swallowing the error would quietly bring 42
+  # disproved people back as "outstanding" with nobody the wiser.
+  try { $nr = Get-Content $nrPath -Raw | ConvertFrom-Json }
+  catch {
+    Write-Host "  !! data/not-relevant.json IS NOT VALID JSON - NOBODY IS EXCLUDED" -ForegroundColor Red
+    Write-Host "     $($_.Exception.Message)" -ForegroundColor Red
+  }
+  if ($nr) {
+    $ncIndex = @{}; foreach ($x in $notConnected) { $ncIndex[$x.id] = $x }
+    $keep = @()
+    foreach ($cl in $nr.clusters) {
+      foreach ($id in $cl.people) {
+        if ($ncIndex.ContainsKey($id)) {
+          $e = $ncIndex[$id]; $ncIndex.Remove($id)
+          # pscustomobject, not a hashtable: Group-Object below groups on the
+          # PROPERTY, and a hashtable would silently group everything under ''.
+          $notRelevant += [pscustomobject]@{ id = $id; name = $e.name; cluster = $cl.name }
+        }
+        elseif ($people.Contains($id) -and $keepP.ContainsKey($id)) {
+          # CONTRADICTION: listed as not-family but there IS a path to the home
+          # person. Either the exclusion is wrong or a bad link was made on
+          # Ancestry. Both need a human, so do NOT exclude them.
+          Write-Host "  !! CONTRADICTION - $id is in not-relevant.json but IS CONNECTED to the home person" -ForegroundColor Red
+          Write-Host "     ('$($cl.name)') - NOT excluded. Check the link on Ancestry, or the exclusion." -ForegroundColor Red
+        }
+        else {
+          # Ancestry merges retire an id and you cannot choose which, so these
+          # rot. Say so rather than ignoring it.
+          Write-Host "  !! stale id in not-relevant.json: $id ('$($cl.name)') is not in this export" -ForegroundColor Yellow
+        }
+      }
+    }
+    $notConnected = @($ncIndex.Values)
+    if ($notRelevant.Count) {
+      $by = $notRelevant | Group-Object cluster | ForEach-Object { "$($_.Name) ($($_.Count))" }
+      Write-Host "  parked $($notRelevant.Count) people as not relevant: $($by -join ', ')" -ForegroundColor DarkGray
+    }
+  }
+}
 $peopleKept = [ordered]@{}; foreach ($k in $people.Keys) { if ($keepP.ContainsKey($k)) { $peopleKept[$k] = $people[$k] } }
 $famsKept = [ordered]@{}; foreach ($k in $fams.Keys) { if ($keepF.ContainsKey($k)) { $famsKept[$k] = $fams[$k] } }
 $people = $peopleKept; $fams = $famsKept
@@ -183,6 +235,7 @@ $doc = [ordered]@{
     sourceRecs   = $sources.Count
     totalInFile  = $totalInFile
     notConnected = $notConnected   # dropped from the site render; Find-Problems lists them
+    notRelevant  = $notRelevant    # PROVED not family (data/not-relevant.json) - parked, not a backlog
   }
   people  = $people
   fams    = $fams

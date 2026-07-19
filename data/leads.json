@@ -15,6 +15,18 @@
   ],
 
   "blocked": [
+    { "id": "I352794603636", "name": "William Ingleby (Thomas b.1812's father - PLACEHOLDER)", "gap": "identity - and it gates 34 disconnected people",
+      "tried": [
+        "Mapped section 6 in full: the 72 disconnected people are 22 ISLANDS, not one problem. Island 2 is 34 people - the whole upper Ingleby line plus the Abbotts - and it hangs off THIS ONE PERSON"
+      ],
+      "found_instead": "THE JOIN POINT IS EXACT. Main tree: Thomas Ingleby I352793559056 b.abt 1812 sits in family F76 whose HUSB is William Ingleby I352794603636 - a placeholder with NO dates and NO sources. Island 2's apex is William Ingleby I352551798670 - b.1794, bapt 19 Sep 1794 Pateley Bridge, 15+ sources, m. Ann Corker 6 Oct 1825 Ripon Cathedral, censuses Bishopside/Fellbeck, d. Mar 1872 bur. Dacre - and behind him George Ingleby b.1760 x Dorothy Hammon, John Ingleby b.1741 x Sarah Kirby, then ANTHONY INGLEBY at the top.",
+      "next": [
+        "⛔ DO NOT MERGE THE TWO WILLIAMS, however tempting a 34-person payoff is. THE DATES DO NOT WORK: William b.1794 married in 1825, but Thomas was born abt 1812 - thirteen years earlier, when William was 18 - and Thomas is not among F27's six children (Rebecca 1835, George 1837, Robert 1839, David 1842, John 1842, Eliza 1846)",
+        "GEOGRAPHY IS CLOSE BUT NOT THE SAME - William b.1794 is Nidderdale (Pateley Bridge, Bishopside, Fellbeck, Dacre); Thomas is 'of Mickley', Kirkby Malzeard / Eavestone / Grewelthorpe",
+        "⭐ AND WE HAVE MADE THIS EXACT MISTAKE ALREADY - Thomas was once mis-grafted onto a JOHN Ingleby, 'a REAL but WRONG man', and it took a full untangle to remove him. Grafting him onto a WILLIAM on a matching forename plus a convenient payoff is the same error with a different first name. A merge is IRREVERSIBLE and retires an ID you cannot choose",
+        "WHAT IS ACTUALLY NEEDED: Thomas Ingleby's BAPTISM (abt 1812, Mickley/Kirkby Malzeard/Grewelthorpe area) or his MARRIAGE record, either of which should name his father. Kirkby Malzeard and Ripon registers are the target - see the grewelthorpe.org.uk lead",
+        "⚠️ NOTE FOR WHOEVER WORKS SECTION 6 - ISLAND 3 (John Ingleby + Mary + Mary Ann + the Richmonds, 8 people) IS THE WRONG FAMILY WE DELIBERATELY CUT OFF. It is disconnected BY DESIGN. Re-attaching it would undo the untangle. Section 6 is not a to-do list; check whether an island was severed on purpose before joining anything"
+      ] },
     { "id": "I352794090880", "name": "Henry Whitehead", "gap": "death",
       "tried": [
         "His HINTS hold no death - only a family tree, and an obituary for a 'Sir Henry Whitehead' of Bradford who died abt 1928 at 'Siagenhoe Park'. Different man; do not attach",

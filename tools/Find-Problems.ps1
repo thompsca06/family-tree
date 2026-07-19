@@ -241,6 +241,20 @@ if ($nc.Count) {
 } else { Say "  everyone in the file is connected" }
 Say "  -> $($nc.Count) people not connected (of $($G.meta.totalInFile) in the file)"
 
+# People PROVED not to be family are parked in data/not-relevant.json and are NOT
+# part of the count above - otherwise this section reports settled work as the
+# biggest outstanding bucket, which it did twice. Listed separately, never hidden.
+$nrel = @($G.meta.notRelevant)
+if ($nrel.Count) {
+  Say ""
+  Say "  PARKED - PROVED NOT FAMILY (data/not-relevant.json), excluded from the count above:"
+  foreach ($grp in ($nrel | Group-Object cluster | Sort-Object Count -Descending)) {
+    Say ("    {0,3} - {1}" -f $grp.Count, $grp.Name)
+  }
+  Say "  -> $($nrel.Count) parked. They stay in the Ancestry tree; excluding is not deleting."
+  Say "     Do NOT 'reconnect' these - each carries the evidence that disproved it in that file."
+}
+
 # ---------------------------------------------------------- 7. occupations
 # The Work page is built ONLY from occupations in the export. A trade read in a
 # record and written up in the journal, but never entered as a fact on Ancestry,

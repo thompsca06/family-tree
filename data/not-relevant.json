@@ -1,0 +1,71 @@
+{
+  "_readme": [
+    "PEOPLE WHO ARE IN THE ANCESTRY TREE BUT ARE NOT CHRIS'S FAMILY.",
+    "",
+    "WHY THIS EXISTS: problems.txt section 6 counts everyone with no path to the home person and",
+    "calls it '72 not connected'. That reads like 72 errors. It is not. Some of those people were",
+    "DELIBERATELY severed after being disproved, and a generated count cannot know that. Twice now a",
+    "session has been spent re-deriving the same conclusion about the same 42 people, because the",
+    "report presented parked work as a backlog.",
+    "",
+    "WHAT THIS FILE DOES: names those people so the generators can take them OUT of the counts and",
+    "OUT of the site, and report them separately as 'parked, with a reason' instead of 'outstanding'.",
+    "",
+    "RULES:",
+    "1. NOTHING goes in here on a hunch. Each cluster carries the evidence that DISPROVED it, the",
+    "   same standard as attaching a record. If it is merely unproven, it does NOT belong here -",
+    "   unproven is a lead (leads.json), disproved is an exclusion (this file).",
+    "2. EXCLUDING IS NOT DELETING. These people stay in the Ancestry tree unless Chris deletes them",
+    "   there. This file only stops them being counted and rendered as if they were research debt.",
+    "3. IT MUST BE LOUD. The generators print how many were excluded and under which cluster. A",
+    "   silent exclusion would recreate the exact problem this file exists to fix - a count that lies.",
+    "4. IF AN EXCLUDED PERSON IS ACTUALLY CONNECTED to the home person, that is a CONTRADICTION and",
+    "   must warn loudly and NOT exclude them. Either the exclusion is wrong or a bad link was made.",
+    "5. IDS DRIFT. An Ancestry merge retires one of two IDs and you cannot choose which. Names and",
+    "   birth years are recorded beside each id so a stale entry is detectable; the generators should",
+    "   warn on any id that is not in the current export rather than ignoring it."
+  ],
+
+  "clusters": [
+    {
+      "name": "Nidderdale Inglebys + Abbotts",
+      "count": 34,
+      "verdict": "DISPROVED - chronologically impossible",
+      "evidence": "This cluster is headed by WILLIAM INGLEBY b.1794 (bapt. 19 Sep 1794 Pateley Bridge), and the tempting move has been made twice: our Thomas Ingleby the cordwainer (I352793559056, b. abt 1812) has a father WILLIAM with no dates, so linking them would connect 34 people in one click. IT IS WRONG. That William married ANN CORKER on 6 Oct 1825 at Ripon Cathedral and their children run Rebecca 1835, George 1837, Robert 1839, David 1842, John 1842, Eliza 1846, all at BISHOPSIDE. OUR Thomas was born abt 1812 at EAVESTONE - thirteen years before that marriage, when William b.1794 was eighteen. Different parish, impossible chronology. Their geography is Nidderdale (Pateley Bridge, Bishopside, Fellbeck, Dacre); ours is Eavestone / Kirkby Malzeard / Mickley.",
+      "do_not": "Do NOT merge William Ingleby b.1794 with the placeholder William I352794603636. A merge is irreversible and retires an ID you cannot choose. This line has already been mis-grafted once (onto a John) and needed a full untangle.",
+      "people": [
+        "I352552815639",  "I352552812685",  "I352552812686",  "I352551799848",
+        "I352551799849",  "I352552812689",  "I352551798670",  "I352552812690",
+        "I352552812692",  "I352551810809",  "I352552812691",  "I352551799210",
+        "I352551799920",  "I352551799212",  "I352551799216",  "I352551799224",
+        "I352551799226",  "I352551799228",  "I352552814522",  "I352552814516",
+        "I352552814517",  "I352552814519",  "I352552814520",  "I352552814521",
+        "I352551800160",  "I352551800159",  "I352551800844",  "I352551800845",
+        "I352551800846",  "I352551800429",  "I352551800430",  "I352551800300",
+        "I352551800301",  "I352551800302"
+      ]
+    },
+    {
+      "name": "John Ingleby of Ripon + Mary + Mary Ann, with the Richmonds and William Gill",
+      "count": 8,
+      "verdict": "DISPROVED - the real but WRONG family Thomas was mis-grafted onto",
+      "evidence": "Thomas Ingleby b.1812 formerly hung off a father 'John Ingleby of Eavestone'. His ACTUAL baptism proves otherwise: 27 Dec 1812, Ripon, 'Thomas, Son of WILLIAM Ingleby' (register image read by Chris; William signed with his mark). The John on the tree turned out to be a REAL man - John Ingleby of Ripon, wife Mary, daughter Mary Ann bapt 10 May 1829 Ripon - just not Thomas's father. Thomas was detached and re-parented to William. Mary and Mary Ann are JOHN's wife and daughter, never Thomas's.",
+      "do_not": "This cluster is disconnected BECAUSE THE UNTANGLE WAS DONE PROPERLY. It is scar tissue, not a backlog item. Do NOT 'reconnect' it - that would undo the fix.",
+      "people": [
+        "I352793560095",  "I352793560756",  "I352793559874",  "I352793559982",
+        "I352793559984",  "I352793559981",  "I352793559983",  "I352793560094"
+      ]
+    }
+  ],
+
+  "deliberately_not_listed": [
+    "THE SAWDONS (~9, Weaverthorpe 1737-56 + Hannah/Harriot West Lutton 1811/1819) are NOT excluded.",
+    "They look like genuine SIBLINGS of our WILLIAM SAWDON (gen 9) and John Sawdon (gen 8), added",
+    "without their parent link. They are real work - the cheapest wins in section 6 - not exclusions.",
+    "",
+    "THE WEATHERILL / WETHERILL SINGLETONS (7, Leeds 1886-90, Sophia 1851, Thomas 1856 Preston,",
+    "Blackburn) are NOT excluded either. Ours are Sheriff Hutton and Lillings Ambo, so these are",
+    "probably a different family - but 'probably' is not disproved, and this file needs disproved.",
+    "Check them, then either link them or move them in here with the evidence."
+  ]
+}
