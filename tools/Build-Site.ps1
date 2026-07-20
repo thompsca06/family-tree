@@ -78,6 +78,53 @@ foreach ($lib in @('vendor/react.production.min.js', 'vendor/react-dom.productio
   if (-not (Test-Path (Join-Path $root $lib))) { throw "missing $lib - the published site would render blank" }
 }
 $html = $html -replace '(?i)(<head>)', "`$1`n$react"
+
+# ---- offline reading -------------------------------------------------------
+# A service worker keeps the whole site minus photographs (about 2.8 MB - every
+# person, every record, every story) so it opens with no signal at all. Photos
+# and map tiles are kept as they are looked at rather than downloaded up front.
+#
+# The version stamp is what makes an update land: the shell cache is named after
+# it, so a rebuild retires the old one. Without it a reader could sit on
+# yesterday's tree indefinitely and never know.
+$swVersion = (Get-Date).ToString('yyyyMMdd-HHmmss')
+$swSrc = Join-Path $root 'sw.js'
+if (Test-Path $swSrc) {
+  $sw = [IO.File]::ReadAllText($swSrc) -replace '__BUILD_VERSION__', $swVersion
+  [IO.File]::WriteAllText((Join-Path $dist 'sw.js'), $sw)
+
+  # Add to Home Screen on a tablet, so it opens like an app rather than a tab.
+  $manifest = [ordered]@{
+    name             = 'A Family Across Two Centuries'
+    short_name       = 'Family Tree'
+    start_url        = './'
+    scope            = './'
+    display          = 'standalone'
+    background_color = '#f7f3ea'
+    theme_color      = '#f7f3ea'
+    description      = 'Thompson and Ingleby — a family history built from original records.'
+    icons            = @()
+  }
+  [IO.File]::WriteAllText((Join-Path $dist 'manifest.webmanifest'), ($manifest | ConvertTo-Json -Depth 4))
+
+  # Registration is injected here rather than living in the component, so the
+  # design-host preview and preview.html never register a worker — a stale
+  # service worker on a local preview would be a miserable thing to debug.
+  $swTag = @'
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f7f3ea">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* offline reading simply unavailable */ });
+    });
+  }
+</script>
+'@
+  $html = $html -replace '(?i)(</head>)', "$swTag`$1"
+  Write-Host "  offline: service worker + manifest written (build $swVersion)"
+}
+
 [IO.File]::WriteAllText((Join-Path $dist 'index.html'), $html)
 
 Copy-Item (Join-Path $root 'support.js') $dist

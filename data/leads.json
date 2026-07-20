@@ -15,6 +15,32 @@
   ],
 
   "blocked": [
+    { "id": "I352794569499", "name": "HANNAH Mills (was wrongly 'Sarah') - possibly nee BROWN", "gap": "marriage and death, now searchable under the right name",
+      "tried": [
+        "1861 and 1871 census searches for a Sarah Mills born Doveridge Derbyshire: the birthplace filter does not bind and nothing matches. That may be because she is not called Sarah"
+      ],
+      "found_instead": "🔶 THE 1861 CENSUS SAYS HANNAH. Barkby, Leicestershire (RG9/2282 f.90 p.5, Barrow upon Soar RD): HANNAH MILLS 43 HEAD, with William 14, Mary Ann 10 and Charles 8. THE CHILDREN ARE OURS - the 1851 Barkby household has William 4 and Maryan 1 month, so ten years on they are exactly 14 and 10, same parish. And the ages agree on the mother: Hannah 43 in 1861 = b.1818; 'Sarah' 33 in 1851 = b.1818. CORROBORATION: William Mills's hints carry a marriage 22 MAY 1842 AT LAMBETH TO HANNAH BROWN (father John Mills) plus a member photo captioned 'MC - Mills William & Brown Hannah'. An 1842 marriage fits first child Eliza b.1843 exactly.",
+      "next": [
+        "✅ SETTLED FROM THE IMAGE AND RENAMED ON THE TREE. The 1851 Barkby page (HO107/2087 f.640 p.20, schedule 86) reads: William Mills, Head, 37, COACHMAN, b. Sussex Walverton / HANNAH do, Wife, Mar, 33, b. DERBY DOVERIDGE / Eliza 8 b. London Marylebone / John 6 / William 4 / Maryan 1 month. THE ENUMERATOR WROTE HANNAH - only Ancestry's INDEX says Sarah, and the birthplace in the same row is the Doveridge that was always on her profile. She is now HANNAH MILLS and her 1851 census is attached (she had none)",
+        "SO THE TWO-WIVES ALTERNATIVE IS DEAD - there was only ever one wife, mis-indexed. And the 1861 Barkby household (Hannah 43 Head, William 14, Mary Ann 10, Charles 8) is simply her",
+        "⭐ NEXT AND BEST LEAD: the 22 MAY 1842 LAMBETH marriage of William Mills (father John Mills) to HANNAH BROWN, with a member-uploaded marriage certificate image. An 1842 London wedding now makes sense - ELIZA WAS BORN IN MARYLEBONE, so the family were in London before moving to Barkby by 1846. Verify it names OUR William and BROWN becomes an attachable maiden name",
+        "⭐ AND A STORY THREAD: William was a COACHMAN in 1851 and still a GROOM (Dom) at 73 in 1881 - horses his whole working life, London to Leicestershire to Nottinghamshire",
+        "NOTE Hannah is HEAD in 1861 with William absent; he turns up lodging at Melton Mowbray in 1871. An absent husband is not a dead one",
+        "Her death bracket so far: William is a WIDOWER on the 1881 census (North Muskham), so his wife died before April 1881 - but that is a lead, not a fact"
+      ] },
+    { "id": "I352548950140", "name": "Ann Pottle - SOLVED, died Sep 1901 York aged 77", "gap": "the Wright marriage only - tidy-up, not urgent",
+      "tried": [
+        "GRO, Ann Wright deaths filtered to ages implying b.1813-1823 (from her 1818 baptism), York/Easingwold/Malton, 1871-1905: ZERO. THAT SEARCH WAS MINE AND IT WAS WRONG - see below",
+        "Norfolk parish marriages (coll 61043) for the Wright remarriage, both from her side and his: nothing pairs an Ann Emms with a William Wright 1863-67"
+      ],
+      "found_instead": "🚨 THE JOURNAL WAS WRONG - she does NOT appear 'with him' in 1871. RG10/4747 f.18 p.30, St John Micklegate York: ANN WRIGHT, 47, HEAD, born Wymondham Norfolk, with sons JAMES EMMS 19 and THOMAS EMMS 18 and a boarder. She heads her own household and there is no Wright husband in it. The remarriage is real (she is Wright by 1871) but do not infer anything about his being alive or dead from his absence.",
+      "next": [
+        "✅ SOLVED AND ATTACHED - 1901 CENSUS: Ann Wright, 77, MOTHER-IN-LAW, born 'Windham, Norfolk', in the household of THOMAS EMMS 46 Head (her son), wife Jane, grandchildren Thomas 17, Lily 9, Hilda 7. York, Bootham. RG13/4438 f.112 p.21. AND DEATH: September quarter 1901, York, aged 77 (GRO 09D/35; coll 8914 rec 38005429). Alive at the April census, dead by the September quarter - three months, same district, same age. She is now COMPLETE",
+        "⭐ THREE SEPARATE THINGS HID HER, ALL WORTH REMEMBERING: (1) her birthplace is spelt WINDHAM on the 1901 - that is how Wymondham is said - and NORWICH on the 1891, so she is under three birthplaces across three censuses; (2) the death is spelt ANNE not Ann, so a civil-index search for 'Ann Wright' in 1901 returns four Yorkshire deaths and NOT hers; (3) my own GRO age band was built from her 1818 baptism (b.1813-1823) but she reports b.1824 in BOTH 1871 and 1901 - consistent self-reporting six years adrift from the register, and my filter cut it off",
+        "⭐ THE RULE: a person is not one name, one age and one birthplace - they are a RANGE on all three, and the search band must be the WIDEST of what the RECORDS say AND what the PERSON said. Ann is Pottle/Emms/Wright, Ann/Anne, b.1818/1821/1824, born Wymondham/Windham/Norwich. All of it is her. What proved identity was none of those fields but the HOUSEHOLD - the same son Thomas Emms beside her in 1871, 1891 and 1901",
+        "RULED OUT - Ann Wright b.1826 age 61, 1887 M Quarter York: she was alive at the 1891 census, so an 1887 death is impossible",
+        "STILL UNFOUND: the Wright marriage itself. The civil index has Ann Emms Q4 1865 NORWICH vol 4b p.414 with WILLIAM WRIGHT on the same page - but the page also carries John Moore and Naomi Sadd, so it is a 50/50 pairing, exactly the coin toss her FIRST marriage was rescued from by the parish register. The Norfolk parish registers do not hold it"
+      ] },
     { "id": "I352548958611", "name": "Ann Fage (gen 9) - and the Sawdon 'siblings'", "gap": "she is UNUSABLE as she stands; and the disconnected Sawdons are not ours",
       "tried": [
         "Searched the real Weaverthorpe register - York CoE Baptisms Marriages Burials 1538-1812, coll 62230, Borthwick Institute PR/WEA/1"

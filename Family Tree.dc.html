@@ -1507,7 +1507,22 @@ class Component extends DCLogic {
       // popup links call back into the app
       window.__ftPerson=(id)=>this.openPerson(id, this.state.view==='places'?'places':'person');
       const map=window.L.map(el,{scrollWheelZoom:false,worldCopyJump:true});
-      window.L.tileLayer(this.TILES,{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+      const tiles=window.L.tileLayer(this.TILES,{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO'});
+      // Offline, the map background cannot be drawn — the tiles come from CARTO
+      // and only the ones already looked at are kept. The PINS still work, so
+      // say what is missing rather than leaving a blank grey square that reads
+      // as a broken page.
+      let toldOffline=false;
+      tiles.on('tileerror',()=>{
+        if(toldOffline||navigator.onLine) return;
+        toldOffline=true;
+        const note=document.createElement('div');
+        note.textContent='Map background needs a connection — the places are still marked';
+        note.setAttribute('style','position:absolute;left:0;right:0;bottom:0;z-index:440;padding:7px 10px;'
+          +'background:rgba(43,37,28,.72);color:#fff;font:500 11.5px/1.4 Archivo,sans-serif;text-align:center');
+        el.appendChild(note);
+      });
+      tiles.addTo(map);
       (lines||[]).forEach(l=>{ if(l.pts&&l.pts.length>1) window.L.polyline(l.pts,{color:l.color||this.BRANCH.thompson,weight:2,opacity:l.opacity||0.85,dashArray:'5,6'}).addTo(map); });
       const pts=[];
       (markers||[]).forEach(m=>{ if(!m.ll) return; pts.push(m.ll);

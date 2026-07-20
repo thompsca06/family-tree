@@ -1,0 +1,11 @@
+{
+  "name": "A Family Across Two Centuries",
+  "short_name": "Family Tree",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f3ea",
+  "theme_color": "#f7f3ea",
+  "description": "Thompson and Ingleby — a family history built from original records.",
+  "icons": []
+}
